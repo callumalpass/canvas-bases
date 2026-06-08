@@ -27,6 +27,7 @@ import {
 import { materializeCanvas, openCanvas } from "./canvas/materializeCanvas";
 import { collectRelationships } from "./canvas/relationships";
 import { TaskNotesRuntime } from "./tasknotes/runtime";
+import { createStarterFiles, ensureStarterFiles } from "./bootstrap/starterFiles";
 import {
 	createI18nService,
 	type InterpolationValues,
@@ -58,6 +59,7 @@ export default class BaseboardPlugin extends Plugin {
 	i18n!: I18nService;
 	private views = new Set<BaseboardView>();
 	private activeView: BaseboardView | null = null;
+	private shouldCreateStarterFiles = false;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
@@ -66,6 +68,7 @@ export default class BaseboardPlugin extends Plugin {
 		this.addSettingTab(new BaseboardSettingTab(this));
 		this.registerBaseboardBasesView();
 		this.registerCommands();
+		await this.ensureStarterFiles();
 	}
 
 	onunload(): void {
@@ -174,7 +177,9 @@ export default class BaseboardPlugin extends Plugin {
 	}
 
 	private async loadSettings(): Promise<void> {
-		this.settings = normalizeSettings((await this.loadData()) as Partial<BaseboardSettings>);
+		const storedSettings = (await this.loadData()) as Partial<BaseboardSettings> | null | undefined;
+		this.shouldCreateStarterFiles = storedSettings == null;
+		this.settings = normalizeSettings(storedSettings);
 	}
 
 	private registerBaseboardBasesView(): void {
@@ -227,6 +232,36 @@ export default class BaseboardPlugin extends Plugin {
 				void this.openLinkedCanvas();
 			},
 		});
+
+		this.addCommand({
+			id: "create-starter-files",
+			name: this.t("commands.createStarterFiles"),
+			callback: () => {
+				void this.createStarterFilesFromCommand();
+			},
+		});
+	}
+
+	private async ensureStarterFiles(): Promise<void> {
+		await ensureStarterFiles({
+			app: this.app,
+			settings: this.settings,
+			shouldCreateStarterFiles: this.shouldCreateStarterFiles,
+			saveSettings: () => this.saveData(this.settings),
+		});
+	}
+
+	private async createStarterFilesFromCommand(): Promise<void> {
+		const result = await createStarterFiles(this.app, {
+			openStartHere: true,
+		});
+		if (result === "blocked") {
+			new Notice(this.t("notices.starterFilesBlocked"));
+			return;
+		}
+
+		await this.updateSettings({ starterFilesCreated: true });
+		new Notice(this.t("notices.starterFilesReady"));
 	}
 
 	private getActiveView(): BaseboardView | null {

@@ -26,6 +26,7 @@ export const ko: TranslationTree = {
 	},
 	commands: {
 		createCanvasFromCurrentView: "현재 베이스 보기에서 캔버스 만들기",
+		createStarterFiles: "시작 파일 만들기",
 		openLinkedCanvas: "연결된 캔버스 열기",
 		updateLinkedCanvas: "연결된 캔버스 업데이트"
 	},
@@ -50,6 +51,8 @@ export const ko: TranslationTree = {
 		removedPropertyLink: "{property} 링크가 제거되었습니다.",
 		chooseCanvasPath: "캔버스 경로를 선택하세요.",
 		chooseLinkProperty: "이 링크에 사용할 노트 속성을 선택하세요.",
+		starterFilesBlocked: "시작 경로가 이미 다른 파일이나 폴더에서 사용 중이라 시작 파일을 만들 수 없습니다.",
+		starterFilesReady: "시작 파일이 Baseboard/에 준비되었습니다.",
 		updatedCanvas: "{path} 업데이트됨: 노드 {nodes}개, 엣지 {edges}개."
 	},
 	settings: {
@@ -193,6 +196,7 @@ export const ko: TranslationTree = {
 		toolbar: {
 			pinNote: "노트 고정",
 			addCard: "카드 추가",
+			addGroup: "그룹 추가",
 			createCanvas: "캔버스 만들기",
 			updateCanvas: "캔버스 업데이트",
 			openCanvas: "캔버스 열기",
@@ -207,9 +211,17 @@ export const ko: TranslationTree = {
 			noteActions: "노트 작업",
 			textCardTitle: "카드",
 			cardActions: "카드 작업",
+			groupActions: "그룹 작업",
 			editCard: "카드 편집",
 			writeNote: "노트 작성",
 			linkFromNote: "이 노트에서 링크"
+		},
+		group: {
+			createTitle: "그룹 만들기",
+			defaultName: "그룹",
+			create: "만들기",
+			renameTitle: "그룹 이름 바꾸기",
+			rename: "이름 바꾸기"
 		},
 		tooltips: {
 			dragGroup: "그룹 드래그",
@@ -227,6 +239,8 @@ export const ko: TranslationTree = {
 			openNote: "노트 열기",
 			unpinFromBoard: "보드에서 고정 해제",
 			removeCard: "카드 제거",
+			renameGroup: "그룹 이름 바꾸기",
+			removeGroup: "그룹 제거",
 			sourceBlocksTarget: "{source}이(가) {target}을(를) 차단",
 			targetBlocksSource: "{target}이(가) {source}을(를) 차단",
 			targetSubtaskOfSource: "{target}은(는) {source}의 하위 작업입니다",

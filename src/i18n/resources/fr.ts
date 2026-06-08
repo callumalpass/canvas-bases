@@ -26,6 +26,7 @@ export const fr: TranslationTree = {
 	},
 	commands: {
 		createCanvasFromCurrentView: "Créer un canevas à partir de la vue de bases actuelle",
+		createStarterFiles: "Créer les fichiers de démarrage",
 		openLinkedCanvas: "Ouvrir le canevas lié",
 		updateLinkedCanvas: "Mettre à jour le canevas lié"
 	},
@@ -50,6 +51,8 @@ export const fr: TranslationTree = {
 		removedPropertyLink: "Lien {property} supprimé.",
 		chooseCanvasPath: "Choisissez un chemin de canevas.",
 		chooseLinkProperty: "Choisissez une propriété de note pour ce lien.",
+		starterFilesBlocked: "Impossible de créer les fichiers de démarrage, car un chemin de démarrage est déjà utilisé par un autre fichier ou dossier.",
+		starterFilesReady: "Les fichiers de démarrage sont prêts dans Baseboard/.",
 		updatedCanvas: "{path} mis à jour : {nodes} nœuds, {edges} arêtes."
 	},
 	settings: {
@@ -193,6 +196,7 @@ export const fr: TranslationTree = {
 		toolbar: {
 			pinNote: "Épingler la note",
 			addCard: "Ajouter une carte",
+			addGroup: "Ajouter un groupe",
 			createCanvas: "Créer un canevas",
 			updateCanvas: "Mettre à jour le canevas",
 			openCanvas: "Ouvrir le canevas",
@@ -207,9 +211,17 @@ export const fr: TranslationTree = {
 			noteActions: "Actions de la note",
 			textCardTitle: "Carte",
 			cardActions: "Actions de la carte",
+			groupActions: "Actions du groupe",
 			editCard: "Modifier la carte",
 			writeNote: "Écrire une note",
 			linkFromNote: "Lier depuis cette note"
+		},
+		group: {
+			createTitle: "Créer un groupe",
+			defaultName: "Groupe",
+			create: "Créer",
+			renameTitle: "Renommer le groupe",
+			rename: "Renommer"
 		},
 		tooltips: {
 			dragGroup: "Déplacer le groupe",
@@ -227,6 +239,8 @@ export const fr: TranslationTree = {
 			openNote: "Ouvrir la note",
 			unpinFromBoard: "Désépingler du tableau",
 			removeCard: "Supprimer la carte",
+			renameGroup: "Renommer le groupe",
+			removeGroup: "Supprimer le groupe",
 			sourceBlocksTarget: "{source} bloque {target}",
 			targetBlocksSource: "{target} bloque {source}",
 			targetSubtaskOfSource: "{target} est une sous-tâche de {source}",

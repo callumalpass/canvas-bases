@@ -26,6 +26,7 @@ export const en: TranslationTree = {
 	},
 	commands: {
 		createCanvasFromCurrentView: "Create canvas from current bases view",
+		createStarterFiles: "Create starter files",
 		openLinkedCanvas: "Open linked canvas",
 		updateLinkedCanvas: "Update linked canvas",
 	},
@@ -50,6 +51,8 @@ export const en: TranslationTree = {
 		removedPropertyLink: "Removed {property} link.",
 		chooseCanvasPath: "Choose a canvas path.",
 		chooseLinkProperty: "Choose a note property for this link.",
+		starterFilesBlocked: "Could not create starter files because a starter path is already used by another file or folder.",
+		starterFilesReady: "Starter files are ready in Baseboard/.",
 		updatedCanvas: "Updated {path}: {nodes} nodes, {edges} edges.",
 	},
 	settings: {
@@ -193,6 +196,7 @@ export const en: TranslationTree = {
 		toolbar: {
 			pinNote: "Pin note",
 			addCard: "Add card",
+			addGroup: "Add group",
 			createCanvas: "Create canvas",
 			updateCanvas: "Update canvas",
 			openCanvas: "Open canvas",
@@ -207,9 +211,17 @@ export const en: TranslationTree = {
 			noteActions: "Note actions",
 			textCardTitle: "Card",
 			cardActions: "Card actions",
+			groupActions: "Group actions",
 			editCard: "Edit card",
 			writeNote: "Write a note",
 			linkFromNote: "Link from this note",
+		},
+		group: {
+			createTitle: "Create group",
+			defaultName: "Group",
+			create: "Create",
+			renameTitle: "Rename group",
+			rename: "Rename",
 		},
 		tooltips: {
 			dragGroup: "Drag group",
@@ -227,6 +239,8 @@ export const en: TranslationTree = {
 			openNote: "Open note",
 			unpinFromBoard: "Unpin from board",
 			removeCard: "Remove card",
+			renameGroup: "Rename group",
+			removeGroup: "Remove group",
 			sourceBlocksTarget: "{source} blocks {target}",
 			targetBlocksSource: "{target} blocks {source}",
 			targetSubtaskOfSource: "{target} is subtask of {source}",

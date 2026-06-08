@@ -26,6 +26,7 @@ export const ru: TranslationTree = {
 	},
 	commands: {
 		createCanvasFromCurrentView: "Создать канвас из текущего представления Bases",
+		createStarterFiles: "Создать начальные файлы",
 		openLinkedCanvas: "Открыть связанный канвас",
 		updateLinkedCanvas: "Обновить связанный канвас"
 	},
@@ -50,6 +51,8 @@ export const ru: TranslationTree = {
 		removedPropertyLink: "Ссылка {property} удалена.",
 		chooseCanvasPath: "Выберите путь к канвасу.",
 		chooseLinkProperty: "Выберите свойство заметки для этой ссылки.",
+		starterFilesBlocked: "Не удалось создать начальные файлы, потому что один из начальных путей уже используется другим файлом или папкой.",
+		starterFilesReady: "Начальные файлы готовы в Baseboard/.",
 		updatedCanvas: "Обновлено {path}: узлов — {nodes}, связей — {edges}."
 	},
 	settings: {
@@ -193,6 +196,7 @@ export const ru: TranslationTree = {
 		toolbar: {
 			pinNote: "Закрепить заметку",
 			addCard: "Добавить карточку",
+			addGroup: "Добавить группу",
 			createCanvas: "Создать канвас",
 			updateCanvas: "Обновить канвас",
 			openCanvas: "Открыть канвас",
@@ -207,9 +211,17 @@ export const ru: TranslationTree = {
 			noteActions: "Действия с заметкой",
 			textCardTitle: "Карточка",
 			cardActions: "Действия с карточкой",
+			groupActions: "Действия группы",
 			editCard: "Редактировать карточку",
 			writeNote: "Написать заметку",
 			linkFromNote: "Связать из этой заметки"
+		},
+		group: {
+			createTitle: "Создать группу",
+			defaultName: "Группа",
+			create: "Создать",
+			renameTitle: "Переименовать группу",
+			rename: "Переименовать"
 		},
 		tooltips: {
 			dragGroup: "Перетащить группу",
@@ -227,6 +239,8 @@ export const ru: TranslationTree = {
 			openNote: "Открыть заметку",
 			unpinFromBoard: "Открепить от доски",
 			removeCard: "Удалить карточку",
+			renameGroup: "Переименовать группу",
+			removeGroup: "Удалить группу",
 			sourceBlocksTarget: "{source} блокирует {target}",
 			targetBlocksSource: "{target} блокирует {source}",
 			targetSubtaskOfSource: "{target} — подзадача {source}",

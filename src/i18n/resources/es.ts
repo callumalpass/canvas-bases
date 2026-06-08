@@ -26,6 +26,7 @@ export const es: TranslationTree = {
 	},
 	commands: {
 		createCanvasFromCurrentView: "Crear lienzo a partir de la vista de bases actual",
+		createStarterFiles: "Crear archivos iniciales",
 		openLinkedCanvas: "Abrir lienzo vinculado",
 		updateLinkedCanvas: "Actualizar lienzo vinculado"
 	},
@@ -50,6 +51,8 @@ export const es: TranslationTree = {
 		removedPropertyLink: "Enlace de {property} eliminado.",
 		chooseCanvasPath: "Elige una ruta de lienzo.",
 		chooseLinkProperty: "Elige una propiedad de nota para este enlace.",
+		starterFilesBlocked: "No se pudieron crear los archivos iniciales porque una ruta inicial ya la usa otro archivo o carpeta.",
+		starterFilesReady: "Los archivos iniciales están listos en Baseboard/.",
 		updatedCanvas: "Actualizado {path}: {nodes} nodos, {edges} aristas."
 	},
 	settings: {
@@ -193,6 +196,7 @@ export const es: TranslationTree = {
 		toolbar: {
 			pinNote: "Fijar nota",
 			addCard: "Añadir tarjeta",
+			addGroup: "Añadir grupo",
 			createCanvas: "Crear lienzo",
 			updateCanvas: "Actualizar lienzo",
 			openCanvas: "Abrir lienzo",
@@ -207,9 +211,17 @@ export const es: TranslationTree = {
 			noteActions: "Acciones de nota",
 			textCardTitle: "Tarjeta",
 			cardActions: "Acciones de tarjeta",
+			groupActions: "Acciones del grupo",
 			editCard: "Editar tarjeta",
 			writeNote: "Escribir una nota",
 			linkFromNote: "Enlazar desde esta nota"
+		},
+		group: {
+			createTitle: "Crear grupo",
+			defaultName: "Grupo",
+			create: "Crear",
+			renameTitle: "Renombrar grupo",
+			rename: "Renombrar"
 		},
 		tooltips: {
 			dragGroup: "Arrastrar grupo",
@@ -227,6 +239,8 @@ export const es: TranslationTree = {
 			openNote: "Abrir nota",
 			unpinFromBoard: "Desfijar del tablero",
 			removeCard: "Eliminar tarjeta",
+			renameGroup: "Renombrar grupo",
+			removeGroup: "Eliminar grupo",
 			sourceBlocksTarget: "{source} bloquea a {target}",
 			targetBlocksSource: "{target} bloquea a {source}",
 			targetSubtaskOfSource: "{target} es subtarea de {source}",

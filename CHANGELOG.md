@@ -5,6 +5,10 @@
 - Initial Baseboard prototype.
 - Added command support for materializing the active native or third-party Bases
   view, not only the dedicated Baseboard layout.
+- Added first-install starter files with a Start Here note, a demo Baseboard
+  view, linked demo notes, and a command to recreate them later.
+- Increased the default generated node size so new boards and canvases have
+  more room on first render.
 - Reworked the Baseboard layout into a canvas-like view with draggable group
   frames and note nodes whose coordinates persist in the Base view config.
 - Added bottom-right resize handles for Baseboard note cards and group frames.

@@ -19,6 +19,7 @@ const TASKNOTES_RELATIONSHIP_MODES = new Set<BaseboardTaskNotesRelationshipMode>
 
 export const DEFAULT_SETTINGS: BaseboardSettings = {
 	locale: "system",
+	starterFilesCreated: false,
 	defaultCanvasFolder: "Baseboards",
 	defaultLayout: "columns",
 	defaultEdgeMode: "none",
@@ -30,8 +31,8 @@ export const DEFAULT_SETTINGS: BaseboardSettings = {
 	defaultTaskNotesRelationships: "dependencies",
 	preservePositions: true,
 	removeMissingNodes: true,
-	nodeWidth: 260,
-	nodeHeight: 110,
+	nodeWidth: 320,
+	nodeHeight: 160,
 	linkedViews: {},
 };
 
@@ -42,6 +43,8 @@ export function normalizeSettings(
 
 	return {
 		locale: settings.locale?.trim() || DEFAULT_SETTINGS.locale,
+		starterFilesCreated:
+			settings.starterFilesCreated ?? DEFAULT_SETTINGS.starterFilesCreated,
 		defaultCanvasFolder:
 			settings.defaultCanvasFolder?.trim() || DEFAULT_SETTINGS.defaultCanvasFolder,
 		defaultLayout: normalizeLayout(settings.defaultLayout, DEFAULT_SETTINGS.defaultLayout),

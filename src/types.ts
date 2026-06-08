@@ -10,6 +10,7 @@ export type BaseboardTaskNotesRelationshipMode = "none" | "dependencies" | "all"
 
 export interface BaseboardSettings {
 	locale: string;
+	starterFilesCreated: boolean;
 	defaultCanvasFolder: string;
 	defaultLayout: BaseboardLayout;
 	defaultEdgeMode: BaseboardEdgeMode;

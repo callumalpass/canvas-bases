@@ -26,6 +26,7 @@ export const de: TranslationTree = {
 	},
 	commands: {
 		createCanvasFromCurrentView: "Canvas aus aktueller Bases-Ansicht erstellen",
+		createStarterFiles: "Startdateien erstellen",
 		openLinkedCanvas: "Verknüpfte Canvas öffnen",
 		updateLinkedCanvas: "Verknüpfte Canvas aktualisieren"
 	},
@@ -50,6 +51,8 @@ export const de: TranslationTree = {
 		removedPropertyLink: "{property}-Link entfernt.",
 		chooseCanvasPath: "Wähle einen Canvas-Pfad.",
 		chooseLinkProperty: "Wähle eine Notiz-Eigenschaft für diesen Link.",
+		starterFilesBlocked: "Startdateien konnten nicht erstellt werden, weil ein Startpfad bereits von einer anderen Datei oder einem Ordner verwendet wird.",
+		starterFilesReady: "Die Startdateien liegen in Baseboard/ bereit.",
 		updatedCanvas: "{path} aktualisiert: {nodes} Knoten, {edges} Kanten."
 	},
 	settings: {
@@ -193,6 +196,7 @@ export const de: TranslationTree = {
 		toolbar: {
 			pinNote: "Notiz anheften",
 			addCard: "Karte hinzufügen",
+			addGroup: "Gruppe hinzufügen",
 			createCanvas: "Canvas erstellen",
 			updateCanvas: "Canvas aktualisieren",
 			openCanvas: "Canvas öffnen",
@@ -207,9 +211,17 @@ export const de: TranslationTree = {
 			noteActions: "Notizaktionen",
 			textCardTitle: "Karte",
 			cardActions: "Kartenaktionen",
+			groupActions: "Gruppenaktionen",
 			editCard: "Karte bearbeiten",
 			writeNote: "Notiz schreiben",
 			linkFromNote: "Von dieser Notiz verknüpfen"
+		},
+		group: {
+			createTitle: "Gruppe erstellen",
+			defaultName: "Gruppe",
+			create: "Erstellen",
+			renameTitle: "Gruppe umbenennen",
+			rename: "Umbenennen"
 		},
 		tooltips: {
 			dragGroup: "Gruppe ziehen",
@@ -227,6 +239,8 @@ export const de: TranslationTree = {
 			openNote: "Notiz öffnen",
 			unpinFromBoard: "Vom Board lösen",
 			removeCard: "Karte entfernen",
+			renameGroup: "Gruppe umbenennen",
+			removeGroup: "Gruppe entfernen",
 			sourceBlocksTarget: "{source} blockiert {target}",
 			targetBlocksSource: "{target} blockiert {source}",
 			targetSubtaskOfSource: "{target} ist Unteraufgabe von {source}",

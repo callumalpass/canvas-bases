@@ -26,6 +26,7 @@ export const zh: TranslationTree = {
 	},
 	commands: {
 		createCanvasFromCurrentView: "从当前 bases 视图创建画布",
+		createStarterFiles: "创建入门文件",
 		openLinkedCanvas: "打开关联画布",
 		updateLinkedCanvas: "更新关联画布"
 	},
@@ -50,6 +51,8 @@ export const zh: TranslationTree = {
 		removedPropertyLink: "已移除 {property} 链接。",
 		chooseCanvasPath: "选择画布路径。",
 		chooseLinkProperty: "为此链接选择笔记属性。",
+		starterFilesBlocked: "无法创建入门文件，因为某个入门路径已被其他文件或文件夹使用。",
+		starterFilesReady: "入门文件已在 Baseboard/ 中准备好。",
 		updatedCanvas: "已更新 {path}：{nodes} 个节点，{edges} 条连线。"
 	},
 	settings: {
@@ -193,6 +196,7 @@ export const zh: TranslationTree = {
 		toolbar: {
 			pinNote: "固定笔记",
 			addCard: "添加卡片",
+			addGroup: "添加分组",
 			createCanvas: "创建画布",
 			updateCanvas: "更新画布",
 			openCanvas: "打开画布",
@@ -207,9 +211,17 @@ export const zh: TranslationTree = {
 			noteActions: "笔记操作",
 			textCardTitle: "卡片",
 			cardActions: "卡片操作",
+			groupActions: "分组操作",
 			editCard: "编辑卡片",
 			writeNote: "撰写笔记",
 			linkFromNote: "从此笔记链接"
+		},
+		group: {
+			createTitle: "创建分组",
+			defaultName: "分组",
+			create: "创建",
+			renameTitle: "重命名分组",
+			rename: "重命名"
 		},
 		tooltips: {
 			dragGroup: "拖动分组",
@@ -227,6 +239,8 @@ export const zh: TranslationTree = {
 			openNote: "打开笔记",
 			unpinFromBoard: "从面板取消固定",
 			removeCard: "移除卡片",
+			renameGroup: "重命名分组",
+			removeGroup: "移除分组",
 			sourceBlocksTarget: "{source} 阻塞 {target}",
 			targetBlocksSource: "{target} 阻塞 {source}",
 			targetSubtaskOfSource: "{target} 是 {source} 的子任务",

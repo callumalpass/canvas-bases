@@ -26,6 +26,7 @@ export const ja: TranslationTree = {
 	},
 	commands: {
 		createCanvasFromCurrentView: "現在の Bases ビューからキャンバスを作成",
+		createStarterFiles: "スターターファイルを作成",
 		openLinkedCanvas: "リンクされたキャンバスを開く",
 		updateLinkedCanvas: "リンクされたキャンバスを更新"
 	},
@@ -50,6 +51,8 @@ export const ja: TranslationTree = {
 		removedPropertyLink: "{property} リンクを削除しました。",
 		chooseCanvasPath: "キャンバスのパスを選択してください。",
 		chooseLinkProperty: "このリンクに使用するノートのプロパティを選択してください。",
+		starterFilesBlocked: "スターター用のパスが別のファイルまたはフォルダで既に使われているため、スターターファイルを作成できませんでした。",
+		starterFilesReady: "スターターファイルを Baseboard/ に用意しました。",
 		updatedCanvas: "{path} を更新しました: {nodes} ノード、{edges} エッジ。"
 	},
 	settings: {
@@ -193,6 +196,7 @@ export const ja: TranslationTree = {
 		toolbar: {
 			pinNote: "ノートをピン留め",
 			addCard: "カードを追加",
+			addGroup: "グループを追加",
 			createCanvas: "キャンバスを作成",
 			updateCanvas: "キャンバスを更新",
 			openCanvas: "キャンバスを開く",
@@ -207,9 +211,17 @@ export const ja: TranslationTree = {
 			noteActions: "ノート操作",
 			textCardTitle: "カード",
 			cardActions: "カード操作",
+			groupActions: "グループ操作",
 			editCard: "カードを編集",
 			writeNote: "ノートを書く",
 			linkFromNote: "このノートからリンク"
+		},
+		group: {
+			createTitle: "グループを作成",
+			defaultName: "グループ",
+			create: "作成",
+			renameTitle: "グループ名を変更",
+			rename: "名前を変更"
 		},
 		tooltips: {
 			dragGroup: "グループをドラッグ",
@@ -227,6 +239,8 @@ export const ja: TranslationTree = {
 			openNote: "ノートを開く",
 			unpinFromBoard: "ボードからピン留めを解除",
 			removeCard: "カードを削除",
+			renameGroup: "グループ名を変更",
+			removeGroup: "グループを削除",
 			sourceBlocksTarget: "{source} は {target} をブロックします",
 			targetBlocksSource: "{target} は {source} をブロックします",
 			targetSubtaskOfSource: "{target} は {source} のサブタスクです",

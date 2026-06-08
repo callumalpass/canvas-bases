@@ -26,6 +26,7 @@ export const pt: TranslationTree = {
 	},
 	commands: {
 		createCanvasFromCurrentView: "Criar canvas a partir da visualização atual do Bases",
+		createStarterFiles: "Criar arquivos iniciais",
 		openLinkedCanvas: "Abrir canvas vinculado",
 		updateLinkedCanvas: "Atualizar canvas vinculado"
 	},
@@ -50,6 +51,8 @@ export const pt: TranslationTree = {
 		removedPropertyLink: "Link de {property} removido.",
 		chooseCanvasPath: "Escolha um caminho de canvas.",
 		chooseLinkProperty: "Escolha uma propriedade da nota para este link.",
+		starterFilesBlocked: "Não foi possível criar os arquivos iniciais porque um caminho inicial já está sendo usado por outro arquivo ou pasta.",
+		starterFilesReady: "Os arquivos iniciais estão prontos em Baseboard/.",
 		updatedCanvas: "{path} atualizado: {nodes} nós, {edges} arestas."
 	},
 	settings: {
@@ -193,6 +196,7 @@ export const pt: TranslationTree = {
 		toolbar: {
 			pinNote: "Fixar nota",
 			addCard: "Adicionar cartão",
+			addGroup: "Adicionar grupo",
 			createCanvas: "Criar canvas",
 			updateCanvas: "Atualizar canvas",
 			openCanvas: "Abrir canvas",
@@ -207,9 +211,17 @@ export const pt: TranslationTree = {
 			noteActions: "Ações da nota",
 			textCardTitle: "Cartão",
 			cardActions: "Ações do cartão",
+			groupActions: "Ações do grupo",
 			editCard: "Editar cartão",
 			writeNote: "Escrever uma nota",
 			linkFromNote: "Vincular a partir desta nota"
+		},
+		group: {
+			createTitle: "Criar grupo",
+			defaultName: "Grupo",
+			create: "Criar",
+			renameTitle: "Renomear grupo",
+			rename: "Renomear"
 		},
 		tooltips: {
 			dragGroup: "Arrastar grupo",
@@ -227,6 +239,8 @@ export const pt: TranslationTree = {
 			openNote: "Abrir nota",
 			unpinFromBoard: "Desafixar do quadro",
 			removeCard: "Remover cartão",
+			renameGroup: "Renomear grupo",
+			removeGroup: "Remover grupo",
 			sourceBlocksTarget: "{source} bloqueia {target}",
 			targetBlocksSource: "{target} bloqueia {source}",
 			targetSubtaskOfSource: "{target} é subtarefa de {source}",

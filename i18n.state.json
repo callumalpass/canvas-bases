@@ -440,6 +440,10 @@
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "8596ffc9a0501d55dba9e4eb6138d9a6f74518bf"
     },
+    "view.toolbar.addGroup": {
+      "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
+      "translation": "ca184600f1133b3352919a043ef58768cc695f57"
+    },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
       "translation": "f9bde68a8df14ccad69ef456e6a0c07200b92956"
@@ -480,6 +484,10 @@
       "source": "92132e5e52fa9c23bc6927ea56c62b38b0c66439",
       "translation": "61a84371c32aa2e3b3957595e1a67fc2f717e368"
     },
+    "view.card.groupActions": {
+      "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
+      "translation": "475ebffcab279b17699ee4b109c686d68f00ecf2"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "9f89cf09d8737f97debc2bea0234ba6452b28cb9"
@@ -491,6 +499,26 @@
     "view.card.linkFromNote": {
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "f844187d73d5157d0c704017b7392082aeb93131"
+    },
+    "view.group.createTitle": {
+      "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
+      "translation": "0b899239e08d26cc77cb47fad2c4283207edef04"
+    },
+    "view.group.defaultName": {
+      "source": "171a0606f7c74580fd3982cf57c49d604104120a",
+      "translation": "f4e8075cef9dd01c29f3d3523cd1b788e525a78b"
+    },
+    "view.group.create": {
+      "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
+      "translation": "dbc9fb8c7424c1726b51bf46c1aff7160eb2a310"
+    },
+    "view.group.renameTitle": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "6de15fb7218018efe0e0cf931b34cfe5bcaf33e3"
+    },
+    "view.group.rename": {
+      "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
+      "translation": "a0aa20d8c296b00f9e2773c8c523d12a80a5395e"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -543,6 +571,14 @@
     "view.menu.removeCard": {
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "6f6a96c40785f4db25538ccafc37f80f8764e040"
+    },
+    "view.menu.renameGroup": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "6de15fb7218018efe0e0cf931b34cfe5bcaf33e3"
+    },
+    "view.menu.removeGroup": {
+      "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
+      "translation": "f6de41947fa8d200dba09f0351ab75d3920a6e28"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -1154,6 +1190,10 @@
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "0b7aaf3c67880d7a576e24ce64bd6be56828df67"
     },
+    "view.toolbar.addGroup": {
+      "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
+      "translation": "16c195db4a649c97dd5c7f424c72058432ff0b86"
+    },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
       "translation": "fd21030fcd69d82007bc5cfaf1f3c7ca73049826"
@@ -1194,6 +1234,10 @@
       "source": "92132e5e52fa9c23bc6927ea56c62b38b0c66439",
       "translation": "325755ca72dfb64298aa1669d62f487aab5039c9"
     },
+    "view.card.groupActions": {
+      "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
+      "translation": "509940bf72a6ee7a3d71bc487025b00f5e4ef00d"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "5de6f68124fdc311b56919c4d1f33e28532a2d81"
@@ -1205,6 +1249,26 @@
     "view.card.linkFromNote": {
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "62f20d5cb909df79abe4ccf85299b6cc4405a92e"
+    },
+    "view.group.createTitle": {
+      "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
+      "translation": "ab71ba6025e3e462f16bb76571b67722502d9bc5"
+    },
+    "view.group.defaultName": {
+      "source": "171a0606f7c74580fd3982cf57c49d604104120a",
+      "translation": "dd18fd863702f6a01c5c608d6e558b5a39e8d60b"
+    },
+    "view.group.create": {
+      "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
+      "translation": "48a0686f58318623637083a4fa0e39abb00acde3"
+    },
+    "view.group.renameTitle": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "f6dc1dc09ee41f39d405bf41d35666dfd19405db"
+    },
+    "view.group.rename": {
+      "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
+      "translation": "c963c0d98acb0c80aad7c8f976e0bde3019be284"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -1257,6 +1321,14 @@
     "view.menu.removeCard": {
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "8a0a4650066c090caadde19db192ae3cd0846d71"
+    },
+    "view.menu.renameGroup": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "f6dc1dc09ee41f39d405bf41d35666dfd19405db"
+    },
+    "view.menu.removeGroup": {
+      "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
+      "translation": "88363196686124bd014373d65a73cf3916fcf4f7"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -1868,6 +1940,10 @@
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "58744e263e4bc3a9cb40b8933649f3c437aee1f1"
     },
+    "view.toolbar.addGroup": {
+      "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
+      "translation": "3f13cea3ada4f3b4d973e868dab8374332a520b1"
+    },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
       "translation": "e44944253052216d43ecce99ac1e8aa9a2432324"
@@ -1908,6 +1984,10 @@
       "source": "92132e5e52fa9c23bc6927ea56c62b38b0c66439",
       "translation": "90806b7e22be81087a65fcdedeb396851d9443dc"
     },
+    "view.card.groupActions": {
+      "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
+      "translation": "21ed4bb7a29f0e4e149801a3ce2f4316c28a1d8a"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "b7c1e243a844c2b8675a6e41ae88ce68b9cddd3a"
@@ -1919,6 +1999,26 @@
     "view.card.linkFromNote": {
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "9b52df38efa2ec31b718747dc96f4ba9e35e92e7"
+    },
+    "view.group.createTitle": {
+      "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
+      "translation": "9031a3d61c6d745a712ec235cf7e93bca25d1a56"
+    },
+    "view.group.defaultName": {
+      "source": "171a0606f7c74580fd3982cf57c49d604104120a",
+      "translation": "1026d22e2a7c1aae2be863f5be84cc05d7677e65"
+    },
+    "view.group.create": {
+      "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
+      "translation": "1a6861723c6988e95ccc2010a3eca9a44fae0458"
+    },
+    "view.group.renameTitle": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "ee84757baa339f2fe6b157349e9967e57c9324f0"
+    },
+    "view.group.rename": {
+      "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
+      "translation": "8e8a86e80cbb7bbf771a301ce63564dd93391541"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -1971,6 +2071,14 @@
     "view.menu.removeCard": {
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "432cd4ac46f652a648bed09760de144608293295"
+    },
+    "view.menu.renameGroup": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "ee84757baa339f2fe6b157349e9967e57c9324f0"
+    },
+    "view.menu.removeGroup": {
+      "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
+      "translation": "64ba04798494b141ccb2971451811c1da77f53e1"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -2582,6 +2690,10 @@
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "cab7e6ecdf3baf8e96864c851d955cce6eb53ee1"
     },
+    "view.toolbar.addGroup": {
+      "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
+      "translation": "ccf90ff864c8dc655116fa44a029125db6f1ceaf"
+    },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
       "translation": "b5ec3bd591c1811a3f86741bc1f30956307010f1"
@@ -2622,6 +2734,10 @@
       "source": "92132e5e52fa9c23bc6927ea56c62b38b0c66439",
       "translation": "ee91864c4e649720fb2f06fbda7dc043d96cecc1"
     },
+    "view.card.groupActions": {
+      "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
+      "translation": "d001cddb96ba8d635fd5871d5866e0027e989fb0"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "b8af0031b7ac2980fc95230d362738493ab28843"
@@ -2633,6 +2749,26 @@
     "view.card.linkFromNote": {
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "668c47681816344b0eb0cdfda1821e5ec694460f"
+    },
+    "view.group.createTitle": {
+      "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
+      "translation": "49dbd7dc238240a9fcf7a2d7bfea9672350a9107"
+    },
+    "view.group.defaultName": {
+      "source": "171a0606f7c74580fd3982cf57c49d604104120a",
+      "translation": "7769eea4413b1212495a9afbe62538149207ae0b"
+    },
+    "view.group.create": {
+      "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
+      "translation": "614f2eaaffaf673b5cb5258a36e27c17905e85d3"
+    },
+    "view.group.renameTitle": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "4ccd455653d3c2729fc9d91ccb8b138f32e674cf"
+    },
+    "view.group.rename": {
+      "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
+      "translation": "3c7e4e9fee828522c3ef54577f43086345f0eff2"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -2685,6 +2821,14 @@
     "view.menu.removeCard": {
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "ffc91b4d93868a62d7c0ee0eceb075f19b4be49d"
+    },
+    "view.menu.renameGroup": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "4ccd455653d3c2729fc9d91ccb8b138f32e674cf"
+    },
+    "view.menu.removeGroup": {
+      "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
+      "translation": "aa414a7991ff7e84f21832eafa76966daea787bd"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -3296,6 +3440,10 @@
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "96e7574b113d5566925dd3137d0634b9bc1e1cb9"
     },
+    "view.toolbar.addGroup": {
+      "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
+      "translation": "bc71356fa2623784c4d7fcbf9da6159e39c416e6"
+    },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
       "translation": "6d18dcb6e40e1c6c395183f8f9baa1a45f8bab34"
@@ -3336,6 +3484,10 @@
       "source": "92132e5e52fa9c23bc6927ea56c62b38b0c66439",
       "translation": "afd88cd72dec767ef666ff082f6033759f56b739"
     },
+    "view.card.groupActions": {
+      "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
+      "translation": "60652abf30a1074ce30e4beea6c892a3bda93a7e"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "167a1c2a73cd530852f1a1b55481b61458085d3c"
@@ -3347,6 +3499,26 @@
     "view.card.linkFromNote": {
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "3599c49f2710b7734809a8a9fc8e10e7c9b46289"
+    },
+    "view.group.createTitle": {
+      "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
+      "translation": "1d9749ffcc44e556d55db4181bc32c2034c75557"
+    },
+    "view.group.defaultName": {
+      "source": "171a0606f7c74580fd3982cf57c49d604104120a",
+      "translation": "32280569150ddc6adee653e1a27759e29f5e3868"
+    },
+    "view.group.create": {
+      "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
+      "translation": "f839ef88bd8224f1b1fa3f82f0cf91cc7b8a8713"
+    },
+    "view.group.renameTitle": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "df1d5631ecae5d92a63917f26d97e272160dbbdb"
+    },
+    "view.group.rename": {
+      "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
+      "translation": "697401e7189a6d97b3138a6ef1ec1a6ef96e577b"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -3399,6 +3571,14 @@
     "view.menu.removeCard": {
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "21dde39b247351c5211b416d1d7efd6343bb148a"
+    },
+    "view.menu.renameGroup": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "df1d5631ecae5d92a63917f26d97e272160dbbdb"
+    },
+    "view.menu.removeGroup": {
+      "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
+      "translation": "a69b5777a59e3d761aa981c30a33dad8838c7532"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -4010,6 +4190,10 @@
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "d58083f04fa5df7cbe861e9feca9c48882a04be5"
     },
+    "view.toolbar.addGroup": {
+      "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
+      "translation": "d313ac2bd64566af382aa7767d917a4a01cf6639"
+    },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
       "translation": "5cf7abc7913fec2627ea5021d1e4f49aefade3ce"
@@ -4050,6 +4234,10 @@
       "source": "92132e5e52fa9c23bc6927ea56c62b38b0c66439",
       "translation": "bf93f184ed09227379e5bd8c689acefe5236c76e"
     },
+    "view.card.groupActions": {
+      "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
+      "translation": "860ec2c45533773a9b0d7e7e5c5ec300dfac2937"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "c177934bfb0fa9c021195ca2368454a5608f895f"
@@ -4061,6 +4249,26 @@
     "view.card.linkFromNote": {
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "7d155af65618f571a50c17bb70e571c294d9eed4"
+    },
+    "view.group.createTitle": {
+      "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
+      "translation": "9a10c95cbb2f18e50d7c7c256850f4feb2bf950a"
+    },
+    "view.group.defaultName": {
+      "source": "171a0606f7c74580fd3982cf57c49d604104120a",
+      "translation": "dd18fd863702f6a01c5c608d6e558b5a39e8d60b"
+    },
+    "view.group.create": {
+      "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
+      "translation": "af3d3c69e68708c03bab47a118b692b8e98aba94"
+    },
+    "view.group.renameTitle": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "35e8bd0c62393d0c35b330eb1650e71dbcf1e497"
+    },
+    "view.group.rename": {
+      "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
+      "translation": "5f9fc71a02dafbb9e5045e084ef655815d795630"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -4113,6 +4321,14 @@
     "view.menu.removeCard": {
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "0513b3aeb0d429a50d959ca2c23416a2e4920f5f"
+    },
+    "view.menu.renameGroup": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "35e8bd0c62393d0c35b330eb1650e71dbcf1e497"
+    },
+    "view.menu.removeGroup": {
+      "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
+      "translation": "4083e64ec708b7e754c617a9fc94615e2264059e"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -4724,6 +4940,10 @@
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "c814d23ba2e730ab4a983a8cec75ff49475b1467"
     },
+    "view.toolbar.addGroup": {
+      "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
+      "translation": "a83b4b4a0c1e1c8d70ac10c5ce8a858aa2b68f77"
+    },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
       "translation": "85476354dda079ccc0c7977af18dcc532b93b30c"
@@ -4764,6 +4984,10 @@
       "source": "92132e5e52fa9c23bc6927ea56c62b38b0c66439",
       "translation": "378a12553d572a9ef62b12335576eedf15ade8a4"
     },
+    "view.card.groupActions": {
+      "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
+      "translation": "84a5fa8d98116735a047a228cd69eb12578400f7"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "f4c4c4f3016ba7c2b30754a75cb93008a5c15af9"
@@ -4775,6 +4999,26 @@
     "view.card.linkFromNote": {
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "f0f2e9e40072adc94d1513c4f3824f4f17cb5d7a"
+    },
+    "view.group.createTitle": {
+      "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
+      "translation": "305f47257435e1e1ec291119a52e61d0178ec6df"
+    },
+    "view.group.defaultName": {
+      "source": "171a0606f7c74580fd3982cf57c49d604104120a",
+      "translation": "ae8ad7b53c3a02aa6816d9eaf1126a6e92bdf9e3"
+    },
+    "view.group.create": {
+      "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
+      "translation": "84370a2097272da416f570e5d8827287e94b3248"
+    },
+    "view.group.renameTitle": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "001d1e6cd0441872b1829a2f6866b6c648af3839"
+    },
+    "view.group.rename": {
+      "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
+      "translation": "715e8f0c321e3352d3bf4be4d187457699a2ff4f"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -4827,6 +5071,14 @@
     "view.menu.removeCard": {
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "a092ae871fdf2848ee4eb46d6d198a89bb783f29"
+    },
+    "view.menu.renameGroup": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "001d1e6cd0441872b1829a2f6866b6c648af3839"
+    },
+    "view.menu.removeGroup": {
+      "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
+      "translation": "05b970e68bb424dbc78e035610e84b9bba7eaec1"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -5438,6 +5690,10 @@
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "ab89692a677dbd474342fbe1e458a8284ddf49f1"
     },
+    "view.toolbar.addGroup": {
+      "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
+      "translation": "cf911c2d5e935e7f6e0f306502eea6452858d1ae"
+    },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
       "translation": "4b60ab41795c7a6c0cfbb619d4bce057709320ec"
@@ -5478,6 +5734,10 @@
       "source": "92132e5e52fa9c23bc6927ea56c62b38b0c66439",
       "translation": "75cd81d58d4457e4b1c36d999db0ae980d1e2b9d"
     },
+    "view.card.groupActions": {
+      "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
+      "translation": "78a98ea5b79602b518018a1cb307dc1dddadd120"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "ba25d3036c6a42bf1ddb2d0eebaa68b8623d2eae"
@@ -5489,6 +5749,26 @@
     "view.card.linkFromNote": {
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "48b356e907807589ee484a4633dcd0c413824790"
+    },
+    "view.group.createTitle": {
+      "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
+      "translation": "23639dcfbd052391e82ddaf0a0dfece2c1fbd8ff"
+    },
+    "view.group.defaultName": {
+      "source": "171a0606f7c74580fd3982cf57c49d604104120a",
+      "translation": "97d8a6c05b4c5c7d73d223d4d72b4356c21437bc"
+    },
+    "view.group.create": {
+      "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
+      "translation": "fcbd0932929ec7e69950f1e10d6a420ce61c89f5"
+    },
+    "view.group.renameTitle": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "8f62b6b255c3b0bdf793b867275ef9534755e5ef"
+    },
+    "view.group.rename": {
+      "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
+      "translation": "1cd80fd7a8b3284ae2b931b08c4dbe1cf3d53eba"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -5541,6 +5821,14 @@
     "view.menu.removeCard": {
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "b44ad0c86e07b0a68d93b5945847043c747048e6"
+    },
+    "view.menu.renameGroup": {
+      "source": "673e72771575c873f460ec3151bfc192c442864c",
+      "translation": "8f62b6b255c3b0bdf793b867275ef9534755e5ef"
+    },
+    "view.menu.removeGroup": {
+      "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
+      "translation": "35c6d23953b12af592bd10f7d58e7138e8b94ddc"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
