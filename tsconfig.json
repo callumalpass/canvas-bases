@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"inlineSourceMap": true,
+		"inlineSources": true,
+		"module": "ESNext",
+		"target": "ES6",
+		"allowJs": false,
+		"noImplicitAny": true,
+		"moduleResolution": "node",
+		"importHelpers": false,
+		"isolatedModules": true,
+		"strictNullChecks": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"skipLibCheck": true,
+		"noImplicitReturns": false,
+		"noImplicitThis": false,
+		"paths": {
+			"obsidian": ["./node_modules/obsidian"]
+		},
+		"types": ["obsidian-typings", "node"],
+		"lib": ["DOM", "DOM.Iterable", "ES5", "ES6", "ES7"]
+	},
+	"include": ["main.ts", "src/**/*.ts"],
+	"exclude": ["node_modules/**/*", "tests/**/*"]
+}

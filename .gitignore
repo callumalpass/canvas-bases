@@ -1,0 +1,6 @@
+node_modules
+main.js
+*.log
+coverage
+.copy-files.local
+test-results
