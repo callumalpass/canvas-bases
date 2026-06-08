@@ -9,6 +9,7 @@
   frames and note nodes whose coordinates persist in the Base view config.
 - Added bottom-right resize handles for Baseboard note cards and group frames.
 - Added inline Markdown editing to Baseboard note cards.
+- Added debounced autosave for inline Markdown edits in Baseboard note cards.
 - Added selected Bases properties to Baseboard note cards and improved card
   spacing around paths, metadata, editors, and the board edge.
 - Added zoom controls, fit/reset view actions, modifier-wheel zoom, and
@@ -21,6 +22,10 @@
   subtasks of their parent task, with edges running from subtask to parent.
 - Fixed dependency edge removal so it uses the exact TaskNotes dependency
   reference stored on the blocked task.
+- Fixed inline Markdown autosaves so body-only saves do not steal focus by
+  re-rendering the board.
+- Improved TaskNotes relationship edge refreshes by reading only the dependency
+  and parent-task data Baseboard needs.
 - Fixed Baseboard card actions so TaskNotes menus are requested only for
   recognized TaskNotes tasks and fall back cleanly when composed menu
   population is unavailable.

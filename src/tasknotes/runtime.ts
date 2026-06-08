@@ -80,7 +80,8 @@ interface TaskNotesRuntimeApiV1 {
 		fields?(): TaskNotesFieldDefinition[];
 	};
 	relationships?: {
-		all(path: string): Promise<TaskNotesTaskRelationships>;
+		parents(path: string): Promise<TaskNotesTaskInfo[]>;
+		dependencies(path: string): Promise<ResolvedTaskDependency[]>;
 	};
 	ui?: {
 		taskMenu?: {
@@ -167,14 +168,6 @@ type TaskNotesDependencyRelType =
 	| "FINISHTOFINISH"
 	| "STARTTOSTART"
 	| "STARTTOFINISH";
-
-interface TaskNotesTaskRelationships {
-	task: TaskNotesTaskInfo;
-	parents: TaskNotesTaskInfo[];
-	subtasks: TaskNotesTaskInfo[];
-	dependencies: ResolvedTaskDependency[];
-	blocking: TaskNotesTaskInfo[];
-}
 
 export class TaskNotesRuntime {
 	private readonly app: App;
@@ -271,11 +264,11 @@ export class TaskNotesRuntime {
 
 		await Promise.all(
 			[...visiblePaths].map(async (path) => {
-				const related = await readRelationships(api, path);
-				if (!related) return;
-				relationships.push(...buildDependencyRelationships(path, related, visiblePaths, this.t));
+				const dependencies = await readDependencies(api, path);
+				relationships.push(...buildDependencyRelationships(path, dependencies, visiblePaths, this.t));
 				if (mode === "all") {
-					relationships.push(...buildStructuralRelationships(path, related, visiblePaths, this.t));
+					const parents = await readParents(api, path);
+					relationships.push(...buildStructuralRelationships(path, parents, visiblePaths, this.t));
 				}
 			})
 		);
@@ -479,14 +472,22 @@ interface TaskNotesCatalog {
 	priorities: Map<string, TaskNotesPriorityConfig>;
 }
 
-async function readRelationships(
+async function readDependencies(
 	api: TaskNotesRuntimeApiV1,
 	path: string
-): Promise<TaskNotesTaskRelationships | null> {
+): Promise<ResolvedTaskDependency[]> {
 	try {
-		return (await api.relationships?.all(path)) ?? null;
+		return (await api.relationships?.dependencies(path)) ?? [];
 	} catch {
-		return null;
+		return [];
+	}
+}
+
+async function readParents(api: TaskNotesRuntimeApiV1, path: string): Promise<TaskNotesTaskInfo[]> {
+	try {
+		return (await api.relationships?.parents(path)) ?? [];
+	} catch {
+		return [];
 	}
 }
 
@@ -594,19 +595,16 @@ function buildTaskBadges(task: TaskNotesTaskInfo, t: TranslateFn): BaseboardTask
 
 function buildDependencyRelationships(
 	path: string,
-	related: TaskNotesTaskRelationships,
+	dependencies: ResolvedTaskDependency[],
 	visiblePaths: Set<string>,
 	t: TranslateFn
 ): BaseboardRelationship[] {
 	const relationships: BaseboardRelationship[] = [];
 
-	for (const dependency of related.dependencies) {
+	for (const dependency of dependencies) {
 		const dependencyPath = dependency.path ?? dependency.task?.path;
 		if (dependencyPath && visiblePaths.has(dependencyPath)) {
-			const dependencyUid =
-				dependency.dependency?.uid ??
-				findStoredDependencyUid(related.task, dependencyPath) ??
-				createWikiLink(dependencyPath);
+			const dependencyUid = dependency.dependency?.uid ?? createWikiLink(dependencyPath);
 			relationships.push({
 				sourcePath: dependencyPath,
 				targetPath: path,
@@ -625,23 +623,15 @@ function buildDependencyRelationships(
 	return relationships;
 }
 
-function findStoredDependencyUid(task: TaskNotesTaskInfo, dependencyPath: string): string | null {
-	return (
-		task.blockedBy?.find((dependency) =>
-			dependencyReferencesSameTask(dependency.uid, dependencyPath)
-		)?.uid ?? null
-	);
-}
-
 function buildStructuralRelationships(
 	path: string,
-	related: TaskNotesTaskRelationships,
+	parents: TaskNotesTaskInfo[],
 	visiblePaths: Set<string>,
 	t: TranslateFn
 ): BaseboardRelationship[] {
 	const relationships: BaseboardRelationship[] = [];
 
-	for (const parent of related.parents) {
+	for (const parent of parents) {
 		if (visiblePaths.has(parent.path)) {
 			relationships.push({
 				sourcePath: path,
@@ -652,22 +642,6 @@ function buildStructuralRelationships(
 					kind: "project",
 					parentPath: parent.path,
 					childPath: path,
-				},
-			});
-		}
-	}
-
-	for (const subtask of related.subtasks) {
-		if (visiblePaths.has(subtask.path)) {
-			relationships.push({
-				sourcePath: subtask.path,
-				targetPath: path,
-				label: t("tasknotes.relationships.subtask"),
-				metadata: {
-					source: "tasknotes",
-					kind: "project",
-					parentPath: path,
-					childPath: subtask.path,
 				},
 			});
 		}

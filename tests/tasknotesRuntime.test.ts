@@ -225,7 +225,7 @@ describe("TaskNotesRuntime", () => {
 		]);
 	});
 
-	it("uses the stored blockedBy uid when dependency relationship details omit it", async () => {
+	it("uses a wikilink fallback when dependency relationship details omit the stored uid", async () => {
 		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
 			relationships: {
 				"260608yp5.md": {
@@ -303,6 +303,38 @@ describe("TaskNotesRuntime", () => {
 				},
 			},
 		]);
+	});
+
+	it("does not read reverse subtask relationships when rendering subtask edges", async () => {
+		const calls: string[] = [];
+		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
+			relationships: {
+				"Tasks/Alpha.md": {
+					task: task("Tasks/Alpha.md"),
+					parents: [task("Tasks/Beta.md")],
+					subtasks: [],
+					dependencies: [],
+					blocking: [],
+				},
+				"Tasks/Beta.md": {
+					task: task("Tasks/Beta.md"),
+					parents: [],
+					subtasks: [task("Tasks/Alpha.md")],
+					dependencies: [],
+					blocking: [],
+				},
+			},
+			relationshipCalls: calls,
+		}));
+
+		await runtime.collectRelationships(snapshot(), "all");
+
+		expect([...calls].sort()).toEqual([
+			"dependencies:Tasks/Alpha.md",
+			"dependencies:Tasks/Beta.md",
+			"parents:Tasks/Alpha.md",
+			"parents:Tasks/Beta.md",
+		].sort());
 	});
 
 	it("writes dependency and project links through the TaskNotes task API", async () => {
@@ -434,6 +466,7 @@ function makeTaskNotesApp({
 	fields = [],
 	fileMenu,
 	frontmatter = {},
+	relationshipCalls,
 	taskMenu,
 	writes = createTaskWrites(),
 }: {
@@ -447,6 +480,7 @@ function makeTaskNotesApp({
 	}>;
 	fileMenu?: FileMenuLog;
 	frontmatter?: Record<string, Record<string, unknown>>;
+	relationshipCalls?: string[];
 	taskMenu?: TaskMenuLog;
 	writes?: TaskWriteLog;
 }): App {
@@ -520,10 +554,17 @@ function makeTaskNotesApp({
 									fields: () => fields,
 								},
 								relationships: {
-									all: async (path: string) => {
+									dependencies: async (path: string) => {
+										relationshipCalls?.push(`dependencies:${path}`);
 										const result = relationships[path];
 										if (result instanceof Error) throw result;
-										return result;
+										return isRelationshipResult(result) ? result.dependencies : [];
+									},
+									parents: async (path: string) => {
+										relationshipCalls?.push(`parents:${path}`);
+										const result = relationships[path];
+										if (result instanceof Error) throw result;
+										return isRelationshipResult(result) ? result.parents : [];
 									},
 								},
 								...(taskMenu
@@ -574,6 +615,18 @@ function createTaskWrites(): TaskWriteLog {
 		addProjects: [],
 		removeProjects: [],
 	};
+}
+
+function isRelationshipResult(value: unknown): value is {
+	dependencies: unknown[];
+	parents: unknown[];
+} {
+	return (
+		value !== null &&
+		typeof value === "object" &&
+		Array.isArray((value as { dependencies?: unknown }).dependencies) &&
+		Array.isArray((value as { parents?: unknown }).parents)
+	);
 }
 
 function createTaskMenuLog(errors: Pick<TaskMenuLog, "populateError" | "showError"> = {}): TaskMenuLog {

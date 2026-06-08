@@ -18,17 +18,23 @@ const OBSIDIAN_BINARY =
 const UPDATED_OBSIDIAN_ASAR = "/home/calluma/.config/obsidian/obsidian-1.13.0.asar";
 const VAULT_DIR = path.join(TASKNOTES_ROOT, "tasknotes-e2e-vault");
 const USER_DATA_DIR = path.join(TASKNOTES_ROOT, ".obsidian-config-baseboard-demo");
-const OUTPUT_DIR = path.join(BASEBOARD_ROOT, "media", "baseboard-demo");
+const OUTPUT_DIR =
+	process.env.BASEBOARD_DEMO_OUTPUT_DIR ??
+	path.join(BASEBOARD_ROOT, "media", "baseboard-demo");
 const FRAME_DIR = path.join(OUTPUT_DIR, "frames");
 const GIF_PATH = path.join(OUTPUT_DIR, "baseboard-daily-note-demo.gif");
 const MP4_PATH = path.join(OUTPUT_DIR, "baseboard-daily-note-demo.mp4");
 const PALETTE_PATH = path.join(OUTPUT_DIR, "palette.png");
 const REMOTE_DEBUGGING_PORT = 9327;
 const VIEWPORT = { width: 1440, height: 940 };
+const RECORD_FPS = Number(process.env.BASEBOARD_DEMO_FPS ?? 18);
+const WRITE_GIF = process.env.BASEBOARD_DEMO_SKIP_GIF !== "1";
+const LEGACY_HOLD_FPS = 6;
 
 const DAILY_NOTE = "2026-06-08.md";
 const BASE_PATH = "TaskNotes/Views/baseboard-demo-today.base";
 const OPEN_BASE_PATH = "TaskNotes/Views/baseboard-demo-open-board.base";
+const CANVAS_PATH = "Baseboards/Baseboard demo.canvas";
 const DEMO_TASK_TITLES = [
 	"Review launch checklist",
 	"Draft partner update",
@@ -38,6 +44,7 @@ const DEMO_TASK_TITLES = [
 const TASK_START_LINE = 4;
 
 let frameIndex = 0;
+let activeRecorder = null;
 
 async function main() {
 	if (!fs.existsSync(OBSIDIAN_BINARY)) {
@@ -59,31 +66,38 @@ async function main() {
 		await openFileByPath(page, DAILY_NOTE);
 		await page.waitForTimeout(1200);
 
-		await capture(page, 8);
 		for (let index = 0; index < DEMO_TASK_TITLES.length; index += 1) {
 			await convertTaskLine(page, TASK_START_LINE + index);
-			await page.waitForTimeout(1300);
-			await capture(page, 5);
+			await page.waitForTimeout(900);
 		}
-
-		await switchToReadingView(page);
-		await waitForBaseboard(page);
-		await capture(page, 10);
+		await waitForDemoTaskFiles(page);
 
 		await openBaseboardInNewLeaf(page);
 		await waitForBaseboard(page);
-		await capture(page, 8);
+		await injectRecordingCursor(page);
+		await arrangeCardsForRecordingStart(page);
 
-		await arrangeCardsForLinkDemo(page);
+		activeRecorder = createFrameRecorder(page);
+		await activeRecorder.start();
+		await capture(page, 12);
+
+		await dragBlockedTaskRight(page);
 		await capture(page, 6);
 		await performLinkDemo(page);
-		await capture(page, 8);
-		await dragFirstCards(page, 2);
 		await capture(page, 10);
+		await updateAndOpenLinkedCanvas(page);
+		await capture(page, 16);
+
+		await activeRecorder.stop();
+		activeRecorder = null;
 
 		encodeOutputs();
 		console.log(JSON.stringify({ gif: GIF_PATH, mp4: MP4_PATH, frames: FRAME_DIR }, null, 2));
 	} finally {
+		if (activeRecorder) {
+			await activeRecorder.stop().catch(() => {});
+			activeRecorder = null;
+		}
 		await browser.close().catch(() => {});
 		obsidianProcess.kill("SIGTERM");
 	}
@@ -95,6 +109,8 @@ function resetOutput() {
 }
 
 function writeDemoFiles() {
+	fs.rmSync(path.join(VAULT_DIR, CANVAS_PATH), { force: true });
+
 	writeObsidianJson(".obsidian/community-plugins.json", ["tasknotes", "baseboard"]);
 	writeObsidianJson(".obsidian/core-plugins.json", [
 		"file-explorer",
@@ -163,6 +179,7 @@ views:
     baseboardTaskNotesShowBadges: true
     baseboardTaskNotesShowActions: true
     baseboardTaskNotesRelationships: dependencies
+    baseboardCanvasPath: "${CANVAS_PATH}"
 `
 	);
 
@@ -194,6 +211,7 @@ views:
     baseboardTaskNotesShowBadges: true
     baseboardTaskNotesShowActions: true
     baseboardTaskNotesRelationships: dependencies
+    baseboardCanvasPath: "${CANVAS_PATH}"
 `
 	);
 
@@ -506,14 +524,14 @@ async function dragFirstCards(page, limit = 3) {
 	for (let i = 0; i < Math.min(limit, boxes.length); i += 1) {
 		const box = boxes[i];
 		if (!box) continue;
-		await page.mouse.move(box.x + box.width / 2, box.y + 22);
+		await moveMouse(page, box.x + box.width / 2, box.y + 22);
 		await page.mouse.down();
-		await page.mouse.move(box.x + box.width / 2 + 34 + i * 18, box.y + 78 + i * 24, {
+		await moveMouse(page, box.x + box.width / 2 + 34 + i * 18, box.y + 78 + i * 24, {
 			steps: 10,
 		});
 		await page.waitForTimeout(100);
 		await capture(page, 1);
-		await page.mouse.move(box.x + box.width / 2 + 110 + i * 30, box.y + 92 + i * 36, {
+		await moveMouse(page, box.x + box.width / 2 + 110 + i * 30, box.y + 92 + i * 36, {
 			steps: 12,
 		});
 		await page.mouse.up();
@@ -535,6 +553,18 @@ async function convertTaskLine(page, line) {
 	}, line);
 	if (!positioned) throw new Error(`Could not position editor cursor on line ${line}`);
 	await executeCommand(page, "tasknotes:convert-to-tasknote");
+}
+
+async function waitForDemoTaskFiles(page) {
+	await page.waitForFunction(
+		(titles) => {
+			const app = window.app;
+			return titles.every((title) => app.vault.getAbstractFileByPath(`${title}.md`));
+		},
+		DEMO_TASK_TITLES,
+		{ timeout: 15000 }
+	);
+	await page.waitForTimeout(700);
 }
 
 async function performLinkDemo(page) {
@@ -564,11 +594,11 @@ async function performLinkDemo(page) {
 		y: targetBox.y + targetBox.height / 2,
 	};
 
-	await page.mouse.move(start.x, start.y);
+	await moveMouse(page, start.x, start.y);
 	await page.mouse.down();
-	await page.mouse.move((start.x + end.x) / 2, (start.y + end.y) / 2, { steps: 10 });
+	await moveMouse(page, (start.x + end.x) / 2, (start.y + end.y) / 2, { steps: 10 });
 	await capture(page, 2);
-	await page.mouse.move(end.x, end.y, { steps: 14 });
+	await moveMouse(page, end.x, end.y, { steps: 14 });
 	await capture(page, 2);
 	await page.mouse.up();
 	await page.waitForTimeout(500);
@@ -578,16 +608,22 @@ async function performLinkDemo(page) {
 		.locator(`.menu-item:has-text("${sourceTitle} blocks ${targetTitle}")`)
 		.first();
 	await menuItem.waitFor({ state: "visible", timeout: 5000 });
-	await menuItem.click();
+	await clickLocator(page, menuItem);
 	await page.waitForTimeout(1800);
 	await waitForRelationshipEdge(page);
 	await capture(page, 6);
 }
 
-async function arrangeCardsForLinkDemo(page) {
-	await moveCardByTitle(page, "Review launch checklist", { x: 420, y: 540 });
-	await capture(page, 2);
-	await moveCardByTitle(page, "Draft partner update", { x: 880, y: 210 });
+async function arrangeCardsForRecordingStart(page) {
+	await moveCardByTitle(page, "Book design review", { x: 420, y: 210 });
+	await moveCardByTitle(page, "Clean up board notes", { x: 420, y: 365 });
+	await moveCardByTitle(page, "Review launch checklist", { x: 420, y: 520 });
+	await moveCardByTitle(page, "Draft partner update", { x: 420, y: 675 });
+	await page.waitForTimeout(500);
+}
+
+async function dragBlockedTaskRight(page) {
+	await moveCardByTitle(page, "Draft partner update", { x: 850, y: 340 });
 	await page.waitForTimeout(500);
 }
 
@@ -609,9 +645,9 @@ async function moveCardByTitle(page, title, targetTopLeft) {
 		y: start.y + (targetTopLeft.y - box.y),
 	};
 
-	await page.mouse.move(start.x, start.y);
+	await moveMouse(page, start.x, start.y);
 	await page.mouse.down();
-	await page.mouse.move(end.x, end.y, { steps: 18 });
+	await moveMouse(page, end.x, end.y, { steps: 18 });
 	await page.mouse.up();
 	await page.waitForTimeout(400);
 }
@@ -628,12 +664,154 @@ async function waitForRelationshipEdge(page) {
 }
 
 async function capture(page, holdFrames = 1) {
+	if (activeRecorder) {
+		await activeRecorder.hold((holdFrames / LEGACY_HOLD_FPS) * 1000);
+		return;
+	}
+
 	const buffer = await captureElectronScreenshot(page);
 	for (let i = 0; i < holdFrames; i += 1) {
-		const framePath = path.join(FRAME_DIR, `frame-${String(frameIndex).padStart(4, "0")}.png`);
-		fs.writeFileSync(framePath, buffer);
-		frameIndex += 1;
+		writeFrame(buffer);
 	}
+}
+
+function createFrameRecorder(page) {
+	let running = false;
+	let loopPromise = null;
+	let error = null;
+	const intervalMs = 1000 / RECORD_FPS;
+
+	async function loop() {
+		while (running) {
+			const startedAt = Date.now();
+			try {
+				writeFrame(await captureElectronScreenshot(page));
+			} catch (captureError) {
+				error = captureError;
+				running = false;
+				break;
+			}
+
+			const elapsed = Date.now() - startedAt;
+			await delay(Math.max(0, intervalMs - elapsed));
+		}
+	}
+
+	return {
+		async start() {
+			if (running) return;
+			running = true;
+			loopPromise = loop();
+		},
+		async stop() {
+			running = false;
+			if (loopPromise) {
+				await loopPromise;
+				loopPromise = null;
+			}
+			if (error) throw error;
+		},
+		async hold(ms) {
+			await delay(ms);
+			if (error) throw error;
+		},
+	};
+}
+
+function writeFrame(buffer) {
+	const framePath = path.join(FRAME_DIR, `frame-${String(frameIndex).padStart(4, "0")}.png`);
+	fs.writeFileSync(framePath, buffer);
+	frameIndex += 1;
+}
+
+function delay(ms) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function injectRecordingCursor(page) {
+	await page.evaluate(() => {
+		document.getElementById("baseboard-demo-cursor")?.remove();
+		const cursorEl = document.createElement("div");
+		cursorEl.id = "baseboard-demo-cursor";
+		cursorEl.style.cssText = [
+			"position:fixed",
+			"left:0",
+			"top:0",
+			"width:18px",
+			"height:18px",
+			"border-radius:999px",
+			"border:2px solid var(--interactive-accent)",
+			"background:rgba(var(--mono-rgb-100),0.96)",
+			"box-shadow:0 0 0 4px rgba(var(--interactive-accent-rgb),0.18),0 3px 10px rgba(0,0,0,0.22)",
+			"transform:translate(-50%,-50%)",
+			"z-index:2147483647",
+			"pointer-events:none",
+			"opacity:0",
+		].join(";");
+		document.body.appendChild(cursorEl);
+
+		window.__baseboardDemoSetCursor = (x, y) => {
+			cursorEl.style.opacity = "1";
+			cursorEl.style.left = `${x}px`;
+			cursorEl.style.top = `${y}px`;
+		};
+
+		document.addEventListener(
+			"pointermove",
+			(event) => {
+				window.__baseboardDemoSetCursor?.(event.clientX, event.clientY);
+			},
+			true
+		);
+	});
+}
+
+async function moveMouse(page, x, y, options = {}) {
+	await page.mouse.move(x, y, options);
+	await page.evaluate(
+		({ cursorX, cursorY }) => window.__baseboardDemoSetCursor?.(cursorX, cursorY),
+		{ cursorX: x, cursorY: y }
+	);
+}
+
+async function clickLocator(page, locator) {
+	const box = await locator.boundingBox();
+	if (!box) throw new Error("Could not click locator without a bounding box");
+	await moveMouse(page, box.x + box.width / 2, box.y + box.height / 2, { steps: 8 });
+	await page.mouse.down();
+	await page.waitForTimeout(90);
+	await page.mouse.up();
+}
+
+async function updateAndOpenLinkedCanvas(page) {
+	await clickToolbarButton(page, "Update canvas");
+	await page.waitForTimeout(1500);
+	await clickToolbarButton(page, "Open canvas");
+	await waitForCanvasView(page);
+}
+
+async function clickToolbarButton(page, label) {
+	const button = page
+		.locator(".workspace-leaf.mod-active .baseboard-view__button")
+		.filter({ hasText: label })
+		.first();
+	await button.waitFor({ state: "visible", timeout: 10000 });
+	await clickLocator(page, button);
+}
+
+async function waitForCanvasView(page) {
+	await page.waitForFunction(
+		() =>
+			Array.from(
+				document.querySelectorAll(".canvas-wrapper, .canvas-node-container, .canvas-node")
+			).some((element) => {
+				const rect = element.getBoundingClientRect();
+				return rect.width > 20 && rect.height > 20;
+			}),
+		undefined,
+		{ timeout: 15000 }
+	);
+	await page.waitForTimeout(1800);
 }
 
 async function captureElectronScreenshot(page) {
@@ -656,36 +834,38 @@ async function captureElectronScreenshot(page) {
 
 function encodeOutputs() {
 	const inputPattern = path.join(FRAME_DIR, "frame-%04d.png");
+	if (WRITE_GIF) {
+		execFileSync("ffmpeg", [
+			"-y",
+			"-framerate",
+			String(RECORD_FPS),
+			"-i",
+			inputPattern,
+			"-vf",
+			"fps=12,scale=1280:-1:flags=lanczos,palettegen",
+			PALETTE_PATH,
+		]);
+		execFileSync("ffmpeg", [
+			"-y",
+			"-framerate",
+			String(RECORD_FPS),
+			"-i",
+			inputPattern,
+			"-i",
+			PALETTE_PATH,
+			"-lavfi",
+			"fps=12,scale=1280:-1:flags=lanczos[x];[x][1:v]paletteuse",
+			GIF_PATH,
+		]);
+	}
 	execFileSync("ffmpeg", [
 		"-y",
 		"-framerate",
-		"6",
+		String(RECORD_FPS),
 		"-i",
 		inputPattern,
 		"-vf",
-		"fps=12,scale=1280:-1:flags=lanczos,palettegen",
-		PALETTE_PATH,
-	]);
-	execFileSync("ffmpeg", [
-		"-y",
-		"-framerate",
-		"6",
-		"-i",
-		inputPattern,
-		"-i",
-		PALETTE_PATH,
-		"-lavfi",
-		"fps=12,scale=1280:-1:flags=lanczos[x];[x][1:v]paletteuse",
-		GIF_PATH,
-	]);
-	execFileSync("ffmpeg", [
-		"-y",
-		"-framerate",
-		"6",
-		"-i",
-		inputPattern,
-		"-vf",
-		"scale=1280:-2:flags=lanczos,format=yuv420p",
+		"fps=30,scale=1280:-2:flags=lanczos,format=yuv420p",
 		"-movflags",
 		"+faststart",
 		MP4_PATH,

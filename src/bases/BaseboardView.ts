@@ -92,6 +92,8 @@ const ZOOM_STEP = 0.1;
 const FIT_VIEW_PADDING = 48;
 const FRONT_CARD_Z_INDEX = "20";
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+const INLINE_EDITOR_AUTOSAVE_DELAY_MS = 750;
+const INLINE_EDITOR_SAVED_STATUS_DELAY_MS = 1500;
 
 type CanvasRenderableNode = CanvasFileNode | CanvasGroupNode | CanvasTextNode;
 type CanvasNodeKind = "file" | "group" | "text";
@@ -176,8 +178,13 @@ interface CanvasRenderState {
 interface InlineEditorState {
 	path: string;
 	editor: BaseboardInlineMarkdownEditor;
+	shellEl: HTMLElement;
 	statusEl: HTMLElement;
 	original: string;
+	autosaveTimer: number | null;
+	pendingSaveValue: string | null;
+	savePromise: Promise<void> | null;
+	savedStatusTimer: number | null;
 }
 
 export class BaseboardView extends BasesView {
@@ -217,6 +224,8 @@ export class BaseboardView extends BasesView {
 	private panEndHandler: ((event: PointerEvent) => void) | null = null;
 	private linkMoveHandler: ((event: PointerEvent) => void) | null = null;
 	private linkEndHandler: ((event: PointerEvent) => void) | null = null;
+	private lastRenderSignature: string | null = null;
+	private deferredInlineEditorRender = false;
 	private renderToken = 0;
 
 	constructor(controller: QueryController, containerEl: HTMLElement, plugin: BaseboardPlugin) {
@@ -238,7 +247,7 @@ export class BaseboardView extends BasesView {
 		this.setupRoot();
 		const refreshFromMetadata = debounce((file: TFile) => {
 			if (this.hasVisibleFile(file.path)) {
-				this.scheduleRender();
+				this.onDataUpdated();
 			}
 		}, 150, true);
 		this.registerEvent(this.app.metadataCache.on("changed", refreshFromMetadata));
@@ -251,10 +260,21 @@ export class BaseboardView extends BasesView {
 	onunload(): void {
 		this.cancelScheduledWork();
 		this.clearDragListeners();
+		this.destroyAllInlineEditors(true);
 		this.plugin.unregisterViewInstance(this);
 	}
 
 	onDataUpdated(): void {
+		const renderSignature = this.getRenderSignature();
+		if (renderSignature && renderSignature === this.lastRenderSignature) {
+			return;
+		}
+
+		if (this.hasFocusedInlineEditor()) {
+			this.deferredInlineEditorRender = true;
+			return;
+		}
+
 		this.scheduleRender();
 	}
 
@@ -387,6 +407,43 @@ export class BaseboardView extends BasesView {
 		return configuredPath?.trim() || null;
 	}
 
+	private getRenderSignature(snapshot = this.getSnapshot()): string | null {
+		if (!snapshot) return null;
+
+		const options = this.getMaterializeOptions();
+		const relationships = collectRelationships(this.app, snapshot, options);
+		return JSON.stringify({
+			options,
+			viewName: snapshot.viewName,
+			totalEntries: snapshot.totalEntries,
+			groups: snapshot.groups.map((group) => ({
+				id: group.id,
+				label: group.label,
+				entries: group.entries.map((entry) => ({
+					path: entry.path,
+					name: entry.name,
+					isManual: Boolean(entry.isManual),
+					properties: (entry.properties ?? []).map((property) => ({
+						id: property.id,
+						displayName: property.displayName,
+						text: property.text,
+						isEmpty: property.isEmpty,
+					})),
+				})),
+			})),
+			textCards: snapshot.textCards.map((card) => ({
+				id: card.id,
+				text: card.text,
+			})),
+			relationships: relationships.map((relationship) => ({
+				sourcePath: relationship.sourcePath,
+				targetPath: relationship.targetPath,
+				label: relationship.label,
+				metadata: relationship.metadata,
+			})),
+		});
+	}
+
 	getViewActions(): BasesViewAction[] {
 		return [
 			{
@@ -489,10 +546,12 @@ export class BaseboardView extends BasesView {
 		this.clearCanvasReferences();
 		rootEl.empty();
 		const snapshot = this.getSnapshot();
+		this.lastRenderSignature = snapshot ? this.getRenderSignature(snapshot) : null;
 
 		this.renderToolbar(rootEl, snapshot);
 
 		if (!snapshot || (snapshot.totalEntries === 0 && snapshot.textCards.length === 0)) {
+			this.destroyAllInlineEditors(true);
 			this.renderEmpty(rootEl);
 			return;
 		}
@@ -811,6 +870,11 @@ export class BaseboardView extends BasesView {
 			taskCards: new Map(),
 			edgeRelationships: initialEdgeRelationships,
 		};
+		if (options.showBodyEditor) {
+			this.pruneInlineEditors(new Set(nodes.map((node) => node.id)));
+		} else {
+			this.destroyAllInlineEditors(true);
+		}
 		this.renderVirtualCanvas();
 		this.renderCanvasControls(containerEl);
 		this.registerPanHandlers(viewportEl);
@@ -2082,7 +2146,6 @@ export class BaseboardView extends BasesView {
 	}
 
 	private clearCanvasReferences(): void {
-		this.destroyAllInlineEditors(true);
 		this.frontCardEl = null;
 		this.edgeLayerEl = null;
 		this.renderedEdges = [];
@@ -2096,6 +2159,17 @@ export class BaseboardView extends BasesView {
 	}
 
 	private renderInlineEditor(containerEl: HTMLElement, nodeId: string, path: string): void {
+		const existingState = this.inlineEditors.get(nodeId);
+		if (existingState && existingState.path === path) {
+			containerEl.appendChild(existingState.shellEl);
+			containerEl.appendChild(existingState.statusEl);
+			return;
+		}
+
+		if (existingState) {
+			this.destroyInlineEditor(nodeId, true);
+		}
+
 		const editorShellEl = containerEl.createDiv({ cls: "baseboard-canvas-file__editor-shell" });
 		const statusEl = containerEl.createDiv({ cls: "baseboard-canvas-file__status" });
 
@@ -2152,11 +2226,20 @@ export class BaseboardView extends BasesView {
 				placeholder: "",
 				file,
 				onChange: (value) => {
-					const original = this.inlineEditors.get(nodeId)?.original ?? creationOriginal;
+					const state = this.inlineEditors.get(nodeId);
+					const original = state?.original ?? creationOriginal;
 					const isDirty = value !== original;
 					editorContainerEl.toggleClass("is-dirty", isDirty);
 					containerEl.toggleClass("is-dirty", isDirty);
 					statusEl.setText(isDirty ? this.t("view.editor.unsaved") : "");
+					if (state) {
+						this.clearInlineEditorSavedStatusTimer(state);
+						if (isDirty) {
+							this.scheduleInlineEditorAutosave(nodeId);
+						} else {
+							this.cancelInlineEditorAutosave(state);
+						}
+					}
 				},
 				onSubmit: () => {
 					void this.saveInlineEditorState(nodeId);
@@ -2164,6 +2247,7 @@ export class BaseboardView extends BasesView {
 				onEscape: () => {
 					const state = this.inlineEditors.get(nodeId);
 					if (!state) return;
+					this.cancelInlineEditorAutosave(state);
 					state.editor.setValue(state.original);
 					editorContainerEl.removeClass("is-dirty");
 					containerEl.removeClass("is-dirty");
@@ -2171,7 +2255,9 @@ export class BaseboardView extends BasesView {
 					state.editor.blur();
 				},
 				onBlur: () => {
-					void this.saveInlineEditorState(nodeId);
+					void this.saveInlineEditorState(nodeId).finally(() => {
+						this.flushDeferredInlineEditorRender();
+					});
 				},
 			});
 
@@ -2179,8 +2265,13 @@ export class BaseboardView extends BasesView {
 			this.inlineEditors.set(nodeId, {
 				path,
 				editor,
+				shellEl: containerEl,
 				statusEl,
 				original: content,
+				autosaveTimer: null,
+				pendingSaveValue: null,
+				savePromise: null,
+				savedStatusTimer: null,
 			});
 			statusEl.setText("");
 		} catch {
@@ -2213,6 +2304,38 @@ export class BaseboardView extends BasesView {
 			editorEl.setAttr("placeholder", this.t("view.editor.missingFile"));
 		}
 
+		let autosaveTimer: number | null = null;
+		const cancelAutosave = () => {
+			if (autosaveTimer === null) return;
+
+			window.clearTimeout(autosaveTimer);
+			autosaveTimer = null;
+		};
+
+		let scheduleAutosave = () => {};
+		const saveCurrentValue = () => {
+			void this.saveInlineEditor(path, editorEl, statusEl).then(() => {
+				if (!editorEl.isConnected || editorEl.disabled) return;
+
+				const original = editorEl.dataset.baseboardOriginal ?? "";
+				if (editorEl.value !== original) {
+					scheduleAutosave();
+				}
+			});
+		};
+		scheduleAutosave = () => {
+			cancelAutosave();
+			autosaveTimer = window.setTimeout(() => {
+				autosaveTimer = null;
+				saveCurrentValue();
+			}, INLINE_EDITOR_AUTOSAVE_DELAY_MS);
+		};
+
+		const flushAutosave = () => {
+			cancelAutosave();
+			saveCurrentValue();
+		};
+
 		this.addElementEvent(editorEl, "pointerdown", (event) => {
 			event.stopPropagation();
 		});
@@ -2225,16 +2348,22 @@ export class BaseboardView extends BasesView {
 			editorEl.toggleClass("is-dirty", isDirty);
 			containerEl.toggleClass("is-dirty", isDirty);
 			statusEl.setText(isDirty ? this.t("view.editor.unsaved") : "");
+			if (isDirty) {
+				scheduleAutosave();
+			} else {
+				cancelAutosave();
+			}
 		});
 		this.addElementEvent(editorEl, "keydown", (event) => {
 			event.stopPropagation();
 			if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
 				event.preventDefault();
-				void this.saveInlineEditor(path, editorEl, statusEl);
+				flushAutosave();
 				return;
 			}
 			if (event.key === "Escape") {
 				event.preventDefault();
+				cancelAutosave();
 				editorEl.value = editorEl.dataset.baseboardOriginal ?? editorEl.value;
 				editorEl.removeClass("is-dirty");
 				containerEl.removeClass("is-dirty");
@@ -2243,7 +2372,8 @@ export class BaseboardView extends BasesView {
 			}
 		});
 		this.addElementEvent(editorEl, "blur", () => {
-			void this.saveInlineEditor(path, editorEl, statusEl);
+			flushAutosave();
+			this.flushDeferredInlineEditorRender();
 		});
 
 		return editorEl;
@@ -2284,7 +2414,8 @@ export class BaseboardView extends BasesView {
 		if (editorEl.disabled) return;
 
 		const original = editorEl.dataset.baseboardOriginal ?? "";
-		if (editorEl.value === original) return;
+		const value = editorEl.value;
+		if (value === original) return;
 
 		const file = this.app.vault.getAbstractFileByPath(path);
 		if (!(file instanceof TFile)) {
@@ -2293,72 +2424,189 @@ export class BaseboardView extends BasesView {
 		}
 
 		statusEl.setText(this.t("view.editor.saving"));
-		await this.app.vault.modify(file, editorEl.value);
-		editorEl.dataset.baseboardOriginal = editorEl.value;
-		editorEl.removeClass("is-dirty");
-		editorEl.parentElement?.removeClass("is-dirty");
-		statusEl.setText(this.t("view.editor.saved"));
+		await this.app.vault.modify(file, value);
+		editorEl.dataset.baseboardOriginal = value;
+		const isDirty = editorEl.value !== value;
+		editorEl.toggleClass("is-dirty", isDirty);
+		editorEl.parentElement?.toggleClass("is-dirty", isDirty);
+		statusEl.setText(isDirty ? this.t("view.editor.unsaved") : this.t("view.editor.saved"));
+		if (isDirty) return;
 
 		window.setTimeout(() => {
 			if (statusEl.isConnected && statusEl.getText() === this.t("view.editor.saved")) {
 				statusEl.setText("");
 			}
-		}, 1500);
+		}, INLINE_EDITOR_SAVED_STATUS_DELAY_MS);
 	}
 
 	private saveInlineEditorState(nodeId: string): Promise<void> {
+		return this.flushInlineEditorAutosave(nodeId);
+	}
+
+	private scheduleInlineEditorAutosave(nodeId: string): void {
+		const state = this.inlineEditors.get(nodeId);
+		if (!state) return;
+
+		this.cancelInlineEditorAutosave(state);
+		state.autosaveTimer = window.setTimeout(() => {
+			state.autosaveTimer = null;
+			void this.saveInlineEditorValue(nodeId, state, state.editor.getValue());
+		}, INLINE_EDITOR_AUTOSAVE_DELAY_MS);
+	}
+
+	private flushInlineEditorAutosave(nodeId: string): Promise<void> {
 		const state = this.inlineEditors.get(nodeId);
 		if (!state) return Promise.resolve();
 
-		return this.saveInlineEditorValue(nodeId, state.editor.getValue());
+		this.cancelInlineEditorAutosave(state);
+		return this.saveInlineEditorValue(nodeId, state, state.editor.getValue());
 	}
 
-	private async saveInlineEditorValue(nodeId: string, value: string): Promise<void> {
-		const state = this.inlineEditors.get(nodeId);
-		if (!state || value === state.original) return;
+	private cancelInlineEditorAutosave(state: InlineEditorState): void {
+		if (state.autosaveTimer === null) return;
 
+		window.clearTimeout(state.autosaveTimer);
+		state.autosaveTimer = null;
+	}
+
+	private saveInlineEditorValue(
+		nodeId: string,
+		state: InlineEditorState,
+		value: string
+	): Promise<void> {
+		if (value === state.original && state.savePromise === null) {
+			state.pendingSaveValue = null;
+			return Promise.resolve();
+		}
+
+		state.pendingSaveValue = value;
+		if (state.savePromise === null) {
+			state.savePromise = this.runInlineEditorSaveQueue(nodeId, state);
+		}
+
+		return state.savePromise;
+	}
+
+	private async runInlineEditorSaveQueue(
+		nodeId: string,
+		state: InlineEditorState
+	): Promise<void> {
+		try {
+			while (state.pendingSaveValue !== null) {
+				const value = state.pendingSaveValue;
+				state.pendingSaveValue = null;
+				if (value === state.original) {
+					this.syncInlineEditorDirtyState(nodeId, state);
+					continue;
+				}
+
+				await this.persistInlineEditorValue(nodeId, state, value);
+			}
+		} finally {
+			state.savePromise = null;
+		}
+	}
+
+	private async persistInlineEditorValue(
+		nodeId: string,
+		state: InlineEditorState,
+		value: string
+	): Promise<void> {
 		const file = this.app.vault.getAbstractFileByPath(state.path);
 		if (!(file instanceof TFile)) {
 			state.statusEl.setText(this.t("view.editor.missing"));
 			return;
 		}
 
+		this.clearInlineEditorSavedStatusTimer(state);
 		state.statusEl.setText(this.t("view.editor.saving"));
 		await this.app.vault.modify(file, value);
 		state.original = value;
-		state.statusEl.setText(this.t("view.editor.saved"));
-		const editorEl = state.statusEl.parentElement?.querySelector(
-			".baseboard-canvas-file__markdown-editor"
-		);
-		if (editorEl instanceof HTMLElement) {
-			editorEl.removeClass("is-dirty");
+		const isDirty = this.syncInlineEditorDirtyState(nodeId, state);
+		state.statusEl.setText(isDirty ? this.t("view.editor.unsaved") : this.t("view.editor.saved"));
+		if (isDirty) {
+			if (this.inlineEditors.get(nodeId) === state && state.pendingSaveValue === null) {
+				this.scheduleInlineEditorAutosave(nodeId);
+			}
+			return;
 		}
-		state.statusEl.parentElement
-			?.querySelector(".baseboard-canvas-file__editor-shell")
-			?.removeClass("is-dirty");
 
-		window.setTimeout(() => {
+		this.scheduleInlineEditorSavedStatusClear(state);
+	}
+
+	private syncInlineEditorDirtyState(nodeId: string, state: InlineEditorState): boolean {
+		if (this.inlineEditors.get(nodeId) !== state) return false;
+
+		const isDirty = state.editor.getValue() !== state.original;
+		const editorEl = state.shellEl.querySelector(".baseboard-canvas-file__markdown-editor");
+		if (editorEl instanceof HTMLElement) {
+			editorEl.toggleClass("is-dirty", isDirty);
+		}
+		state.shellEl.toggleClass("is-dirty", isDirty);
+		return isDirty;
+	}
+
+	private clearInlineEditorSavedStatusTimer(state: InlineEditorState): void {
+		if (state.savedStatusTimer === null) return;
+
+		window.clearTimeout(state.savedStatusTimer);
+		state.savedStatusTimer = null;
+	}
+
+	private scheduleInlineEditorSavedStatusClear(state: InlineEditorState): void {
+		this.clearInlineEditorSavedStatusTimer(state);
+		state.savedStatusTimer = window.setTimeout(() => {
+			state.savedStatusTimer = null;
 			if (state.statusEl.isConnected && state.statusEl.getText() === this.t("view.editor.saved")) {
 				state.statusEl.setText("");
 			}
-		}, 1500);
+		}, INLINE_EDITOR_SAVED_STATUS_DELAY_MS);
+	}
+
+	private hasFocusedInlineEditor(): boolean {
+		const activeElement = this.rootEl?.ownerDocument.activeElement;
+		if (!(activeElement instanceof HTMLElement)) return false;
+
+		for (const state of this.inlineEditors.values()) {
+			if (state.shellEl.contains(activeElement)) return true;
+		}
+
+		return false;
+	}
+
+	private flushDeferredInlineEditorRender(): void {
+		if (!this.deferredInlineEditorRender || this.hasFocusedInlineEditor()) return;
+
+		this.deferredInlineEditorRender = false;
+		this.scheduleRender();
 	}
 
 	private destroyInlineEditor(nodeId: string, saveDirty: boolean): void {
 		const state = this.inlineEditors.get(nodeId);
 		if (!state) return;
 
+		this.cancelInlineEditorAutosave(state);
+		this.clearInlineEditorSavedStatusTimer(state);
 		const value = state.editor.getValue();
 		if (saveDirty && value !== state.original) {
-			void this.saveInlineEditorValue(nodeId, value);
+			void this.saveInlineEditorValue(nodeId, state, value);
 		}
 		state.editor.destroy();
 		this.inlineEditors.delete(nodeId);
+		this.flushDeferredInlineEditorRender();
 	}
 
 	private destroyAllInlineEditors(saveDirty: boolean): void {
 		for (const nodeId of [...this.inlineEditors.keys()]) {
 			this.destroyInlineEditor(nodeId, saveDirty);
+		}
+	}
+
+	private pruneInlineEditors(visibleNodeIds: Set<string>): void {
+		for (const nodeId of [...this.inlineEditors.keys()]) {
+			if (!visibleNodeIds.has(nodeId)) {
+				this.destroyInlineEditor(nodeId, true);
+			}
 		}
 	}
 
