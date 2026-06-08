@@ -3,278 +3,278 @@ import type { TranslationTree } from "../types";
 export const ko: TranslationTree = {
 	common: {
 		appName: "Baseboard",
-		automatic: "Automatic",
-		cancel: "Cancel",
+		automatic: "자동",
+		cancel: "취소",
 		card: {
-			one: "{count} card",
-			other: "{count} cards",
+			one: "카드 {count}개",
+			other: "카드 {count}개"
 		},
 		group: {
-			one: "{count} group",
-			other: "{count} groups",
+			one: "그룹 {count}개",
+			other: "그룹 {count}개"
 		},
 		languages: {
-			en: "English",
+			en: "영어"
 		},
-		none: "None",
+		none: "없음",
 		note: {
-			one: "{count} note",
-			other: "{count} notes",
+			one: "노트 {count}개",
+			other: "노트 {count}개"
 		},
-		off: "Off",
-		systemDefault: "System default",
+		off: "끄기",
+		systemDefault: "시스템 기본값"
 	},
 	commands: {
-		createCanvasFromCurrentView: "Create canvas from current bases view",
-		openLinkedCanvas: "Open linked canvas",
-		updateLinkedCanvas: "Update linked canvas",
+		createCanvasFromCurrentView: "현재 베이스 보기에서 캔버스 만들기",
+		openLinkedCanvas: "연결된 캔버스 열기",
+		updateLinkedCanvas: "연결된 캔버스 업데이트"
 	},
 	notices: {
-		addedDependency: "Added dependency: {label}.",
-		addedProjectRelationship: "Added project relationship: {label}.",
-		addedPropertyLink: "Added {property}: {source} -> {target}.",
-		baseboardWaitingForBasesData: "Baseboard is waiting for bases data.",
-		couldNotAddPropertyLink: "Could not add property link: {message}",
-		couldNotFind: "Could not find {path}.",
-		couldNotRemovePropertyLink: "Could not remove property link: {message}",
-		couldNotUpdateLink: "Could not update link: {message}",
-		languageChanged: "Language changed to {language}.",
-		linkActionUnavailable: "That link action is unavailable for these notes.",
-		noLinkedCanvas: "{source} has no linked canvas yet.",
-		noVisibleLinkProperties: "No visible note properties are available for links.",
-		obsidianVersionRequired: "Baseboard requires Obsidian 1.10.1 or newer.",
-		openBaseboardViewFirst: "Open a baseboard view first.",
-		openBasesViewFirst: "Open a bases view first.",
-		removedDependency: "Removed dependency.",
-		removedProjectRelationship: "Removed project relationship.",
-		removedPropertyLink: "Removed {property} link.",
-		chooseCanvasPath: "Choose a canvas path.",
-		chooseLinkProperty: "Choose a note property for this link.",
-		updatedCanvas: "Updated {path}: {nodes} nodes, {edges} edges.",
+		addedDependency: "종속성 추가됨: {label}.",
+		addedProjectRelationship: "프로젝트 관계 추가됨: {label}.",
+		addedPropertyLink: "{property} 추가됨: {source} -> {target}.",
+		baseboardWaitingForBasesData: "Baseboard가 베이스 데이터를 기다리고 있습니다.",
+		couldNotAddPropertyLink: "속성 링크를 추가할 수 없습니다: {message}",
+		couldNotFind: "{path}을(를) 찾을 수 없습니다.",
+		couldNotRemovePropertyLink: "속성 링크를 제거할 수 없습니다: {message}",
+		couldNotUpdateLink: "링크를 업데이트할 수 없습니다: {message}",
+		languageChanged: "언어가 {language}(으)로 변경되었습니다.",
+		linkActionUnavailable: "해당 링크 작업은 이 노트에서 사용할 수 없습니다.",
+		noLinkedCanvas: "{source}에는 아직 연결된 캔버스가 없습니다.",
+		noVisibleLinkProperties: "링크에 사용할 수 있는 표시된 노트 속성이 없습니다.",
+		obsidianVersionRequired: "Baseboard는 Obsidian 1.10.1 이상이 필요합니다.",
+		openBaseboardViewFirst: "먼저 baseboard 보기를 여세요.",
+		openBasesViewFirst: "먼저 베이스 보기를 여세요.",
+		removedDependency: "종속성이 제거되었습니다.",
+		removedProjectRelationship: "프로젝트 관계가 제거되었습니다.",
+		removedPropertyLink: "{property} 링크가 제거되었습니다.",
+		chooseCanvasPath: "캔버스 경로를 선택하세요.",
+		chooseLinkProperty: "이 링크에 사용할 노트 속성을 선택하세요.",
+		updatedCanvas: "{path} 업데이트됨: 노드 {nodes}개, 엣지 {edges}개."
 	},
 	settings: {
 		defaults: {
-			heading: "Defaults",
+			heading: "기본값",
 			canvasFolder: {
-				name: "Default canvas folder",
-				description: "Folder used when a baseboard view has no canvas path yet.",
+				name: "기본 캔버스 폴더",
+				description: "baseboard 보기에 아직 캔버스 경로가 없을 때 사용되는 폴더입니다."
 			},
 			layout: {
-				name: "Default layout",
-				description: "Initial layout used for new canvas snapshots.",
+				name: "기본 레이아웃",
+				description: "새 캔버스 스냅샷에 사용되는 초기 레이아웃입니다."
 			},
 			edges: {
-				name: "Default edges",
-				description: "Initial edge source for new canvas snapshots.",
+				name: "기본 엣지",
+				description: "새 캔버스 스냅샷의 초기 엣지 소스입니다."
 			},
 			edgeProperties: {
-				name: "Default edge properties",
-				description: "Comma-separated frontmatter properties used when property edges are enabled.",
+				name: "기본 엣지 속성",
+				description: "속성 엣지가 활성화될 때 사용되는 쉼표로 구분된 프론트매터 속성입니다."
 			},
 			bodyEditor: {
-				name: "Show body editor",
-				description: "Show editable note body text on live baseboard cards by default.",
-			},
+				name: "본문 편집기 표시",
+				description: "라이브 baseboard 카드에 편집 가능한 노트 본문 텍스트를 기본으로 표시합니다."
+			}
 		},
 		tasknotes: {
 			heading: "TaskNotes",
 			integration: {
-				name: "TaskNotes integration",
-				description: "Default TaskNotes behavior for new baseboard views.",
+				name: "TaskNotes 통합",
+				description: "새 baseboard 보기의 기본 TaskNotes 동작입니다."
 			},
 			badges: {
-				name: "Show task badges",
-				description: "Show TaskNotes status, priority, due dates, and blockers on live cards by default.",
+				name: "작업 배지 표시",
+				description: "라이브 카드에 TaskNotes 상태, 우선순위, 기한 및 차단 요소를 기본으로 표시합니다."
 			},
 			actions: {
-				name: "Show task actions",
-				description: "Use the TaskNotes task menu from card actions by default.",
+				name: "작업 동작 표시",
+				description: "카드 작업에서 기본적으로 TaskNotes 작업 메뉴를 사용합니다."
 			},
 			relationships: {
-				name: "Task relationship edges",
-				description: "Default TaskNotes relationship edges for generated canvases and live boards.",
-			},
+				name: "작업 관계 엣지",
+				description: "생성된 캔버스 및 라이브 보드의 기본 TaskNotes 관계 엣지입니다."
+			}
 		},
 		updateRules: {
-			heading: "Update rules",
+			heading: "업데이트 규칙",
 			preservePositions: {
-				name: "Preserve positions",
-				description: "Keep existing baseboard node positions when updating a canvas.",
+				name: "위치 유지",
+				description: "캔버스를 업데이트할 때 기존 baseboard 노드 위치를 유지합니다."
 			},
 			removeMissingNotes: {
-				name: "Remove missing notes",
-				description: "Remove baseboard nodes that no longer appear in the current base result.",
+				name: "누락된 노트 제거",
+				description: "현재 베이스 결과에 더 이상 나타나지 않는 baseboard 노드를 제거합니다."
 			},
 			nodeWidth: {
-				name: "Node width",
-				description: "Default canvas file node width.",
+				name: "노드 너비",
+				description: "기본 캔버스 파일 노드 너비입니다."
 			},
 			nodeHeight: {
-				name: "Node height",
-				description: "Default canvas file node height.",
-			},
+				name: "노드 높이",
+				description: "기본 캔버스 파일 노드 높이입니다."
+			}
 		},
 		language: {
-			heading: "Interface language",
-			description: "Change the language of Baseboard commands, settings, notices, and views.",
-			name: "UI language",
-			dropdownDescription: "Select the language used for Baseboard interface text.",
-		},
+			heading: "인터페이스 언어",
+			description: "Baseboard 명령, 설정, 알림 및 보기의 언어를 변경합니다.",
+			name: "UI 언어",
+			dropdownDescription: "Baseboard 인터페이스 텍스트에 사용할 언어를 선택하세요."
+		}
 	},
 	options: {
 		layout: {
-			columns: "Grouped columns",
-			rows: "Grouped rows",
-			grid: "Grid",
+			columns: "그룹화된 열",
+			rows: "그룹화된 행",
+			grid: "그리드"
 		},
 		edgeMode: {
-			wikilinks: "Links within view",
-			properties: "Selected properties",
-			all: "Links and selected properties",
+			wikilinks: "보기 내 링크",
+			properties: "선택된 속성",
+			all: "링크 및 선택된 속성"
 		},
 		relationships: {
-			dependencies: "Dependencies",
-			all: "Dependencies and subtasks",
-		},
+			dependencies: "종속성",
+			all: "종속성 및 하위 작업"
+		}
 	},
 	tasknotes: {
 		badges: {
-			due: "Due",
-			scheduled: "Scheduled",
-			recurrence: "Repeats",
-			recurring: "Recurring",
-			blocked: "Blocked",
-			blocking: "Blocking",
-			subtasks: "Subtasks",
-			estimate: "Estimate",
-			tracked: "Tracked",
+			due: "기한",
+			scheduled: "예약됨",
+			recurrence: "반복",
+			recurring: "반복",
+			blocked: "차단됨",
+			blocking: "차단 중",
+			subtasks: "하위 작업",
+			estimate: "예상",
+			tracked: "추적됨"
 		},
 		relationships: {
-			blocks: "blocks",
-			subtask: "subtask",
-		},
+			blocks: "차단",
+			subtask: "하위 작업"
+		}
 	},
 	modal: {
-		title: "Create canvas from view",
+		title: "보기에서 캔버스 만들기",
 		canvasPath: {
-			name: "Canvas path",
-			description: "Vault path for the generated JSON canvas file.",
+			name: "캔버스 경로",
+			description: "생성된 JSON 캔버스 파일의 보관소 경로입니다."
 		},
 		layout: {
-			name: "Layout",
-			description: "How base groups are arranged in the generated canvas.",
+			name: "레이아웃",
+			description: "생성된 캔버스에서 베이스 그룹이 배치되는 방식입니다."
 		},
 		nodeSize: {
-			name: "Node size",
-			description: "Width and height for new canvas file nodes.",
-			width: "Width",
-			height: "Height",
+			name: "노드 크기",
+			description: "새 캔버스 파일 노드의 너비와 높이입니다.",
+			width: "너비",
+			height: "높이"
 		},
 		edges: {
-			name: "Edges",
-			description: "Draw edges only when both notes are in this base result.",
+			name: "엣지",
+			description: "두 노트가 모두 이 베이스 결과에 있을 때만 엣지를 그립니다."
 		},
 		linkProperties: {
-			name: "Link properties",
-			description: "Comma-separated frontmatter properties used for property edges.",
-			placeholder: "Depends_on, related",
+			name: "링크 속성",
+			description: "속성 엣지에 사용되는 쉼표로 구분된 프론트매터 속성입니다.",
+			placeholder: "의존, 관련"
 		},
 		taskRelationships: {
-			name: "Task relationship edges",
-			description: "Add task relationship edges to the generated canvas.",
+			name: "작업 관계 엣지",
+			description: "생성된 캔버스에 작업 관계 엣지를 추가합니다."
 		},
 		preservePositions: {
-			description: "Keep positions for baseboard nodes already present in the canvas.",
+			description: "이미 캔버스에 있는 baseboard 노드의 위치를 유지합니다."
 		},
-		createCanvas: "Create canvas",
+		createCanvas: "캔버스 만들기"
 	},
 	view: {
-		waitingForBasesData: "Waiting for Bases data",
+		waitingForBasesData: "베이스 데이터 대기 중",
 		toolbar: {
-			pinNote: "Pin note",
-			addCard: "Add card",
-			createCanvas: "Create canvas",
-			updateCanvas: "Update canvas",
-			openCanvas: "Open canvas",
-			resetLayout: "Reset layout",
+			pinNote: "노트 고정",
+			addCard: "카드 추가",
+			createCanvas: "캔버스 만들기",
+			updateCanvas: "캔버스 업데이트",
+			openCanvas: "캔버스 열기",
+			resetLayout: "레이아웃 재설정"
 		},
 		empty: {
-			title: "No notes in this view",
-			body: "Change the Base filters, pin a note, or add a card.",
+			title: "이 보기에 노트가 없습니다",
+			body: "Base 필터를 변경하거나, 노트를 고정하거나, 카드를 추가하세요."
 		},
 		card: {
-			pinned: "Pinned",
-			noteActions: "Note actions",
-			textCardTitle: "Card",
-			cardActions: "Card actions",
-			editCard: "Edit card",
-			writeNote: "Write a note",
-			linkFromNote: "Link from this note",
+			pinned: "고정됨",
+			noteActions: "노트 작업",
+			textCardTitle: "카드",
+			cardActions: "카드 작업",
+			editCard: "카드 편집",
+			writeNote: "노트 작성",
+			linkFromNote: "이 노트에서 링크"
 		},
 		tooltips: {
-			dragGroup: "Drag group",
-			resizeGroup: "Resize group",
-			dragNote: "Drag note. Double-click to open.",
-			resizeCard: "Resize card",
-			dragToLinkNotes: "Drag to link notes",
-			dragCard: "Drag card",
-			zoomOut: "Zoom out",
-			zoomIn: "Zoom in",
-			fitView: "Fit view",
-			resetView: "Reset view",
+			dragGroup: "그룹 드래그",
+			resizeGroup: "그룹 크기 조정",
+			dragNote: "노트를 드래그하세요. 더블 클릭하여 엽니다.",
+			resizeCard: "카드 크기 조정",
+			dragToLinkNotes: "드래그하여 노트 연결",
+			dragCard: "카드 드래그",
+			zoomOut: "축소",
+			zoomIn: "확대",
+			fitView: "보기에 맞추기",
+			resetView: "보기 재설정"
 		},
 		menu: {
-			openNote: "Open note",
-			unpinFromBoard: "Unpin from board",
-			removeCard: "Remove card",
-			sourceBlocksTarget: "{source} blocks {target}",
-			targetBlocksSource: "{target} blocks {source}",
-			targetSubtaskOfSource: "{target} is subtask of {source}",
-			sourceSubtaskOfTarget: "{source} is subtask of {target}",
-			addPropertyLink: "Add {property}: {source} -> {target}",
-			chooseProperty: "Choose property...",
-			openPath: "Open {name}",
-			removeDependency: "Remove dependency",
-			removeProjectRelationship: "Remove project relationship",
-			removePropertyLink: "Remove {property} link",
+			openNote: "노트 열기",
+			unpinFromBoard: "보드에서 고정 해제",
+			removeCard: "카드 제거",
+			sourceBlocksTarget: "{source}이(가) {target}을(를) 차단",
+			targetBlocksSource: "{target}이(가) {source}을(를) 차단",
+			targetSubtaskOfSource: "{target}은(는) {source}의 하위 작업입니다",
+			sourceSubtaskOfTarget: "{source}은(는) {target}의 하위 작업입니다",
+			addPropertyLink: "{property} 추가: {source} -> {target}",
+			chooseProperty: "속성 선택...",
+			openPath: "{name} 열기",
+			removeDependency: "종속성 제거",
+			removeProjectRelationship: "프로젝트 관계 제거",
+			removePropertyLink: "{property} 링크 제거"
 		},
 		editor: {
-			editPath: "Edit {path}",
-			loading: "Loading",
-			unsaved: "Unsaved",
-			missingFile: "Missing file",
-			missing: "Missing",
-			unableToLoad: "Unable to load",
-			error: "Error",
-			saving: "Saving",
-			saved: "Saved",
+			editPath: "{path} 편집",
+			loading: "불러오는 중",
+			unsaved: "저장되지 않음",
+			missingFile: "누락된 파일",
+			missing: "누락됨",
+			unableToLoad: "불러올 수 없음",
+			error: "오류",
+			saving: "저장 중",
+			saved: "저장됨"
 		},
 		suggest: {
-			propertyPlaceholder: "Choose a note property for the link",
-			noMatchingProperties: "No matching properties",
-			notePlaceholder: "Pin a note to this board",
-			noMatchingNotes: "No matching notes",
-		},
+			propertyPlaceholder: "링크에 사용할 노트 속성을 선택하세요",
+			noMatchingProperties: "일치하는 속성 없음",
+			notePlaceholder: "이 보드에 노트 고정",
+			noMatchingNotes: "일치하는 노트 없음"
+		}
 	},
 	basesOptions: {
-		canvas: "Canvas",
-		canvasPath: "Canvas path",
-		layout: "Layout",
-		edges: "Edges",
-		linkProperties: "Link properties",
-		cards: "Cards",
-		showBodyEditor: "Show body editor",
+		canvas: "캔버스",
+		canvasPath: "캔버스 경로",
+		layout: "레이아웃",
+		edges: "엣지",
+		linkProperties: "링크 속성",
+		cards: "카드",
+		showBodyEditor: "본문 편집기 표시",
 		tasknotes: "TaskNotes",
-		tasknotesIntegration: "TaskNotes integration",
-		showTaskBadges: "Show task badges",
-		showTaskActions: "Show task actions",
-		taskRelationshipEdges: "Task relationship edges",
-		manualCards: "Manual cards",
-		pinnedNotes: "Pinned notes",
-		updateRules: "Update rules",
-		preservePositions: "Preserve positions",
-		removeMissingNotes: "Remove missing notes",
-		nodeWidth: "Node width",
-		nodeHeight: "Node height",
-	},
+		tasknotesIntegration: "TaskNotes 통합",
+		showTaskBadges: "작업 배지 표시",
+		showTaskActions: "작업 동작 표시",
+		taskRelationshipEdges: "작업 관계 엣지",
+		manualCards: "수동 카드",
+		pinnedNotes: "고정된 노트",
+		updateRules: "업데이트 규칙",
+		preservePositions: "위치 유지",
+		removeMissingNotes: "누락된 노트 제거",
+		nodeWidth: "노드 너비",
+		nodeHeight: "노드 높이"
+	}
 };

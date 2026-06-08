@@ -3,278 +3,278 @@ import type { TranslationTree } from "../types";
 export const fr: TranslationTree = {
 	common: {
 		appName: "Baseboard",
-		automatic: "Automatic",
-		cancel: "Cancel",
+		automatic: "Automatique",
+		cancel: "Annuler",
 		card: {
-			one: "{count} card",
-			other: "{count} cards",
+			one: "{count} carte",
+			other: "{count} cartes"
 		},
 		group: {
-			one: "{count} group",
-			other: "{count} groups",
+			one: "{count} groupe",
+			other: "{count} groupes"
 		},
 		languages: {
-			en: "English",
+			en: "Anglais"
 		},
-		none: "None",
+		none: "Aucun",
 		note: {
 			one: "{count} note",
-			other: "{count} notes",
+			other: "{count} notes"
 		},
-		off: "Off",
-		systemDefault: "System default",
+		off: "Désactivé",
+		systemDefault: "Par défaut du système"
 	},
 	commands: {
-		createCanvasFromCurrentView: "Create canvas from current bases view",
-		openLinkedCanvas: "Open linked canvas",
-		updateLinkedCanvas: "Update linked canvas",
+		createCanvasFromCurrentView: "Créer un canevas à partir de la vue de bases actuelle",
+		openLinkedCanvas: "Ouvrir le canevas lié",
+		updateLinkedCanvas: "Mettre à jour le canevas lié"
 	},
 	notices: {
-		addedDependency: "Added dependency: {label}.",
-		addedProjectRelationship: "Added project relationship: {label}.",
-		addedPropertyLink: "Added {property}: {source} -> {target}.",
-		baseboardWaitingForBasesData: "Baseboard is waiting for bases data.",
-		couldNotAddPropertyLink: "Could not add property link: {message}",
-		couldNotFind: "Could not find {path}.",
-		couldNotRemovePropertyLink: "Could not remove property link: {message}",
-		couldNotUpdateLink: "Could not update link: {message}",
-		languageChanged: "Language changed to {language}.",
-		linkActionUnavailable: "That link action is unavailable for these notes.",
-		noLinkedCanvas: "{source} has no linked canvas yet.",
-		noVisibleLinkProperties: "No visible note properties are available for links.",
-		obsidianVersionRequired: "Baseboard requires Obsidian 1.10.1 or newer.",
-		openBaseboardViewFirst: "Open a baseboard view first.",
-		openBasesViewFirst: "Open a bases view first.",
-		removedDependency: "Removed dependency.",
-		removedProjectRelationship: "Removed project relationship.",
-		removedPropertyLink: "Removed {property} link.",
-		chooseCanvasPath: "Choose a canvas path.",
-		chooseLinkProperty: "Choose a note property for this link.",
-		updatedCanvas: "Updated {path}: {nodes} nodes, {edges} edges.",
+		addedDependency: "Dépendance ajoutée : {label}.",
+		addedProjectRelationship: "Relation de projet ajoutée : {label}.",
+		addedPropertyLink: "{property} ajouté : {source} -> {target}.",
+		baseboardWaitingForBasesData: "Baseboard attend les données de bases.",
+		couldNotAddPropertyLink: "Impossible d'ajouter le lien de propriété : {message}",
+		couldNotFind: "Impossible de trouver {path}.",
+		couldNotRemovePropertyLink: "Impossible de supprimer le lien de propriété : {message}",
+		couldNotUpdateLink: "Impossible de mettre à jour le lien : {message}",
+		languageChanged: "Langue changée en {language}.",
+		linkActionUnavailable: "Cette action de lien n'est pas disponible pour ces notes.",
+		noLinkedCanvas: "{source} n'a pas encore de canevas lié.",
+		noVisibleLinkProperties: "Aucune propriété de note visible n'est disponible pour les liens.",
+		obsidianVersionRequired: "Baseboard nécessite Obsidian 1.10.1 ou plus récent.",
+		openBaseboardViewFirst: "Ouvrez d'abord une vue baseboard.",
+		openBasesViewFirst: "Ouvrez d'abord une vue de bases.",
+		removedDependency: "Dépendance supprimée.",
+		removedProjectRelationship: "Relation de projet supprimée.",
+		removedPropertyLink: "Lien {property} supprimé.",
+		chooseCanvasPath: "Choisissez un chemin de canevas.",
+		chooseLinkProperty: "Choisissez une propriété de note pour ce lien.",
+		updatedCanvas: "{path} mis à jour : {nodes} nœuds, {edges} arêtes."
 	},
 	settings: {
 		defaults: {
-			heading: "Defaults",
+			heading: "Valeurs par défaut",
 			canvasFolder: {
-				name: "Default canvas folder",
-				description: "Folder used when a baseboard view has no canvas path yet.",
+				name: "Dossier de canevas par défaut",
+				description: "Dossier utilisé lorsqu'une vue baseboard n'a pas encore de chemin de canevas."
 			},
 			layout: {
-				name: "Default layout",
-				description: "Initial layout used for new canvas snapshots.",
+				name: "Disposition par défaut",
+				description: "Disposition initiale utilisée pour les nouveaux instantanés de canevas."
 			},
 			edges: {
-				name: "Default edges",
-				description: "Initial edge source for new canvas snapshots.",
+				name: "Arêtes par défaut",
+				description: "Source d'arête initiale pour les nouveaux instantanés de canevas."
 			},
 			edgeProperties: {
-				name: "Default edge properties",
-				description: "Comma-separated frontmatter properties used when property edges are enabled.",
+				name: "Propriétés d'arête par défaut",
+				description: "Propriétés de frontmatter séparées par des virgules utilisées lorsque les arêtes de propriété sont activées."
 			},
 			bodyEditor: {
-				name: "Show body editor",
-				description: "Show editable note body text on live baseboard cards by default.",
-			},
+				name: "Afficher l'éditeur de corps",
+				description: "Afficher par défaut le texte modifiable du corps de la note sur les cartes baseboard en direct."
+			}
 		},
 		tasknotes: {
 			heading: "TaskNotes",
 			integration: {
-				name: "TaskNotes integration",
-				description: "Default TaskNotes behavior for new baseboard views.",
+				name: "Intégration TaskNotes",
+				description: "Comportement TaskNotes par défaut pour les nouvelles vues baseboard."
 			},
 			badges: {
-				name: "Show task badges",
-				description: "Show TaskNotes status, priority, due dates, and blockers on live cards by default.",
+				name: "Afficher les badges de tâche",
+				description: "Afficher par défaut le statut TaskNotes, la priorité, les dates d'échéance et les bloqueurs sur les cartes en direct."
 			},
 			actions: {
-				name: "Show task actions",
-				description: "Use the TaskNotes task menu from card actions by default.",
+				name: "Afficher les actions de tâche",
+				description: "Utiliser par défaut le menu de tâches TaskNotes depuis les actions de la carte."
 			},
 			relationships: {
-				name: "Task relationship edges",
-				description: "Default TaskNotes relationship edges for generated canvases and live boards.",
-			},
+				name: "Arêtes de relation entre tâches",
+				description: "Arêtes de relation TaskNotes par défaut pour les canevas générés et les tableaux en direct."
+			}
 		},
 		updateRules: {
-			heading: "Update rules",
+			heading: "Règles de mise à jour",
 			preservePositions: {
-				name: "Preserve positions",
-				description: "Keep existing baseboard node positions when updating a canvas.",
+				name: "Conserver les positions",
+				description: "Conserver les positions existantes des nœuds baseboard lors de la mise à jour d'un canevas."
 			},
 			removeMissingNotes: {
-				name: "Remove missing notes",
-				description: "Remove baseboard nodes that no longer appear in the current base result.",
+				name: "Supprimer les notes manquantes",
+				description: "Supprimer les nœuds baseboard qui n'apparaissent plus dans le résultat de base actuel."
 			},
 			nodeWidth: {
-				name: "Node width",
-				description: "Default canvas file node width.",
+				name: "Largeur du nœud",
+				description: "Largeur par défaut des nœuds de fichier du canevas."
 			},
 			nodeHeight: {
-				name: "Node height",
-				description: "Default canvas file node height.",
-			},
+				name: "Hauteur du nœud",
+				description: "Hauteur par défaut des nœuds de fichier du canevas."
+			}
 		},
 		language: {
-			heading: "Interface language",
-			description: "Change the language of Baseboard commands, settings, notices, and views.",
-			name: "UI language",
-			dropdownDescription: "Select the language used for Baseboard interface text.",
-		},
+			heading: "Langue de l'interface",
+			description: "Changer la langue des commandes, paramètres, notifications et vues de Baseboard.",
+			name: "Langue de l'interface",
+			dropdownDescription: "Sélectionnez la langue utilisée pour le texte de l'interface Baseboard."
+		}
 	},
 	options: {
 		layout: {
-			columns: "Grouped columns",
-			rows: "Grouped rows",
-			grid: "Grid",
+			columns: "Colonnes groupées",
+			rows: "Lignes groupées",
+			grid: "Grille"
 		},
 		edgeMode: {
-			wikilinks: "Links within view",
-			properties: "Selected properties",
-			all: "Links and selected properties",
+			wikilinks: "Liens dans la vue",
+			properties: "Propriétés sélectionnées",
+			all: "Liens et propriétés sélectionnées"
 		},
 		relationships: {
-			dependencies: "Dependencies",
-			all: "Dependencies and subtasks",
-		},
+			dependencies: "Dépendances",
+			all: "Dépendances et sous-tâches"
+		}
 	},
 	tasknotes: {
 		badges: {
-			due: "Due",
-			scheduled: "Scheduled",
-			recurrence: "Repeats",
-			recurring: "Recurring",
-			blocked: "Blocked",
-			blocking: "Blocking",
-			subtasks: "Subtasks",
-			estimate: "Estimate",
-			tracked: "Tracked",
+			due: "Échéance",
+			scheduled: "Planifié",
+			recurrence: "Répétitions",
+			recurring: "Récurrent",
+			blocked: "Bloqué",
+			blocking: "Bloquant",
+			subtasks: "Sous-tâches",
+			estimate: "Estimation",
+			tracked: "Suivi"
 		},
 		relationships: {
-			blocks: "blocks",
-			subtask: "subtask",
-		},
+			blocks: "bloque",
+			subtask: "sous-tâche"
+		}
 	},
 	modal: {
-		title: "Create canvas from view",
+		title: "Créer un canevas à partir de la vue",
 		canvasPath: {
-			name: "Canvas path",
-			description: "Vault path for the generated JSON canvas file.",
+			name: "Chemin du canevas",
+			description: "Chemin du coffre pour le fichier de canevas JSON généré."
 		},
 		layout: {
-			name: "Layout",
-			description: "How base groups are arranged in the generated canvas.",
+			name: "Disposition",
+			description: "Comment les groupes de base sont disposés dans le canevas généré."
 		},
 		nodeSize: {
-			name: "Node size",
-			description: "Width and height for new canvas file nodes.",
-			width: "Width",
-			height: "Height",
+			name: "Taille du nœud",
+			description: "Largeur et hauteur des nouveaux nœuds de fichier de canevas.",
+			width: "Largeur",
+			height: "Hauteur"
 		},
 		edges: {
-			name: "Edges",
-			description: "Draw edges only when both notes are in this base result.",
+			name: "Arêtes",
+			description: "Dessiner les arêtes uniquement lorsque les deux notes sont dans ce résultat de base."
 		},
 		linkProperties: {
-			name: "Link properties",
-			description: "Comma-separated frontmatter properties used for property edges.",
-			placeholder: "Depends_on, related",
+			name: "Propriétés de lien",
+			description: "Propriétés de frontmatter séparées par des virgules utilisées pour les arêtes de propriété.",
+			placeholder: "depend_de, lie"
 		},
 		taskRelationships: {
-			name: "Task relationship edges",
-			description: "Add task relationship edges to the generated canvas.",
+			name: "Arêtes de relation entre tâches",
+			description: "Ajouter les arêtes de relation entre tâches au canevas généré."
 		},
 		preservePositions: {
-			description: "Keep positions for baseboard nodes already present in the canvas.",
+			description: "Conserver les positions des nœuds baseboard déjà présents dans le canevas."
 		},
-		createCanvas: "Create canvas",
+		createCanvas: "Créer un canevas"
 	},
 	view: {
-		waitingForBasesData: "Waiting for Bases data",
+		waitingForBasesData: "En attente des données de bases",
 		toolbar: {
-			pinNote: "Pin note",
-			addCard: "Add card",
-			createCanvas: "Create canvas",
-			updateCanvas: "Update canvas",
-			openCanvas: "Open canvas",
-			resetLayout: "Reset layout",
+			pinNote: "Épingler la note",
+			addCard: "Ajouter une carte",
+			createCanvas: "Créer un canevas",
+			updateCanvas: "Mettre à jour le canevas",
+			openCanvas: "Ouvrir le canevas",
+			resetLayout: "Réinitialiser la disposition"
 		},
 		empty: {
-			title: "No notes in this view",
-			body: "Change the Base filters, pin a note, or add a card.",
+			title: "Aucune note dans cette vue",
+			body: "Modifiez les filtres de la base, épinglez une note ou ajoutez une carte."
 		},
 		card: {
-			pinned: "Pinned",
-			noteActions: "Note actions",
-			textCardTitle: "Card",
-			cardActions: "Card actions",
-			editCard: "Edit card",
-			writeNote: "Write a note",
-			linkFromNote: "Link from this note",
+			pinned: "Épinglé",
+			noteActions: "Actions de la note",
+			textCardTitle: "Carte",
+			cardActions: "Actions de la carte",
+			editCard: "Modifier la carte",
+			writeNote: "Écrire une note",
+			linkFromNote: "Lier depuis cette note"
 		},
 		tooltips: {
-			dragGroup: "Drag group",
-			resizeGroup: "Resize group",
-			dragNote: "Drag note. Double-click to open.",
-			resizeCard: "Resize card",
-			dragToLinkNotes: "Drag to link notes",
-			dragCard: "Drag card",
-			zoomOut: "Zoom out",
-			zoomIn: "Zoom in",
-			fitView: "Fit view",
-			resetView: "Reset view",
+			dragGroup: "Déplacer le groupe",
+			resizeGroup: "Redimensionner le groupe",
+			dragNote: "Déplacez la note. Double-cliquez pour ouvrir.",
+			resizeCard: "Redimensionner la carte",
+			dragToLinkNotes: "Glisser pour lier les notes",
+			dragCard: "Déplacer la carte",
+			zoomOut: "Zoom arrière",
+			zoomIn: "Zoom avant",
+			fitView: "Ajuster la vue",
+			resetView: "Réinitialiser la vue"
 		},
 		menu: {
-			openNote: "Open note",
-			unpinFromBoard: "Unpin from board",
-			removeCard: "Remove card",
-			sourceBlocksTarget: "{source} blocks {target}",
-			targetBlocksSource: "{target} blocks {source}",
-			targetSubtaskOfSource: "{target} is subtask of {source}",
-			sourceSubtaskOfTarget: "{source} is subtask of {target}",
-			addPropertyLink: "Add {property}: {source} -> {target}",
-			chooseProperty: "Choose property...",
-			openPath: "Open {name}",
-			removeDependency: "Remove dependency",
-			removeProjectRelationship: "Remove project relationship",
-			removePropertyLink: "Remove {property} link",
+			openNote: "Ouvrir la note",
+			unpinFromBoard: "Désépingler du tableau",
+			removeCard: "Supprimer la carte",
+			sourceBlocksTarget: "{source} bloque {target}",
+			targetBlocksSource: "{target} bloque {source}",
+			targetSubtaskOfSource: "{target} est une sous-tâche de {source}",
+			sourceSubtaskOfTarget: "{source} est une sous-tâche de {target}",
+			addPropertyLink: "Ajouter {property} : {source} -> {target}",
+			chooseProperty: "Choisir une propriété...",
+			openPath: "Ouvrir {name}",
+			removeDependency: "Supprimer la dépendance",
+			removeProjectRelationship: "Supprimer la relation de projet",
+			removePropertyLink: "Supprimer le lien {property}"
 		},
 		editor: {
-			editPath: "Edit {path}",
-			loading: "Loading",
-			unsaved: "Unsaved",
-			missingFile: "Missing file",
-			missing: "Missing",
-			unableToLoad: "Unable to load",
-			error: "Error",
-			saving: "Saving",
-			saved: "Saved",
+			editPath: "Modifier {path}",
+			loading: "Chargement",
+			unsaved: "Non enregistré",
+			missingFile: "Fichier manquant",
+			missing: "Manquant",
+			unableToLoad: "Impossible de charger",
+			error: "Erreur",
+			saving: "Enregistrement",
+			saved: "Enregistré"
 		},
 		suggest: {
-			propertyPlaceholder: "Choose a note property for the link",
-			noMatchingProperties: "No matching properties",
-			notePlaceholder: "Pin a note to this board",
-			noMatchingNotes: "No matching notes",
-		},
+			propertyPlaceholder: "Choisissez une propriété de note pour le lien",
+			noMatchingProperties: "Aucune propriété correspondante",
+			notePlaceholder: "Épingler une note à ce tableau",
+			noMatchingNotes: "Aucune note correspondante"
+		}
 	},
 	basesOptions: {
-		canvas: "Canvas",
-		canvasPath: "Canvas path",
-		layout: "Layout",
-		edges: "Edges",
-		linkProperties: "Link properties",
-		cards: "Cards",
-		showBodyEditor: "Show body editor",
+		canvas: "Canevas",
+		canvasPath: "Chemin du canevas",
+		layout: "Disposition",
+		edges: "Arêtes",
+		linkProperties: "Propriétés de lien",
+		cards: "Cartes",
+		showBodyEditor: "Afficher l'éditeur de corps",
 		tasknotes: "TaskNotes",
-		tasknotesIntegration: "TaskNotes integration",
-		showTaskBadges: "Show task badges",
-		showTaskActions: "Show task actions",
-		taskRelationshipEdges: "Task relationship edges",
-		manualCards: "Manual cards",
-		pinnedNotes: "Pinned notes",
-		updateRules: "Update rules",
-		preservePositions: "Preserve positions",
-		removeMissingNotes: "Remove missing notes",
-		nodeWidth: "Node width",
-		nodeHeight: "Node height",
-	},
+		tasknotesIntegration: "Intégration TaskNotes",
+		showTaskBadges: "Afficher les badges de tâche",
+		showTaskActions: "Afficher les actions de tâche",
+		taskRelationshipEdges: "Arêtes de relation entre tâches",
+		manualCards: "Cartes manuelles",
+		pinnedNotes: "Notes épinglées",
+		updateRules: "Règles de mise à jour",
+		preservePositions: "Conserver les positions",
+		removeMissingNotes: "Supprimer les notes manquantes",
+		nodeWidth: "Largeur du nœud",
+		nodeHeight: "Hauteur du nœud"
+	}
 };

@@ -63,5 +63,12 @@ describe("I18nService", () => {
 			"pt",
 			"ko",
 		]);
+
+		const i18n = new I18nService({
+			resources: translationResources,
+			defaultLocale: "en",
+			initialLocale: "ja",
+		});
+		expect(i18n.translate("common.cancel")).toBe("キャンセル");
 	});
 });

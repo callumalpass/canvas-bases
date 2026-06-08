@@ -3,278 +3,278 @@ import type { TranslationTree } from "../types";
 export const ru: TranslationTree = {
 	common: {
 		appName: "Baseboard",
-		automatic: "Automatic",
-		cancel: "Cancel",
+		automatic: "Автоматически",
+		cancel: "Отмена",
 		card: {
-			one: "{count} card",
-			other: "{count} cards",
+			one: "{count} карточка",
+			other: "{count} карточек"
 		},
 		group: {
-			one: "{count} group",
-			other: "{count} groups",
+			one: "{count} группа",
+			other: "{count} групп"
 		},
 		languages: {
-			en: "English",
+			en: "Английский"
 		},
-		none: "None",
+		none: "Нет",
 		note: {
-			one: "{count} note",
-			other: "{count} notes",
+			one: "{count} заметка",
+			other: "{count} заметок"
 		},
-		off: "Off",
-		systemDefault: "System default",
+		off: "Выкл.",
+		systemDefault: "Системный по умолчанию"
 	},
 	commands: {
-		createCanvasFromCurrentView: "Create canvas from current bases view",
-		openLinkedCanvas: "Open linked canvas",
-		updateLinkedCanvas: "Update linked canvas",
+		createCanvasFromCurrentView: "Создать канвас из текущего представления Bases",
+		openLinkedCanvas: "Открыть связанный канвас",
+		updateLinkedCanvas: "Обновить связанный канвас"
 	},
 	notices: {
-		addedDependency: "Added dependency: {label}.",
-		addedProjectRelationship: "Added project relationship: {label}.",
-		addedPropertyLink: "Added {property}: {source} -> {target}.",
-		baseboardWaitingForBasesData: "Baseboard is waiting for bases data.",
-		couldNotAddPropertyLink: "Could not add property link: {message}",
-		couldNotFind: "Could not find {path}.",
-		couldNotRemovePropertyLink: "Could not remove property link: {message}",
-		couldNotUpdateLink: "Could not update link: {message}",
-		languageChanged: "Language changed to {language}.",
-		linkActionUnavailable: "That link action is unavailable for these notes.",
-		noLinkedCanvas: "{source} has no linked canvas yet.",
-		noVisibleLinkProperties: "No visible note properties are available for links.",
-		obsidianVersionRequired: "Baseboard requires Obsidian 1.10.1 or newer.",
-		openBaseboardViewFirst: "Open a baseboard view first.",
-		openBasesViewFirst: "Open a bases view first.",
-		removedDependency: "Removed dependency.",
-		removedProjectRelationship: "Removed project relationship.",
-		removedPropertyLink: "Removed {property} link.",
-		chooseCanvasPath: "Choose a canvas path.",
-		chooseLinkProperty: "Choose a note property for this link.",
-		updatedCanvas: "Updated {path}: {nodes} nodes, {edges} edges.",
+		addedDependency: "Добавлена зависимость: {label}.",
+		addedProjectRelationship: "Добавлена связь проекта: {label}.",
+		addedPropertyLink: "Добавлено {property}: {source} -> {target}.",
+		baseboardWaitingForBasesData: "Baseboard ожидает данные Bases.",
+		couldNotAddPropertyLink: "Не удалось добавить ссылку свойства: {message}",
+		couldNotFind: "Не удалось найти {path}.",
+		couldNotRemovePropertyLink: "Не удалось удалить ссылку свойства: {message}",
+		couldNotUpdateLink: "Не удалось обновить ссылку: {message}",
+		languageChanged: "Язык изменён на {language}.",
+		linkActionUnavailable: "Это действие со ссылкой недоступно для этих заметок.",
+		noLinkedCanvas: "{source} ещё не имеет связанного канваса.",
+		noVisibleLinkProperties: "Нет видимых свойств заметки, доступных для ссылок.",
+		obsidianVersionRequired: "Для Baseboard требуется Obsidian 1.10.1 или новее.",
+		openBaseboardViewFirst: "Сначала откройте представление baseboard.",
+		openBasesViewFirst: "Сначала откройте представление bases.",
+		removedDependency: "Зависимость удалена.",
+		removedProjectRelationship: "Связь проекта удалена.",
+		removedPropertyLink: "Ссылка {property} удалена.",
+		chooseCanvasPath: "Выберите путь к канвасу.",
+		chooseLinkProperty: "Выберите свойство заметки для этой ссылки.",
+		updatedCanvas: "Обновлено {path}: узлов — {nodes}, связей — {edges}."
 	},
 	settings: {
 		defaults: {
-			heading: "Defaults",
+			heading: "По умолчанию",
 			canvasFolder: {
-				name: "Default canvas folder",
-				description: "Folder used when a baseboard view has no canvas path yet.",
+				name: "Папка канваса по умолчанию",
+				description: "Папка, используемая когда у представления baseboard ещё нет пути к канвасу."
 			},
 			layout: {
-				name: "Default layout",
-				description: "Initial layout used for new canvas snapshots.",
+				name: "Макет по умолчанию",
+				description: "Начальный макет для новых снимков канваса."
 			},
 			edges: {
-				name: "Default edges",
-				description: "Initial edge source for new canvas snapshots.",
+				name: "Связи по умолчанию",
+				description: "Начальный источник связей для новых снимков канваса."
 			},
 			edgeProperties: {
-				name: "Default edge properties",
-				description: "Comma-separated frontmatter properties used when property edges are enabled.",
+				name: "Свойства связей по умолчанию",
+				description: "Свойства frontmatter через запятую, используемые при включённых связях по свойствам."
 			},
 			bodyEditor: {
-				name: "Show body editor",
-				description: "Show editable note body text on live baseboard cards by default.",
-			},
+				name: "Показать редактор текста",
+				description: "По умолчанию показывать редактируемый текст заметки на живых карточках baseboard."
+			}
 		},
 		tasknotes: {
 			heading: "TaskNotes",
 			integration: {
-				name: "TaskNotes integration",
-				description: "Default TaskNotes behavior for new baseboard views.",
+				name: "Интеграция с TaskNotes",
+				description: "Поведение TaskNotes по умолчанию для новых представлений baseboard."
 			},
 			badges: {
-				name: "Show task badges",
-				description: "Show TaskNotes status, priority, due dates, and blockers on live cards by default.",
+				name: "Показать значки задачи",
+				description: "По умолчанию показывать статус, приоритет, сроки и блокировщики TaskNotes на живых карточках."
 			},
 			actions: {
-				name: "Show task actions",
-				description: "Use the TaskNotes task menu from card actions by default.",
+				name: "Показать действия задачи",
+				description: "По умолчанию использовать меню задач TaskNotes из действий карточки."
 			},
 			relationships: {
-				name: "Task relationship edges",
-				description: "Default TaskNotes relationship edges for generated canvases and live boards.",
-			},
+				name: "Связи отношений задач",
+				description: "Связи отношений TaskNotes по умолчанию для создаваемых канвасов и живых досок."
+			}
 		},
 		updateRules: {
-			heading: "Update rules",
+			heading: "Правила обновления",
 			preservePositions: {
-				name: "Preserve positions",
-				description: "Keep existing baseboard node positions when updating a canvas.",
+				name: "Сохранять позиции",
+				description: "Сохранять существующие позиции узлов baseboard при обновлении канваса."
 			},
 			removeMissingNotes: {
-				name: "Remove missing notes",
-				description: "Remove baseboard nodes that no longer appear in the current base result.",
+				name: "Удалять отсутствующие заметки",
+				description: "Удалять узлы baseboard, которых больше нет в текущем результате base."
 			},
 			nodeWidth: {
-				name: "Node width",
-				description: "Default canvas file node width.",
+				name: "Ширина узла",
+				description: "Ширина узла файла канваса по умолчанию."
 			},
 			nodeHeight: {
-				name: "Node height",
-				description: "Default canvas file node height.",
-			},
+				name: "Высота узла",
+				description: "Высота узла файла канваса по умолчанию."
+			}
 		},
 		language: {
-			heading: "Interface language",
-			description: "Change the language of Baseboard commands, settings, notices, and views.",
-			name: "UI language",
-			dropdownDescription: "Select the language used for Baseboard interface text.",
-		},
+			heading: "Язык интерфейса",
+			description: "Изменить язык команд, настроек, уведомлений и представлений Baseboard.",
+			name: "Язык интерфейса",
+			dropdownDescription: "Выберите язык, используемый для текста интерфейса Baseboard."
+		}
 	},
 	options: {
 		layout: {
-			columns: "Grouped columns",
-			rows: "Grouped rows",
-			grid: "Grid",
+			columns: "Сгруппированные столбцы",
+			rows: "Сгруппированные строки",
+			grid: "Сетка"
 		},
 		edgeMode: {
-			wikilinks: "Links within view",
-			properties: "Selected properties",
-			all: "Links and selected properties",
+			wikilinks: "Ссылки в пределах представления",
+			properties: "Выбранные свойства",
+			all: "Ссылки и выбранные свойства"
 		},
 		relationships: {
-			dependencies: "Dependencies",
-			all: "Dependencies and subtasks",
-		},
+			dependencies: "Зависимости",
+			all: "Зависимости и подзадачи"
+		}
 	},
 	tasknotes: {
 		badges: {
-			due: "Due",
-			scheduled: "Scheduled",
-			recurrence: "Repeats",
-			recurring: "Recurring",
-			blocked: "Blocked",
-			blocking: "Blocking",
-			subtasks: "Subtasks",
-			estimate: "Estimate",
-			tracked: "Tracked",
+			due: "Срок",
+			scheduled: "Запланировано",
+			recurrence: "Повторы",
+			recurring: "Повторяющаяся",
+			blocked: "Заблокировано",
+			blocking: "Блокирует",
+			subtasks: "Подзадачи",
+			estimate: "Оценка",
+			tracked: "Отслеживается"
 		},
 		relationships: {
-			blocks: "blocks",
-			subtask: "subtask",
-		},
+			blocks: "блокирует",
+			subtask: "подзадача"
+		}
 	},
 	modal: {
-		title: "Create canvas from view",
+		title: "Создать канвас из представления",
 		canvasPath: {
-			name: "Canvas path",
-			description: "Vault path for the generated JSON canvas file.",
+			name: "Путь к канвасу",
+			description: "Путь в хранилище для создаваемого файла канваса JSON."
 		},
 		layout: {
-			name: "Layout",
-			description: "How base groups are arranged in the generated canvas.",
+			name: "Макет",
+			description: "Как группы base располагаются на создаваемом канвасе."
 		},
 		nodeSize: {
-			name: "Node size",
-			description: "Width and height for new canvas file nodes.",
-			width: "Width",
-			height: "Height",
+			name: "Размер узла",
+			description: "Ширина и высота для новых узлов файлов канваса.",
+			width: "Ширина",
+			height: "Высота"
 		},
 		edges: {
-			name: "Edges",
-			description: "Draw edges only when both notes are in this base result.",
+			name: "Связи",
+			description: "Рисовать связи только когда обе заметки присутствуют в результате этой Base."
 		},
 		linkProperties: {
-			name: "Link properties",
-			description: "Comma-separated frontmatter properties used for property edges.",
-			placeholder: "Depends_on, related",
+			name: "Свойства ссылок",
+			description: "Свойства frontmatter через запятую, используемые для связей по свойствам.",
+			placeholder: "depends_on, related"
 		},
 		taskRelationships: {
-			name: "Task relationship edges",
-			description: "Add task relationship edges to the generated canvas.",
+			name: "Связи отношений задач",
+			description: "Добавлять связи задач на создаваемый канвас."
 		},
 		preservePositions: {
-			description: "Keep positions for baseboard nodes already present in the canvas.",
+			description: "Сохранять позиции для узлов baseboard, уже присутствующих на канвасе."
 		},
-		createCanvas: "Create canvas",
+		createCanvas: "Создать канвас"
 	},
 	view: {
-		waitingForBasesData: "Waiting for Bases data",
+		waitingForBasesData: "Ожидание данных Bases",
 		toolbar: {
-			pinNote: "Pin note",
-			addCard: "Add card",
-			createCanvas: "Create canvas",
-			updateCanvas: "Update canvas",
-			openCanvas: "Open canvas",
-			resetLayout: "Reset layout",
+			pinNote: "Закрепить заметку",
+			addCard: "Добавить карточку",
+			createCanvas: "Создать канвас",
+			updateCanvas: "Обновить канвас",
+			openCanvas: "Открыть канвас",
+			resetLayout: "Сбросить макет"
 		},
 		empty: {
-			title: "No notes in this view",
-			body: "Change the Base filters, pin a note, or add a card.",
+			title: "Нет заметок в этом представлении",
+			body: "Измените фильтры Base, закрепите заметку или добавьте карточку."
 		},
 		card: {
-			pinned: "Pinned",
-			noteActions: "Note actions",
-			textCardTitle: "Card",
-			cardActions: "Card actions",
-			editCard: "Edit card",
-			writeNote: "Write a note",
-			linkFromNote: "Link from this note",
+			pinned: "Закреплено",
+			noteActions: "Действия с заметкой",
+			textCardTitle: "Карточка",
+			cardActions: "Действия с карточкой",
+			editCard: "Редактировать карточку",
+			writeNote: "Написать заметку",
+			linkFromNote: "Связать из этой заметки"
 		},
 		tooltips: {
-			dragGroup: "Drag group",
-			resizeGroup: "Resize group",
-			dragNote: "Drag note. Double-click to open.",
-			resizeCard: "Resize card",
-			dragToLinkNotes: "Drag to link notes",
-			dragCard: "Drag card",
-			zoomOut: "Zoom out",
-			zoomIn: "Zoom in",
-			fitView: "Fit view",
-			resetView: "Reset view",
+			dragGroup: "Перетащить группу",
+			resizeGroup: "Изменить размер группы",
+			dragNote: "Перетащить заметку. Двойной клик — открыть.",
+			resizeCard: "Изменить размер карточки",
+			dragToLinkNotes: "Перетащите, чтобы связать заметки",
+			dragCard: "Перетащить карточку",
+			zoomOut: "Уменьшить",
+			zoomIn: "Увеличить",
+			fitView: "Вписать в окно",
+			resetView: "Сбросить вид"
 		},
 		menu: {
-			openNote: "Open note",
-			unpinFromBoard: "Unpin from board",
-			removeCard: "Remove card",
-			sourceBlocksTarget: "{source} blocks {target}",
-			targetBlocksSource: "{target} blocks {source}",
-			targetSubtaskOfSource: "{target} is subtask of {source}",
-			sourceSubtaskOfTarget: "{source} is subtask of {target}",
-			addPropertyLink: "Add {property}: {source} -> {target}",
-			chooseProperty: "Choose property...",
-			openPath: "Open {name}",
-			removeDependency: "Remove dependency",
-			removeProjectRelationship: "Remove project relationship",
-			removePropertyLink: "Remove {property} link",
+			openNote: "Открыть заметку",
+			unpinFromBoard: "Открепить от доски",
+			removeCard: "Удалить карточку",
+			sourceBlocksTarget: "{source} блокирует {target}",
+			targetBlocksSource: "{target} блокирует {source}",
+			targetSubtaskOfSource: "{target} — подзадача {source}",
+			sourceSubtaskOfTarget: "{source} — подзадача {target}",
+			addPropertyLink: "Добавить {property}: {source} -> {target}",
+			chooseProperty: "Выбрать свойство...",
+			openPath: "Открыть {name}",
+			removeDependency: "Удалить зависимость",
+			removeProjectRelationship: "Удалить связь проекта",
+			removePropertyLink: "Удалить ссылку {property}"
 		},
 		editor: {
-			editPath: "Edit {path}",
-			loading: "Loading",
-			unsaved: "Unsaved",
-			missingFile: "Missing file",
-			missing: "Missing",
-			unableToLoad: "Unable to load",
-			error: "Error",
-			saving: "Saving",
-			saved: "Saved",
+			editPath: "Редактировать {path}",
+			loading: "Загрузка",
+			unsaved: "Не сохранено",
+			missingFile: "Файл отсутствует",
+			missing: "Отсутствует",
+			unableToLoad: "Не удалось загрузить",
+			error: "Ошибка",
+			saving: "Сохранение",
+			saved: "Сохранено"
 		},
 		suggest: {
-			propertyPlaceholder: "Choose a note property for the link",
-			noMatchingProperties: "No matching properties",
-			notePlaceholder: "Pin a note to this board",
-			noMatchingNotes: "No matching notes",
-		},
+			propertyPlaceholder: "Выберите свойство заметки для ссылки",
+			noMatchingProperties: "Нет подходящих свойств",
+			notePlaceholder: "Закрепить заметку на этой доске",
+			noMatchingNotes: "Нет подходящих заметок"
+		}
 	},
 	basesOptions: {
-		canvas: "Canvas",
-		canvasPath: "Canvas path",
-		layout: "Layout",
-		edges: "Edges",
-		linkProperties: "Link properties",
-		cards: "Cards",
-		showBodyEditor: "Show body editor",
+		canvas: "Канвас",
+		canvasPath: "Путь к канвасу",
+		layout: "Макет",
+		edges: "Связи",
+		linkProperties: "Свойства ссылок",
+		cards: "Карточки",
+		showBodyEditor: "Показать редактор текста",
 		tasknotes: "TaskNotes",
-		tasknotesIntegration: "TaskNotes integration",
-		showTaskBadges: "Show task badges",
-		showTaskActions: "Show task actions",
-		taskRelationshipEdges: "Task relationship edges",
-		manualCards: "Manual cards",
-		pinnedNotes: "Pinned notes",
-		updateRules: "Update rules",
-		preservePositions: "Preserve positions",
-		removeMissingNotes: "Remove missing notes",
-		nodeWidth: "Node width",
-		nodeHeight: "Node height",
-	},
+		tasknotesIntegration: "Интеграция с TaskNotes",
+		showTaskBadges: "Показать значки задачи",
+		showTaskActions: "Показать действия задачи",
+		taskRelationshipEdges: "Связи отношений задач",
+		manualCards: "Ручные карточки",
+		pinnedNotes: "Закреплённые заметки",
+		updateRules: "Правила обновления",
+		preservePositions: "Сохранять позиции",
+		removeMissingNotes: "Удалять отсутствующие заметки",
+		nodeWidth: "Ширина узла",
+		nodeHeight: "Высота узла"
+	}
 };

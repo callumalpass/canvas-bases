@@ -3,278 +3,278 @@ import type { TranslationTree } from "../types";
 export const zh: TranslationTree = {
 	common: {
 		appName: "Baseboard",
-		automatic: "Automatic",
-		cancel: "Cancel",
+		automatic: "自动",
+		cancel: "取消",
 		card: {
-			one: "{count} card",
-			other: "{count} cards",
+			one: "{count} 张卡片",
+			other: "{count} 张卡片"
 		},
 		group: {
-			one: "{count} group",
-			other: "{count} groups",
+			one: "{count} 个分组",
+			other: "{count} 个分组"
 		},
 		languages: {
-			en: "English",
+			en: "英语"
 		},
-		none: "None",
+		none: "无",
 		note: {
-			one: "{count} note",
-			other: "{count} notes",
+			one: "{count} 个笔记",
+			other: "{count} 个笔记"
 		},
-		off: "Off",
-		systemDefault: "System default",
+		off: "关闭",
+		systemDefault: "系统默认"
 	},
 	commands: {
-		createCanvasFromCurrentView: "Create canvas from current bases view",
-		openLinkedCanvas: "Open linked canvas",
-		updateLinkedCanvas: "Update linked canvas",
+		createCanvasFromCurrentView: "从当前 bases 视图创建画布",
+		openLinkedCanvas: "打开关联画布",
+		updateLinkedCanvas: "更新关联画布"
 	},
 	notices: {
-		addedDependency: "Added dependency: {label}.",
-		addedProjectRelationship: "Added project relationship: {label}.",
-		addedPropertyLink: "Added {property}: {source} -> {target}.",
-		baseboardWaitingForBasesData: "Baseboard is waiting for bases data.",
-		couldNotAddPropertyLink: "Could not add property link: {message}",
-		couldNotFind: "Could not find {path}.",
-		couldNotRemovePropertyLink: "Could not remove property link: {message}",
-		couldNotUpdateLink: "Could not update link: {message}",
-		languageChanged: "Language changed to {language}.",
-		linkActionUnavailable: "That link action is unavailable for these notes.",
-		noLinkedCanvas: "{source} has no linked canvas yet.",
-		noVisibleLinkProperties: "No visible note properties are available for links.",
-		obsidianVersionRequired: "Baseboard requires Obsidian 1.10.1 or newer.",
-		openBaseboardViewFirst: "Open a baseboard view first.",
-		openBasesViewFirst: "Open a bases view first.",
-		removedDependency: "Removed dependency.",
-		removedProjectRelationship: "Removed project relationship.",
-		removedPropertyLink: "Removed {property} link.",
-		chooseCanvasPath: "Choose a canvas path.",
-		chooseLinkProperty: "Choose a note property for this link.",
-		updatedCanvas: "Updated {path}: {nodes} nodes, {edges} edges.",
+		addedDependency: "已添加依赖项：{label}。",
+		addedProjectRelationship: "已添加项目关系：{label}。",
+		addedPropertyLink: "已添加 {property}：{source} -> {target}。",
+		baseboardWaitingForBasesData: "Baseboard 正在等待 bases 数据。",
+		couldNotAddPropertyLink: "无法添加属性链接：{message}",
+		couldNotFind: "找不到 {path}。",
+		couldNotRemovePropertyLink: "无法移除属性链接：{message}",
+		couldNotUpdateLink: "无法更新链接：{message}",
+		languageChanged: "语言已更改为 {language}。",
+		linkActionUnavailable: "该链接操作对这些笔记不可用。",
+		noLinkedCanvas: "{source} 尚未关联画布。",
+		noVisibleLinkProperties: "没有可见的笔记属性可用于链接。",
+		obsidianVersionRequired: "Baseboard 需要 Obsidian 1.10.1 或更新版本。",
+		openBaseboardViewFirst: "请先打开 baseboard 视图。",
+		openBasesViewFirst: "请先打开 bases 视图。",
+		removedDependency: "已移除依赖项。",
+		removedProjectRelationship: "已移除项目关系。",
+		removedPropertyLink: "已移除 {property} 链接。",
+		chooseCanvasPath: "选择画布路径。",
+		chooseLinkProperty: "为此链接选择笔记属性。",
+		updatedCanvas: "已更新 {path}：{nodes} 个节点，{edges} 条连线。"
 	},
 	settings: {
 		defaults: {
-			heading: "Defaults",
+			heading: "默认值",
 			canvasFolder: {
-				name: "Default canvas folder",
-				description: "Folder used when a baseboard view has no canvas path yet.",
+				name: "默认画布文件夹",
+				description: "当 baseboard 视图尚未指定画布路径时使用的文件夹。"
 			},
 			layout: {
-				name: "Default layout",
-				description: "Initial layout used for new canvas snapshots.",
+				name: "默认布局",
+				description: "新画布快照使用的初始布局。"
 			},
 			edges: {
-				name: "Default edges",
-				description: "Initial edge source for new canvas snapshots.",
+				name: "默认连线",
+				description: "新画布快照的初始连线来源。"
 			},
 			edgeProperties: {
-				name: "Default edge properties",
-				description: "Comma-separated frontmatter properties used when property edges are enabled.",
+				name: "默认连线属性",
+				description: "启用属性连线时使用的 frontmatter 属性，以逗号分隔。"
 			},
 			bodyEditor: {
-				name: "Show body editor",
-				description: "Show editable note body text on live baseboard cards by default.",
-			},
+				name: "显示正文编辑器",
+				description: "默认在实时 baseboard 卡片上显示可编辑的笔记正文。"
+			}
 		},
 		tasknotes: {
 			heading: "TaskNotes",
 			integration: {
-				name: "TaskNotes integration",
-				description: "Default TaskNotes behavior for new baseboard views.",
+				name: "TaskNotes 集成",
+				description: "新建 baseboard 视图的默认 TaskNotes 行为。"
 			},
 			badges: {
-				name: "Show task badges",
-				description: "Show TaskNotes status, priority, due dates, and blockers on live cards by default.",
+				name: "显示任务徽章",
+				description: "默认在实时卡片上显示 TaskNotes 的状态、优先级、截止日期和阻塞项。"
 			},
 			actions: {
-				name: "Show task actions",
-				description: "Use the TaskNotes task menu from card actions by default.",
+				name: "显示任务操作",
+				description: "默认从卡片操作中使用 TaskNotes 任务菜单。"
 			},
 			relationships: {
-				name: "Task relationship edges",
-				description: "Default TaskNotes relationship edges for generated canvases and live boards.",
-			},
+				name: "任务关系连线",
+				description: "生成的画布和实时面板的默认 TaskNotes 关系连线。"
+			}
 		},
 		updateRules: {
-			heading: "Update rules",
+			heading: "更新规则",
 			preservePositions: {
-				name: "Preserve positions",
-				description: "Keep existing baseboard node positions when updating a canvas.",
+				name: "保留位置",
+				description: "更新画布时保留现有 baseboard 节点的位置。"
 			},
 			removeMissingNotes: {
-				name: "Remove missing notes",
-				description: "Remove baseboard nodes that no longer appear in the current base result.",
+				name: "移除缺失的笔记",
+				description: "移除不再出现在当前 base 结果中的 baseboard 节点。"
 			},
 			nodeWidth: {
-				name: "Node width",
-				description: "Default canvas file node width.",
+				name: "节点宽度",
+				description: "画布文件节点的默认宽度。"
 			},
 			nodeHeight: {
-				name: "Node height",
-				description: "Default canvas file node height.",
-			},
+				name: "节点高度",
+				description: "画布文件节点的默认高度。"
+			}
 		},
 		language: {
-			heading: "Interface language",
-			description: "Change the language of Baseboard commands, settings, notices, and views.",
-			name: "UI language",
-			dropdownDescription: "Select the language used for Baseboard interface text.",
-		},
+			heading: "界面语言",
+			description: "更改 Baseboard 命令、设置、通知和视图的语言。",
+			name: "界面语言",
+			dropdownDescription: "选择 Baseboard 界面文本使用的语言。"
+		}
 	},
 	options: {
 		layout: {
-			columns: "Grouped columns",
-			rows: "Grouped rows",
-			grid: "Grid",
+			columns: "分组列",
+			rows: "分组行",
+			grid: "网格"
 		},
 		edgeMode: {
-			wikilinks: "Links within view",
-			properties: "Selected properties",
-			all: "Links and selected properties",
+			wikilinks: "视图内链接",
+			properties: "选定属性",
+			all: "链接和选定属性"
 		},
 		relationships: {
-			dependencies: "Dependencies",
-			all: "Dependencies and subtasks",
-		},
+			dependencies: "依赖项",
+			all: "依赖项和子任务"
+		}
 	},
 	tasknotes: {
 		badges: {
-			due: "Due",
-			scheduled: "Scheduled",
-			recurrence: "Repeats",
-			recurring: "Recurring",
-			blocked: "Blocked",
-			blocking: "Blocking",
-			subtasks: "Subtasks",
-			estimate: "Estimate",
-			tracked: "Tracked",
+			due: "截止",
+			scheduled: "已安排",
+			recurrence: "重复",
+			recurring: "重复",
+			blocked: "被阻塞",
+			blocking: "阻塞",
+			subtasks: "子任务",
+			estimate: "预估",
+			tracked: "已跟踪"
 		},
 		relationships: {
-			blocks: "blocks",
-			subtask: "subtask",
-		},
+			blocks: "阻塞",
+			subtask: "子任务"
+		}
 	},
 	modal: {
-		title: "Create canvas from view",
+		title: "从视图创建画布",
 		canvasPath: {
-			name: "Canvas path",
-			description: "Vault path for the generated JSON canvas file.",
+			name: "画布路径",
+			description: "生成的 JSON 画布文件的库路径。"
 		},
 		layout: {
-			name: "Layout",
-			description: "How base groups are arranged in the generated canvas.",
+			name: "布局",
+			description: "base 分组在生成的画布中的排列方式。"
 		},
 		nodeSize: {
-			name: "Node size",
-			description: "Width and height for new canvas file nodes.",
-			width: "Width",
-			height: "Height",
+			name: "节点大小",
+			description: "新画布文件节点的宽度和高度。",
+			width: "宽度",
+			height: "高度"
 		},
 		edges: {
-			name: "Edges",
-			description: "Draw edges only when both notes are in this base result.",
+			name: "连线",
+			description: "仅当两个笔记都在此 base 结果中时才绘制连线。"
 		},
 		linkProperties: {
-			name: "Link properties",
-			description: "Comma-separated frontmatter properties used for property edges.",
-			placeholder: "Depends_on, related",
+			name: "链接属性",
+			description: "用于属性连线的 frontmatter 属性，以逗号分隔。",
+			placeholder: "依赖于, 相关"
 		},
 		taskRelationships: {
-			name: "Task relationship edges",
-			description: "Add task relationship edges to the generated canvas.",
+			name: "任务关系连线",
+			description: "在生成的画布中添加任务关系连线。"
 		},
 		preservePositions: {
-			description: "Keep positions for baseboard nodes already present in the canvas.",
+			description: "保留画布中已存在的 baseboard 节点的位置。"
 		},
-		createCanvas: "Create canvas",
+		createCanvas: "创建画布"
 	},
 	view: {
-		waitingForBasesData: "Waiting for Bases data",
+		waitingForBasesData: "等待 Bases 数据",
 		toolbar: {
-			pinNote: "Pin note",
-			addCard: "Add card",
-			createCanvas: "Create canvas",
-			updateCanvas: "Update canvas",
-			openCanvas: "Open canvas",
-			resetLayout: "Reset layout",
+			pinNote: "固定笔记",
+			addCard: "添加卡片",
+			createCanvas: "创建画布",
+			updateCanvas: "更新画布",
+			openCanvas: "打开画布",
+			resetLayout: "重置布局"
 		},
 		empty: {
-			title: "No notes in this view",
-			body: "Change the Base filters, pin a note, or add a card.",
+			title: "此视图中没有笔记",
+			body: "更改 Base 筛选器、固定笔记或添加卡片。"
 		},
 		card: {
-			pinned: "Pinned",
-			noteActions: "Note actions",
-			textCardTitle: "Card",
-			cardActions: "Card actions",
-			editCard: "Edit card",
-			writeNote: "Write a note",
-			linkFromNote: "Link from this note",
+			pinned: "已固定",
+			noteActions: "笔记操作",
+			textCardTitle: "卡片",
+			cardActions: "卡片操作",
+			editCard: "编辑卡片",
+			writeNote: "撰写笔记",
+			linkFromNote: "从此笔记链接"
 		},
 		tooltips: {
-			dragGroup: "Drag group",
-			resizeGroup: "Resize group",
-			dragNote: "Drag note. Double-click to open.",
-			resizeCard: "Resize card",
-			dragToLinkNotes: "Drag to link notes",
-			dragCard: "Drag card",
-			zoomOut: "Zoom out",
-			zoomIn: "Zoom in",
-			fitView: "Fit view",
-			resetView: "Reset view",
+			dragGroup: "拖动分组",
+			resizeGroup: "调整分组大小",
+			dragNote: "拖动笔记。双击打开。",
+			resizeCard: "调整卡片大小",
+			dragToLinkNotes: "拖动以链接笔记",
+			dragCard: "拖动卡片",
+			zoomOut: "缩小",
+			zoomIn: "放大",
+			fitView: "适应视图",
+			resetView: "重置视图"
 		},
 		menu: {
-			openNote: "Open note",
-			unpinFromBoard: "Unpin from board",
-			removeCard: "Remove card",
-			sourceBlocksTarget: "{source} blocks {target}",
-			targetBlocksSource: "{target} blocks {source}",
-			targetSubtaskOfSource: "{target} is subtask of {source}",
-			sourceSubtaskOfTarget: "{source} is subtask of {target}",
-			addPropertyLink: "Add {property}: {source} -> {target}",
-			chooseProperty: "Choose property...",
-			openPath: "Open {name}",
-			removeDependency: "Remove dependency",
-			removeProjectRelationship: "Remove project relationship",
-			removePropertyLink: "Remove {property} link",
+			openNote: "打开笔记",
+			unpinFromBoard: "从面板取消固定",
+			removeCard: "移除卡片",
+			sourceBlocksTarget: "{source} 阻塞 {target}",
+			targetBlocksSource: "{target} 阻塞 {source}",
+			targetSubtaskOfSource: "{target} 是 {source} 的子任务",
+			sourceSubtaskOfTarget: "{source} 是 {target} 的子任务",
+			addPropertyLink: "添加 {property}：{source} -> {target}",
+			chooseProperty: "选择属性...",
+			openPath: "打开 {name}",
+			removeDependency: "移除依赖项",
+			removeProjectRelationship: "移除项目关系",
+			removePropertyLink: "移除 {property} 链接"
 		},
 		editor: {
-			editPath: "Edit {path}",
-			loading: "Loading",
-			unsaved: "Unsaved",
-			missingFile: "Missing file",
-			missing: "Missing",
-			unableToLoad: "Unable to load",
-			error: "Error",
-			saving: "Saving",
-			saved: "Saved",
+			editPath: "编辑 {path}",
+			loading: "加载中",
+			unsaved: "未保存",
+			missingFile: "缺失文件",
+			missing: "缺失",
+			unableToLoad: "无法加载",
+			error: "错误",
+			saving: "保存中",
+			saved: "已保存"
 		},
 		suggest: {
-			propertyPlaceholder: "Choose a note property for the link",
-			noMatchingProperties: "No matching properties",
-			notePlaceholder: "Pin a note to this board",
-			noMatchingNotes: "No matching notes",
-		},
+			propertyPlaceholder: "为链接选择笔记属性",
+			noMatchingProperties: "没有匹配的属性",
+			notePlaceholder: "将笔记固定到此面板",
+			noMatchingNotes: "没有匹配的笔记"
+		}
 	},
 	basesOptions: {
-		canvas: "Canvas",
-		canvasPath: "Canvas path",
-		layout: "Layout",
-		edges: "Edges",
-		linkProperties: "Link properties",
-		cards: "Cards",
-		showBodyEditor: "Show body editor",
+		canvas: "画布",
+		canvasPath: "画布路径",
+		layout: "布局",
+		edges: "连线",
+		linkProperties: "链接属性",
+		cards: "卡片",
+		showBodyEditor: "显示正文编辑器",
 		tasknotes: "TaskNotes",
-		tasknotesIntegration: "TaskNotes integration",
-		showTaskBadges: "Show task badges",
-		showTaskActions: "Show task actions",
-		taskRelationshipEdges: "Task relationship edges",
-		manualCards: "Manual cards",
-		pinnedNotes: "Pinned notes",
-		updateRules: "Update rules",
-		preservePositions: "Preserve positions",
-		removeMissingNotes: "Remove missing notes",
-		nodeWidth: "Node width",
-		nodeHeight: "Node height",
-	},
+		tasknotesIntegration: "TaskNotes 集成",
+		showTaskBadges: "显示任务徽章",
+		showTaskActions: "显示任务操作",
+		taskRelationshipEdges: "任务关系连线",
+		manualCards: "手动卡片",
+		pinnedNotes: "已固定的笔记",
+		updateRules: "更新规则",
+		preservePositions: "保留位置",
+		removeMissingNotes: "移除缺失的笔记",
+		nodeWidth: "节点宽度",
+		nodeHeight: "节点高度"
+	}
 };

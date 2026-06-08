@@ -3,278 +3,278 @@ import type { TranslationTree } from "../types";
 export const ja: TranslationTree = {
 	common: {
 		appName: "Baseboard",
-		automatic: "Automatic",
-		cancel: "Cancel",
+		automatic: "自動",
+		cancel: "キャンセル",
 		card: {
-			one: "{count} card",
-			other: "{count} cards",
+			one: "{count} 枚のカード",
+			other: "{count} 枚のカード"
 		},
 		group: {
-			one: "{count} group",
-			other: "{count} groups",
+			one: "{count} 個のグループ",
+			other: "{count} 個のグループ"
 		},
 		languages: {
-			en: "English",
+			en: "英語"
 		},
-		none: "None",
+		none: "なし",
 		note: {
-			one: "{count} note",
-			other: "{count} notes",
+			one: "{count} 件のノート",
+			other: "{count} 件のノート"
 		},
-		off: "Off",
-		systemDefault: "System default",
+		off: "オフ",
+		systemDefault: "システム既定"
 	},
 	commands: {
-		createCanvasFromCurrentView: "Create canvas from current bases view",
-		openLinkedCanvas: "Open linked canvas",
-		updateLinkedCanvas: "Update linked canvas",
+		createCanvasFromCurrentView: "現在の Bases ビューからキャンバスを作成",
+		openLinkedCanvas: "リンクされたキャンバスを開く",
+		updateLinkedCanvas: "リンクされたキャンバスを更新"
 	},
 	notices: {
-		addedDependency: "Added dependency: {label}.",
-		addedProjectRelationship: "Added project relationship: {label}.",
-		addedPropertyLink: "Added {property}: {source} -> {target}.",
-		baseboardWaitingForBasesData: "Baseboard is waiting for bases data.",
-		couldNotAddPropertyLink: "Could not add property link: {message}",
-		couldNotFind: "Could not find {path}.",
-		couldNotRemovePropertyLink: "Could not remove property link: {message}",
-		couldNotUpdateLink: "Could not update link: {message}",
-		languageChanged: "Language changed to {language}.",
-		linkActionUnavailable: "That link action is unavailable for these notes.",
-		noLinkedCanvas: "{source} has no linked canvas yet.",
-		noVisibleLinkProperties: "No visible note properties are available for links.",
-		obsidianVersionRequired: "Baseboard requires Obsidian 1.10.1 or newer.",
-		openBaseboardViewFirst: "Open a baseboard view first.",
-		openBasesViewFirst: "Open a bases view first.",
-		removedDependency: "Removed dependency.",
-		removedProjectRelationship: "Removed project relationship.",
-		removedPropertyLink: "Removed {property} link.",
-		chooseCanvasPath: "Choose a canvas path.",
-		chooseLinkProperty: "Choose a note property for this link.",
-		updatedCanvas: "Updated {path}: {nodes} nodes, {edges} edges.",
+		addedDependency: "依存関係を追加しました: {label}。",
+		addedProjectRelationship: "プロジェクトの関係を追加しました: {label}。",
+		addedPropertyLink: "{property} を追加しました: {source} -> {target}。",
+		baseboardWaitingForBasesData: "Baseboard は Bases のデータを待機しています。",
+		couldNotAddPropertyLink: "プロパティリンクを追加できませんでした: {message}",
+		couldNotFind: "{path} が見つかりませんでした。",
+		couldNotRemovePropertyLink: "プロパティリンクを削除できませんでした: {message}",
+		couldNotUpdateLink: "リンクを更新できませんでした: {message}",
+		languageChanged: "言語を {language} に変更しました。",
+		linkActionUnavailable: "これらのノートではそのリンク操作は利用できません。",
+		noLinkedCanvas: "{source} にはまだリンクされたキャンバスがありません。",
+		noVisibleLinkProperties: "リンクに利用できる表示中のノートプロパティはありません。",
+		obsidianVersionRequired: "Baseboard には Obsidian 1.10.1 以上が必要です。",
+		openBaseboardViewFirst: "先に Baseboard ビューを開いてください。",
+		openBasesViewFirst: "先に Bases ビューを開いてください。",
+		removedDependency: "依存関係を削除しました。",
+		removedProjectRelationship: "プロジェクトの関係を削除しました。",
+		removedPropertyLink: "{property} リンクを削除しました。",
+		chooseCanvasPath: "キャンバスのパスを選択してください。",
+		chooseLinkProperty: "このリンクに使用するノートのプロパティを選択してください。",
+		updatedCanvas: "{path} を更新しました: {nodes} ノード、{edges} エッジ。"
 	},
 	settings: {
 		defaults: {
-			heading: "Defaults",
+			heading: "既定値",
 			canvasFolder: {
-				name: "Default canvas folder",
-				description: "Folder used when a baseboard view has no canvas path yet.",
+				name: "既定のキャンバスフォルダ",
+				description: "Baseboard ビューにキャンバスのパスがまだ設定されていない場合に使用するフォルダ。"
 			},
 			layout: {
-				name: "Default layout",
-				description: "Initial layout used for new canvas snapshots.",
+				name: "既定のレイアウト",
+				description: "新しいキャンバススナップショットで使用される初期レイアウト。"
 			},
 			edges: {
-				name: "Default edges",
-				description: "Initial edge source for new canvas snapshots.",
+				name: "既定のエッジ",
+				description: "新しいキャンバススナップショットの初期エッジソース。"
 			},
 			edgeProperties: {
-				name: "Default edge properties",
-				description: "Comma-separated frontmatter properties used when property edges are enabled.",
+				name: "既定のエッジプロパティ",
+				description: "プロパティエッジを有効にしたときに使用するフロントマタープロパティ（カンマ区切り）。"
 			},
 			bodyEditor: {
-				name: "Show body editor",
-				description: "Show editable note body text on live baseboard cards by default.",
-			},
+				name: "本文エディタを表示",
+				description: "ライブ Baseboard カードに編集可能なノート本文を既定で表示します。"
+			}
 		},
 		tasknotes: {
 			heading: "TaskNotes",
 			integration: {
-				name: "TaskNotes integration",
-				description: "Default TaskNotes behavior for new baseboard views.",
+				name: "TaskNotes 連携",
+				description: "新しい Baseboard ビューの既定の TaskNotes 動作。"
 			},
 			badges: {
-				name: "Show task badges",
-				description: "Show TaskNotes status, priority, due dates, and blockers on live cards by default.",
+				name: "タスクバッジを表示",
+				description: "ライブカードに TaskNotes のステータス、優先度、期限、ブロッカーを既定で表示します。"
 			},
 			actions: {
-				name: "Show task actions",
-				description: "Use the TaskNotes task menu from card actions by default.",
+				name: "タスク操作を表示",
+				description: "カード操作から TaskNotes のタスクメニューを既定で使用します。"
 			},
 			relationships: {
-				name: "Task relationship edges",
-				description: "Default TaskNotes relationship edges for generated canvases and live boards.",
-			},
+				name: "タスクの関係エッジ",
+				description: "生成されたキャンバスとライブボードの既定の TaskNotes 関係エッジ。"
+			}
 		},
 		updateRules: {
-			heading: "Update rules",
+			heading: "更新ルール",
 			preservePositions: {
-				name: "Preserve positions",
-				description: "Keep existing baseboard node positions when updating a canvas.",
+				name: "位置を保持",
+				description: "キャンバスを更新する際に、既存の Baseboard ノードの位置を保持します。"
 			},
 			removeMissingNotes: {
-				name: "Remove missing notes",
-				description: "Remove baseboard nodes that no longer appear in the current base result.",
+				name: "見つからないノートを削除",
+				description: "現在の Base の結果に表示されなくなった Baseboard ノードを削除します。"
 			},
 			nodeWidth: {
-				name: "Node width",
-				description: "Default canvas file node width.",
+				name: "ノードの幅",
+				description: "キャンバスのファイルノードの既定の幅。"
 			},
 			nodeHeight: {
-				name: "Node height",
-				description: "Default canvas file node height.",
-			},
+				name: "ノードの高さ",
+				description: "キャンバスのファイルノードの既定の高さ。"
+			}
 		},
 		language: {
-			heading: "Interface language",
-			description: "Change the language of Baseboard commands, settings, notices, and views.",
-			name: "UI language",
-			dropdownDescription: "Select the language used for Baseboard interface text.",
-		},
+			heading: "インターフェース言語",
+			description: "Baseboard のコマンド、設定、通知、ビューの言語を変更します。",
+			name: "UI 言語",
+			dropdownDescription: "Baseboard のインターフェーステキストに使用する言語を選択します。"
+		}
 	},
 	options: {
 		layout: {
-			columns: "Grouped columns",
-			rows: "Grouped rows",
-			grid: "Grid",
+			columns: "グループ化された列",
+			rows: "グループ化された行",
+			grid: "グリッド"
 		},
 		edgeMode: {
-			wikilinks: "Links within view",
-			properties: "Selected properties",
-			all: "Links and selected properties",
+			wikilinks: "ビュー内のリンク",
+			properties: "選択されたプロパティ",
+			all: "リンクと選択されたプロパティ"
 		},
 		relationships: {
-			dependencies: "Dependencies",
-			all: "Dependencies and subtasks",
-		},
+			dependencies: "依存関係",
+			all: "依存関係とサブタスク"
+		}
 	},
 	tasknotes: {
 		badges: {
-			due: "Due",
-			scheduled: "Scheduled",
-			recurrence: "Repeats",
-			recurring: "Recurring",
-			blocked: "Blocked",
-			blocking: "Blocking",
-			subtasks: "Subtasks",
-			estimate: "Estimate",
-			tracked: "Tracked",
+			due: "期限",
+			scheduled: "予定",
+			recurrence: "繰り返し",
+			recurring: "繰り返し",
+			blocked: "ブロックされている",
+			blocking: "ブロック中",
+			subtasks: "サブタスク",
+			estimate: "見積もり",
+			tracked: "追跡中"
 		},
 		relationships: {
-			blocks: "blocks",
-			subtask: "subtask",
-		},
+			blocks: "ブロックする",
+			subtask: "サブタスク"
+		}
 	},
 	modal: {
-		title: "Create canvas from view",
+		title: "ビューからキャンバスを作成",
 		canvasPath: {
-			name: "Canvas path",
-			description: "Vault path for the generated JSON canvas file.",
+			name: "キャンバスのパス",
+			description: "生成された JSON キャンバスファイルの Vault 内パス。"
 		},
 		layout: {
-			name: "Layout",
-			description: "How base groups are arranged in the generated canvas.",
+			name: "レイアウト",
+			description: "生成されたキャンバスでの Base グループの配置方法。"
 		},
 		nodeSize: {
-			name: "Node size",
-			description: "Width and height for new canvas file nodes.",
-			width: "Width",
-			height: "Height",
+			name: "ノードのサイズ",
+			description: "新しいキャンバスのファイルノードの幅と高さ。",
+			width: "幅",
+			height: "高さ"
 		},
 		edges: {
-			name: "Edges",
-			description: "Draw edges only when both notes are in this base result.",
+			name: "エッジ",
+			description: "両方のノートがこの Base の結果に含まれる場合にのみエッジを描画します。"
 		},
 		linkProperties: {
-			name: "Link properties",
-			description: "Comma-separated frontmatter properties used for property edges.",
-			placeholder: "Depends_on, related",
+			name: "リンクプロパティ",
+			description: "プロパティエッジに使用するフロントマタープロパティ（カンマ区切り）。",
+			placeholder: "依存先, 関連"
 		},
 		taskRelationships: {
-			name: "Task relationship edges",
-			description: "Add task relationship edges to the generated canvas.",
+			name: "タスクの関係エッジ",
+			description: "生成されたキャンバスにタスクの関係エッジを追加します。"
 		},
 		preservePositions: {
-			description: "Keep positions for baseboard nodes already present in the canvas.",
+			description: "キャンバスに既に存在する Baseboard ノードの位置を保持します。"
 		},
-		createCanvas: "Create canvas",
+		createCanvas: "キャンバスを作成"
 	},
 	view: {
-		waitingForBasesData: "Waiting for Bases data",
+		waitingForBasesData: "Bases のデータを待機中",
 		toolbar: {
-			pinNote: "Pin note",
-			addCard: "Add card",
-			createCanvas: "Create canvas",
-			updateCanvas: "Update canvas",
-			openCanvas: "Open canvas",
-			resetLayout: "Reset layout",
+			pinNote: "ノートをピン留め",
+			addCard: "カードを追加",
+			createCanvas: "キャンバスを作成",
+			updateCanvas: "キャンバスを更新",
+			openCanvas: "キャンバスを開く",
+			resetLayout: "レイアウトをリセット"
 		},
 		empty: {
-			title: "No notes in this view",
-			body: "Change the Base filters, pin a note, or add a card.",
+			title: "このビューにはノートがありません",
+			body: "Base のフィルターを変更するか、ノートをピン留めするか、カードを追加してください。"
 		},
 		card: {
-			pinned: "Pinned",
-			noteActions: "Note actions",
-			textCardTitle: "Card",
-			cardActions: "Card actions",
-			editCard: "Edit card",
-			writeNote: "Write a note",
-			linkFromNote: "Link from this note",
+			pinned: "ピン留め済み",
+			noteActions: "ノート操作",
+			textCardTitle: "カード",
+			cardActions: "カード操作",
+			editCard: "カードを編集",
+			writeNote: "ノートを書く",
+			linkFromNote: "このノートからリンク"
 		},
 		tooltips: {
-			dragGroup: "Drag group",
-			resizeGroup: "Resize group",
-			dragNote: "Drag note. Double-click to open.",
-			resizeCard: "Resize card",
-			dragToLinkNotes: "Drag to link notes",
-			dragCard: "Drag card",
-			zoomOut: "Zoom out",
-			zoomIn: "Zoom in",
-			fitView: "Fit view",
-			resetView: "Reset view",
+			dragGroup: "グループをドラッグ",
+			resizeGroup: "グループのサイズを変更",
+			dragNote: "ノートをドラッグ。ダブルクリックで開きます。",
+			resizeCard: "カードのサイズを変更",
+			dragToLinkNotes: "ドラッグしてノートをリンク",
+			dragCard: "カードをドラッグ",
+			zoomOut: "ズームアウト",
+			zoomIn: "ズームイン",
+			fitView: "ビューに合わせる",
+			resetView: "ビューをリセット"
 		},
 		menu: {
-			openNote: "Open note",
-			unpinFromBoard: "Unpin from board",
-			removeCard: "Remove card",
-			sourceBlocksTarget: "{source} blocks {target}",
-			targetBlocksSource: "{target} blocks {source}",
-			targetSubtaskOfSource: "{target} is subtask of {source}",
-			sourceSubtaskOfTarget: "{source} is subtask of {target}",
-			addPropertyLink: "Add {property}: {source} -> {target}",
-			chooseProperty: "Choose property...",
-			openPath: "Open {name}",
-			removeDependency: "Remove dependency",
-			removeProjectRelationship: "Remove project relationship",
-			removePropertyLink: "Remove {property} link",
+			openNote: "ノートを開く",
+			unpinFromBoard: "ボードからピン留めを解除",
+			removeCard: "カードを削除",
+			sourceBlocksTarget: "{source} は {target} をブロックします",
+			targetBlocksSource: "{target} は {source} をブロックします",
+			targetSubtaskOfSource: "{target} は {source} のサブタスクです",
+			sourceSubtaskOfTarget: "{source} は {target} のサブタスクです",
+			addPropertyLink: "{property} を追加: {source} -> {target}",
+			chooseProperty: "プロパティを選択...",
+			openPath: "{name} を開く",
+			removeDependency: "依存関係を削除",
+			removeProjectRelationship: "プロジェクトの関係を削除",
+			removePropertyLink: "{property} リンクを削除"
 		},
 		editor: {
-			editPath: "Edit {path}",
-			loading: "Loading",
-			unsaved: "Unsaved",
-			missingFile: "Missing file",
-			missing: "Missing",
-			unableToLoad: "Unable to load",
-			error: "Error",
-			saving: "Saving",
-			saved: "Saved",
+			editPath: "{path} を編集",
+			loading: "読み込み中",
+			unsaved: "未保存",
+			missingFile: "ファイルが見つかりません",
+			missing: "見つかりません",
+			unableToLoad: "読み込めません",
+			error: "エラー",
+			saving: "保存中",
+			saved: "保存済み"
 		},
 		suggest: {
-			propertyPlaceholder: "Choose a note property for the link",
-			noMatchingProperties: "No matching properties",
-			notePlaceholder: "Pin a note to this board",
-			noMatchingNotes: "No matching notes",
-		},
+			propertyPlaceholder: "リンクに使用するノートのプロパティを選択",
+			noMatchingProperties: "一致するプロパティはありません",
+			notePlaceholder: "このボードにノートをピン留め",
+			noMatchingNotes: "一致するノートはありません"
+		}
 	},
 	basesOptions: {
-		canvas: "Canvas",
-		canvasPath: "Canvas path",
-		layout: "Layout",
-		edges: "Edges",
-		linkProperties: "Link properties",
-		cards: "Cards",
-		showBodyEditor: "Show body editor",
+		canvas: "キャンバス",
+		canvasPath: "キャンバスのパス",
+		layout: "レイアウト",
+		edges: "エッジ",
+		linkProperties: "リンクプロパティ",
+		cards: "カード",
+		showBodyEditor: "本文エディタを表示",
 		tasknotes: "TaskNotes",
-		tasknotesIntegration: "TaskNotes integration",
-		showTaskBadges: "Show task badges",
-		showTaskActions: "Show task actions",
-		taskRelationshipEdges: "Task relationship edges",
-		manualCards: "Manual cards",
-		pinnedNotes: "Pinned notes",
-		updateRules: "Update rules",
-		preservePositions: "Preserve positions",
-		removeMissingNotes: "Remove missing notes",
-		nodeWidth: "Node width",
-		nodeHeight: "Node height",
-	},
+		tasknotesIntegration: "TaskNotes 連携",
+		showTaskBadges: "タスクバッジを表示",
+		showTaskActions: "タスク操作を表示",
+		taskRelationshipEdges: "タスクの関係エッジ",
+		manualCards: "手動カード",
+		pinnedNotes: "ピン留めされたノート",
+		updateRules: "更新ルール",
+		preservePositions: "位置を保持",
+		removeMissingNotes: "見つからないノートを削除",
+		nodeWidth: "ノードの幅",
+		nodeHeight: "ノードの高さ"
+	}
 };
