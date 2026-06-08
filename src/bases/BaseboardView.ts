@@ -90,6 +90,7 @@ const MIN_ZOOM = 0.35;
 const MAX_ZOOM = 2;
 const ZOOM_STEP = 0.1;
 const FIT_VIEW_PADDING = 48;
+const FRONT_CARD_Z_INDEX = "20";
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
 type CanvasRenderableNode = CanvasFileNode | CanvasGroupNode | CanvasTextNode;
@@ -197,6 +198,7 @@ export class BaseboardView extends BasesView {
 	private canvasNodeElements = new Map<string, HTMLElement>();
 	private inlineEditors = new Map<string, InlineEditorState>();
 	private renderedEdges: RenderedBaseboardEdge[] = [];
+	private frontCardEl: HTMLElement | null = null;
 	private canvasBounds: { width: number; height: number } | null = null;
 	private canvasRenderState: CanvasRenderState | null = null;
 	private taskEdgeCache: {
@@ -908,6 +910,9 @@ export class BaseboardView extends BasesView {
 		const kind = getCanvasNodeKind(element);
 
 		this.addElementEvent(element, "pointerdown", (event) => {
+			if (kind === "file" || kind === "text") {
+				this.bringCardToFront(event, element);
+			}
 			this.startDrag(event, dragNodeIds, this.canvasNodeElements, state.nodePositions);
 		});
 
@@ -917,6 +922,18 @@ export class BaseboardView extends BasesView {
 		this.addElementEvent(handleEl, "pointerdown", (event) => {
 			this.startResize(event, nodeId, kind, element, state.nodePositions);
 		});
+	}
+
+	private bringCardToFront(event: PointerEvent, element: HTMLElement): void {
+		if (event.button !== 0) return;
+		if (isNodeControlTarget(event.target)) return;
+
+		if (this.frontCardEl && this.frontCardEl !== element) {
+			this.frontCardEl.style.removeProperty("z-index");
+		}
+
+		this.frontCardEl = element;
+		element.style.setProperty("z-index", FRONT_CARD_Z_INDEX);
 	}
 
 	private getViewportMetrics(viewportEl: HTMLElement): CanvasViewportMetrics {
@@ -2066,6 +2083,7 @@ export class BaseboardView extends BasesView {
 
 	private clearCanvasReferences(): void {
 		this.destroyAllInlineEditors(true);
+		this.frontCardEl = null;
 		this.edgeLayerEl = null;
 		this.renderedEdges = [];
 		this.canvasNodeElements = new Map();
