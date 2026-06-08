@@ -3,12 +3,13 @@ import type { App, BasesViewConfig } from "obsidian";
 import { VIEW_CONFIG_KEYS } from "../constants";
 import type {
 	BaseboardEntrySnapshot,
+	BaseboardManualGroupSnapshot,
 	BaseboardTextCardSnapshot,
 	BaseboardViewSnapshot,
 } from "../types";
-import { getGroupNodeId } from "../canvas/canvasBuilder";
 
 const MANUAL_GROUP_LABEL = "Pinned notes";
+const DEFAULT_MANUAL_GROUP_ID = "pinned";
 
 export function applyManualViewItems(
 	app: App,
@@ -17,24 +18,19 @@ export function applyManualViewItems(
 ): BaseboardViewSnapshot {
 	const manualEntries = buildManualEntries(app, snapshot, config);
 	const textCards = normalizeTextCards(config.get(VIEW_CONFIG_KEYS.textCards));
+	const manualGroups = normalizeConfiguredManualGroups(
+		config.get(VIEW_CONFIG_KEYS.manualGroups),
+		manualEntries.length > 0
+	);
 
-	if (manualEntries.length === 0 && textCards.length === 0) {
+	if (manualEntries.length === 0 && textCards.length === 0 && manualGroups.length === 0) {
 		return snapshot;
 	}
 
 	return {
 		...snapshot,
-		groups:
-			manualEntries.length > 0
-				? [
-						...snapshot.groups,
-						{
-							id: getGroupNodeId(snapshot.viewName, MANUAL_GROUP_LABEL),
-							label: MANUAL_GROUP_LABEL,
-							entries: manualEntries,
-						},
-					]
-				: snapshot.groups,
+		manualEntries,
+		manualGroups,
 		textCards,
 		totalEntries: snapshot.totalEntries + manualEntries.length,
 	};
@@ -69,8 +65,37 @@ export function normalizeTextCards(value: unknown): BaseboardTextCardSnapshot[] 
 		.filter((entry): entry is BaseboardTextCardSnapshot => entry !== null);
 }
 
+export function normalizeManualGroups(value: unknown): BaseboardManualGroupSnapshot[] {
+	if (!Array.isArray(value)) return [];
+
+	const seen = new Set<string>();
+	const groups: BaseboardManualGroupSnapshot[] = [];
+
+	for (const entry of value) {
+		const group = normalizeManualGroup(entry);
+		if (!group || seen.has(group.id)) continue;
+		seen.add(group.id);
+		groups.push(group);
+	}
+
+	return groups;
+}
+
 export function setManualNotePaths(config: BasesViewConfig, paths: string[]): void {
 	config.set(VIEW_CONFIG_KEYS.manualNotePaths, normalizeManualNotePaths(paths));
+}
+
+export function setManualGroups(
+	config: BasesViewConfig,
+	groups: BaseboardManualGroupSnapshot[]
+): void {
+	config.set(
+		VIEW_CONFIG_KEYS.manualGroups,
+		normalizeManualGroups(groups).map((group) => ({
+			id: group.id,
+			label: group.label,
+		}))
+	);
 }
 
 export function setTextCards(config: BasesViewConfig, cards: BaseboardTextCardSnapshot[]): void {
@@ -81,6 +106,13 @@ export function setTextCards(config: BasesViewConfig, cards: BaseboardTextCardSn
 			text: card.text,
 		}))
 	);
+}
+
+export function createDefaultManualGroup(): BaseboardManualGroupSnapshot {
+	return {
+		id: DEFAULT_MANUAL_GROUP_ID,
+		label: MANUAL_GROUP_LABEL,
+	};
 }
 
 function buildManualEntries(
@@ -110,6 +142,30 @@ function buildManualEntries(
 	}
 
 	return entries;
+}
+
+function normalizeConfiguredManualGroups(
+	value: unknown,
+	hasManualEntries: boolean
+): BaseboardManualGroupSnapshot[] {
+	if (Array.isArray(value)) {
+		return normalizeManualGroups(value);
+	}
+
+	return hasManualEntries ? [createDefaultManualGroup()] : [];
+}
+
+function normalizeManualGroup(value: unknown): BaseboardManualGroupSnapshot | null {
+	if (!isRecord(value) || typeof value.id !== "string") return null;
+
+	const id = value.id.trim();
+	if (!id) return null;
+	const label = typeof value.label === "string" ? value.label.trim() : "";
+
+	return {
+		id,
+		label: label || MANUAL_GROUP_LABEL,
+	};
 }
 
 function normalizeTextCard(value: unknown): BaseboardTextCardSnapshot | null {

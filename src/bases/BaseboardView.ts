@@ -4,7 +4,9 @@ import {
 	FuzzySuggestModal,
 	Keymap,
 	Menu,
+	Modal,
 	Notice,
+	Setting,
 	TFile,
 	debounce,
 	setIcon,
@@ -21,6 +23,7 @@ import { BASEBOARD_VIEW_TYPE, VIEW_CONFIG_KEYS } from "../constants";
 import type {
 	BaseboardEntryPropertySnapshot,
 	BaseboardEntrySnapshot,
+	BaseboardManualGroupSnapshot,
 	BaseboardNodePosition,
 	BaseboardNodePositionMap,
 	BaseboardRelationship,
@@ -33,6 +36,7 @@ import type { BasesViewAction } from "./actions";
 import {
 	buildBaseboardCanvas,
 	getFileNodeId,
+	getManualGroupNodeId,
 	getRelationshipEdgeId,
 	getTextCardNodeId,
 	initializeTextCardPositions,
@@ -48,11 +52,18 @@ import { collectRelationships } from "../canvas/relationships";
 import { buildBaseboardEdgeGeometry } from "./edgeGeometry";
 import {
 	applyManualViewItems,
+	createDefaultManualGroup,
+	normalizeManualGroups,
 	normalizeManualNotePaths,
 	normalizeTextCards,
+	setManualGroups,
 	setManualNotePaths,
 	setTextCards,
 } from "./manualItems";
+import {
+	getSnapshotEntriesByPath,
+	getSnapshotPaths,
+} from "./snapshotEntries";
 import {
 	DEFAULT_VIRTUALIZATION_OVERSCAN,
 	DEFAULT_VIRTUALIZATION_THRESHOLD,
@@ -62,6 +73,7 @@ import {
 } from "./virtualization";
 import {
 	buildDefaultMaterializeOptions,
+	DEFAULT_SETTINGS,
 	normalizeDimension,
 	normalizeEdgeMode,
 	normalizeLayout,
@@ -86,6 +98,9 @@ const MIN_GROUP_NODE_WIDTH = 220;
 const MIN_GROUP_NODE_HEIGHT = 120;
 const MIN_TEXT_NODE_WIDTH = 160;
 const MIN_TEXT_NODE_HEIGHT = 100;
+const GROUP_HEADER_HEIGHT = 42;
+const GROUP_PADDING = 18;
+const NODE_GAP = 16;
 const MIN_ZOOM = 0.35;
 const MAX_ZOOM = 2;
 const ZOOM_STEP = 0.1;
@@ -167,6 +182,7 @@ interface CanvasRenderState {
 	groupEntries: Map<string, string[]>;
 	entriesByPath: Map<string, BaseboardEntrySnapshot>;
 	filePathsByNodeId: Map<string, string>;
+	manualGroupsByNodeId: Map<string, BaseboardManualGroupSnapshot>;
 	textCardsByNodeId: Map<string, BaseboardTextCardSnapshot>;
 	nodePositions: Map<string, BaseboardNodePosition>;
 	planeEl: HTMLElement;
@@ -431,6 +447,15 @@ export class BaseboardView extends BasesView {
 					})),
 				})),
 			})),
+			manualEntries: snapshot.manualEntries.map((entry) => ({
+				path: entry.path,
+				name: entry.name,
+				isManual: Boolean(entry.isManual),
+			})),
+			manualGroups: snapshot.manualGroups.map((group) => ({
+				id: group.id,
+				label: group.label,
+			})),
 			textCards: snapshot.textCards.map((card) => ({
 				id: card.id,
 				text: card.text,
@@ -550,7 +575,14 @@ export class BaseboardView extends BasesView {
 
 		this.renderToolbar(rootEl, snapshot);
 
-		if (!snapshot || (snapshot.totalEntries === 0 && snapshot.textCards.length === 0)) {
+		if (
+			!snapshot ||
+			(
+				snapshot.totalEntries === 0 &&
+				snapshot.textCards.length === 0 &&
+				snapshot.manualGroups.length === 0
+			)
+		) {
 			this.destroyAllInlineEditors(true);
 			this.renderEmpty(rootEl);
 			return;
@@ -585,6 +617,12 @@ export class BaseboardView extends BasesView {
 			icon: "lucide-sticky-note",
 			label: this.t("view.toolbar.addCard"),
 			onClick: () => this.addTextCard(),
+			isPrimary: false,
+		});
+		this.addToolbarButton(actionsEl, {
+			icon: "lucide-box-select",
+			label: this.t("view.toolbar.addGroup"),
+			onClick: () => this.openCreateManualGroupModal(),
 			isPrimary: false,
 		});
 		this.addToolbarButton(actionsEl, {
@@ -656,7 +694,7 @@ export class BaseboardView extends BasesView {
 	private formatSnapshotMeta(snapshot: BaseboardViewSnapshot): string {
 		return [
 			this.tp("common.note", snapshot.totalEntries),
-			this.tp("common.group", snapshot.groups.length),
+			this.tp("common.group", snapshot.groups.length + snapshot.manualGroups.length),
 			snapshot.textCards.length > 0
 				? this.tp("common.card", snapshot.textCards.length)
 				: null,
@@ -668,17 +706,29 @@ export class BaseboardView extends BasesView {
 	private async openManualNotePicker(): Promise<void> {
 		if (!this.config) return;
 
-		const visiblePaths = new Set(
-			this.getSnapshot()?.groups.flatMap((group) =>
-				group.entries.map((entry) => entry.path)
-			) ?? []
-		);
 		const pinnedPaths = this.getManualNotePaths();
-		const unavailablePaths = new Set([...visiblePaths, ...pinnedPaths]);
+		const unavailablePaths = new Set(pinnedPaths);
 
 		new ManualNoteSuggestModal(this.app, unavailablePaths, this.t.bind(this), (file) => {
-			this.addManualNote(file.path);
+			this.pinNoteToDefaultGroup(file.path);
 		}).open();
+	}
+
+	private async openCreateManualGroupModal(): Promise<void> {
+		if (!this.config) return;
+
+		new ManualGroupNameModal(
+			this.app,
+			{
+				title: this.t("view.group.createTitle"),
+				initialValue: this.t("view.group.defaultName"),
+				submitLabel: this.t("view.group.create"),
+				cancelLabel: this.t("common.cancel"),
+			},
+			(label) => {
+				this.addManualGroup(label);
+			}
+		).open();
 	}
 
 	private async addTextCard(): Promise<void> {
@@ -686,7 +736,7 @@ export class BaseboardView extends BasesView {
 
 		const options = this.getMaterializeOptions();
 		const card: BaseboardTextCardSnapshot = {
-			id: createTextCardId(),
+			id: createItemId(),
 			text: "",
 		};
 		const cards = [...normalizeTextCards(this.config.get(VIEW_CONFIG_KEYS.textCards)), card];
@@ -701,13 +751,64 @@ export class BaseboardView extends BasesView {
 		this.scheduleRender();
 	}
 
-	private addManualNote(path: string): void {
+	private addManualGroup(label: string): void {
 		if (!this.config) return;
 
-		const paths = this.getManualNotePaths();
-		if (paths.includes(path)) return;
+		const group: BaseboardManualGroupSnapshot = {
+			id: createItemId(),
+			label: label.trim() || this.t("view.group.defaultName"),
+		};
+		const groups = [...this.getManualGroups(), group];
+		const positions = this.getNodePositions();
+		positions[getManualGroupNodeId(group.id)] = this.getNewCardPosition(360, 220);
 
-		setManualNotePaths(this.config, [...paths, path]);
+		setManualGroups(this.config, groups);
+		this.setNodePositions(positions);
+		this.scheduleRender();
+	}
+
+	private renameManualGroup(id: string, label: string): void {
+		if (!this.config) return;
+
+		const nextLabel = label.trim();
+		if (!nextLabel) return;
+
+		setManualGroups(
+			this.config,
+			this.getManualGroups().map((group) =>
+				group.id === id ? { ...group, label: nextLabel } : group
+			)
+		);
+		this.scheduleRender();
+	}
+
+	private removeManualGroup(id: string): void {
+		if (!this.config) return;
+
+		setManualGroups(
+			this.config,
+			this.getManualGroups().filter((group) => group.id !== id)
+		);
+		const positions = this.getNodePositions();
+		delete positions[getManualGroupNodeId(id)];
+		this.setNodePositions(positions);
+		this.scheduleRender();
+	}
+
+	private pinNoteToDefaultGroup(path: string): void {
+		if (!this.config) return;
+
+		const group = this.ensureDefaultManualGroup();
+		const snapshot = this.getSnapshot();
+		const visiblePaths = snapshot ? new Set(getSnapshotPaths(snapshot)) : new Set<string>();
+		const paths = this.getManualNotePaths();
+		if (!visiblePaths.has(path) && !paths.includes(path)) {
+			setManualNotePaths(this.config, [...paths, path]);
+		}
+
+		const positions = this.getNodePositions();
+		positions[getFileNodeId(path)] = this.getPositionInsideManualGroup(group.id);
+		this.setNodePositions(positions);
 		this.scheduleRender();
 	}
 
@@ -719,6 +820,68 @@ export class BaseboardView extends BasesView {
 			this.getManualNotePaths().filter((entry) => entry !== path)
 		);
 		this.scheduleRender();
+	}
+
+	private getManualGroups(): BaseboardManualGroupSnapshot[] {
+		if (!this.config) return [];
+
+		const configuredGroups = this.config.get(VIEW_CONFIG_KEYS.manualGroups);
+		if (Array.isArray(configuredGroups)) {
+			return normalizeManualGroups(configuredGroups);
+		}
+
+		return this.getManualNotePaths().length > 0 ? [createDefaultManualGroup()] : [];
+	}
+
+	private ensureDefaultManualGroup(): BaseboardManualGroupSnapshot {
+		if (!this.config) return createDefaultManualGroup();
+
+		const defaultGroup = createDefaultManualGroup();
+		const groups = this.getManualGroups();
+		const existingGroup = groups.find((group) => group.id === defaultGroup.id);
+		const group = existingGroup ?? defaultGroup;
+		if (!existingGroup) {
+			setManualGroups(this.config, [...groups, group]);
+		}
+
+		const nodeId = getManualGroupNodeId(group.id);
+		const positions = this.getNodePositions();
+		if (!this.getCurrentNodePosition(nodeId)) {
+			positions[nodeId] = this.getNewCardPosition(360, 220);
+			this.setNodePositions(positions);
+		}
+
+		return group;
+	}
+
+	private getPositionInsideManualGroup(groupId: string): BaseboardNodePosition {
+		const options = this.getMaterializeOptions();
+		const groupNodeId = getManualGroupNodeId(groupId);
+		const groupPosition =
+			this.getCurrentNodePosition(groupNodeId) ?? this.getNewCardPosition(360, 220);
+		const childCount = this.canvasRenderState?.groupEntries.get(groupNodeId)?.length ?? 0;
+
+		return {
+			x: groupPosition.x + GROUP_PADDING,
+			y:
+				groupPosition.y +
+				GROUP_HEADER_HEIGHT +
+				GROUP_PADDING +
+				childCount * (options.nodeHeight + NODE_GAP),
+			width: options.nodeWidth,
+			height: options.nodeHeight,
+		};
+	}
+
+	private getCurrentNodePosition(nodeId: string): BaseboardNodePosition | null {
+		const element = this.canvasNodeElements.get(nodeId);
+		const elementPosition = element ? getElementNodePosition(element) : null;
+		return (
+			elementPosition ??
+			this.canvasRenderState?.nodePositions.get(nodeId) ??
+			this.getNodePositions()[nodeId] ??
+			null
+		);
 	}
 
 	private updateTextCardText(id: string, text: string): void {
@@ -825,16 +988,10 @@ export class BaseboardView extends BasesView {
 		const nodePositions = new Map(
 			nodes.map((node) => [node.id, getCanvasNodePosition(node)])
 		);
-		const groupEntries = new Map(
-			snapshot.groups.map((group) => [
-				group.id,
-				group.entries.map((entry) => getFileNodeId(entry.path)),
-			])
-		);
-		const entriesByPath = new Map(
-			snapshot.groups.flatMap((group) =>
-				group.entries.map((entry) => [entry.path, entry] as const)
-			)
+		const groupEntries = buildGroupContainmentMap(nodes, nodePositions);
+		const entriesByPath = getSnapshotEntriesByPath(snapshot);
+		const manualGroupsByNodeId = new Map(
+			snapshot.manualGroups.map((group) => [getManualGroupNodeId(group.id), group] as const)
 		);
 		const textCardsByNodeId = new Map(
 			snapshot.textCards.map((card) => [getTextCardNodeId(card.id), card] as const)
@@ -863,6 +1020,7 @@ export class BaseboardView extends BasesView {
 			groupEntries,
 			entriesByPath,
 			filePathsByNodeId,
+			manualGroupsByNodeId,
 			textCardsByNodeId,
 			nodePositions,
 			planeEl,
@@ -954,7 +1112,12 @@ export class BaseboardView extends BasesView {
 		state: CanvasRenderState
 	): HTMLElement {
 		if (node.type === "group") {
-			return this.renderGroupNode(containerEl, node, state.groupEntries.get(node.id) ?? []);
+			return this.renderGroupNode(
+				containerEl,
+				node,
+				state.groupEntries.get(node.id) ?? [],
+				state.manualGroupsByNodeId.get(node.id)
+			);
 		}
 
 		if (node.type === "file") {
@@ -969,14 +1132,17 @@ export class BaseboardView extends BasesView {
 		element: HTMLElement,
 		state: CanvasRenderState
 	): void {
-		const childNodeIds = state.groupEntries.get(nodeId) ?? [];
-		const dragNodeIds = childNodeIds.length > 0 ? [nodeId, ...childNodeIds] : [nodeId];
 		const kind = getCanvasNodeKind(element);
 
 		this.addElementEvent(element, "pointerdown", (event) => {
 			if (kind === "file" || kind === "text") {
 				this.bringCardToFront(event, element);
 			}
+			if (kind === "group") {
+				this.refreshGroupContainment();
+			}
+			const childNodeIds = state.groupEntries.get(nodeId) ?? [];
+			const dragNodeIds = childNodeIds.length > 0 ? [nodeId, ...childNodeIds] : [nodeId];
 			this.startDrag(event, dragNodeIds, this.canvasNodeElements, state.nodePositions);
 		});
 
@@ -1041,22 +1207,58 @@ export class BaseboardView extends BasesView {
 		}
 	}
 
+	private refreshGroupContainment(): void {
+		if (!this.canvasRenderState) return;
+
+		this.canvasRenderState.groupEntries = buildGroupContainmentMap(
+			this.canvasRenderState.allNodes,
+			this.canvasRenderState.nodePositions
+		);
+
+		for (const node of this.canvasRenderState.allNodes) {
+			if (node.type !== "group") continue;
+
+			const groupEl = this.canvasNodeElements.get(node.id);
+			const countEl = groupEl?.querySelector(".baseboard-canvas-group__count");
+			if (countEl instanceof HTMLElement) {
+				countEl.setText(String(this.canvasRenderState.groupEntries.get(node.id)?.length ?? 0));
+			}
+		}
+	}
+
 	private renderGroupNode(
 		containerEl: HTMLElement,
 		node: CanvasGroupNode,
-		childNodeIds: string[]
+		childNodeIds: string[],
+		manualGroup: BaseboardManualGroupSnapshot | undefined
 	): HTMLElement {
 		const groupEl = containerEl.createDiv({ cls: "baseboard-canvas-group" });
 		groupEl.setAttr("data-baseboard-node-id", node.id);
 		groupEl.setAttr("data-baseboard-node-kind", "group");
+		groupEl.toggleClass("is-manual", Boolean(manualGroup));
 		setNodeGeometry(groupEl, node);
 
 		const headerEl = groupEl.createDiv({ cls: "baseboard-canvas-group__header" });
-		headerEl.createDiv({ cls: "baseboard-canvas-group__title", text: node.label });
+		const titleEl = headerEl.createDiv({ cls: "baseboard-canvas-group__title", text: node.label });
 		headerEl.createDiv({
 			cls: "baseboard-canvas-group__count",
 			text: String(childNodeIds.length),
 		});
+		if (manualGroup) {
+			this.addElementEvent(groupEl, "contextmenu", (event) => {
+				event.preventDefault();
+				event.stopPropagation();
+				this.openGroupMenu(event, manualGroup);
+			});
+			this.addElementEvent(titleEl, "dblclick", (event) => {
+				event.preventDefault();
+				event.stopPropagation();
+				this.openRenameManualGroupModal(manualGroup);
+			});
+			this.renderCardActionButton(headerEl, this.t("view.card.groupActions"), (event) => {
+				this.openGroupMenu(event, manualGroup);
+			});
+		}
 		setTooltip(headerEl, this.t("view.tooltips.dragGroup"));
 		this.addResizeHandle(groupEl, this.t("view.tooltips.resizeGroup"));
 
@@ -1290,6 +1492,43 @@ export class BaseboardView extends BasesView {
 				.setDisabled(!card)
 				.onClick(() => {
 					if (card) this.removeTextCard(card.id);
+				});
+		});
+		menu.showAtMouseEvent(event);
+	}
+
+	private openRenameManualGroupModal(group: BaseboardManualGroupSnapshot): void {
+		new ManualGroupNameModal(
+			this.app,
+			{
+				title: this.t("view.group.renameTitle"),
+				initialValue: group.label,
+				submitLabel: this.t("view.group.rename"),
+				cancelLabel: this.t("common.cancel"),
+			},
+			(label) => {
+				this.renameManualGroup(group.id, label);
+			}
+		).open();
+	}
+
+	private openGroupMenu(event: MouseEvent, group: BaseboardManualGroupSnapshot): void {
+		const menu = new Menu();
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.renameGroup"))
+				.setIcon("lucide-pencil")
+				.onClick(() => {
+					this.openRenameManualGroupModal(group);
+				});
+		});
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.removeGroup"))
+				.setIcon("lucide-trash-2")
+				.setWarning(true)
+				.onClick(() => {
+					this.removeManualGroup(group.id);
 				});
 		});
 		menu.showAtMouseEvent(event);
@@ -1926,12 +2165,8 @@ export class BaseboardView extends BasesView {
 	): Promise<void> {
 		if (options.taskNotesMode === "off") return;
 
-		const paths = snapshot.groups.flatMap((group) => group.entries.map((entry) => entry.path));
-		const entriesByPath = new Map(
-			snapshot.groups.flatMap((group) =>
-				group.entries.map((entry) => [entry.path, entry] as const)
-			)
-		);
+		const paths = getSnapshotPaths(snapshot);
+		const entriesByPath = getSnapshotEntriesByPath(snapshot);
 		if (
 			options.taskNotesShowBadges &&
 			paths.length > 0 &&
@@ -2946,6 +3181,7 @@ export class BaseboardView extends BasesView {
 
 		this.setNodePositions(nodePositions);
 		this.updateEdgeLayerGeometry();
+		this.refreshGroupContainment();
 		this.clearDragListeners();
 	}
 
@@ -2974,6 +3210,7 @@ export class BaseboardView extends BasesView {
 		setNodeGeometry(this.resizeState.element, nextPosition);
 		this.setNodePositions(nodePositions);
 		this.updateEdgeLayerGeometry();
+		this.refreshGroupContainment();
 		this.clearDragListeners();
 	}
 
@@ -3106,9 +3343,7 @@ export class BaseboardView extends BasesView {
 		const snapshot = this.getSnapshot();
 		if (!snapshot) return false;
 
-		return snapshot.groups.some((group) =>
-			group.entries.some((entry) => entry.path === path)
-		);
+		return getSnapshotPaths(snapshot).includes(path);
 	}
 
 	private clearDragListeners(): void {
@@ -3218,6 +3453,82 @@ class ManualNoteSuggestModal extends FuzzySuggestModal<TFile> {
 
 	onChooseItem(item: TFile): void {
 		this.onChoose(item);
+	}
+}
+
+class ManualGroupNameModal extends Modal {
+	private readonly options: {
+		title: string;
+		initialValue: string;
+		submitLabel: string;
+		cancelLabel: string;
+	};
+	private readonly onSubmit: (label: string) => void;
+	private value: string;
+
+	constructor(
+		app: App,
+		options: {
+			title: string;
+			initialValue: string;
+			submitLabel: string;
+			cancelLabel: string;
+		},
+		onSubmit: (label: string) => void
+	) {
+		super(app);
+		this.options = options;
+		this.value = options.initialValue;
+		this.onSubmit = onSubmit;
+	}
+
+	onOpen(): void {
+		this.contentEl.empty();
+		this.contentEl.addClass("baseboard-modal");
+		this.contentEl.createEl("h2", { text: this.options.title });
+
+		new Setting(this.contentEl)
+			.setName(this.options.title)
+			.addText((text) => {
+				text
+					.setValue(this.value)
+					.onChange((value) => {
+						this.value = value;
+					});
+				text.inputEl.addEventListener("keydown", (event) => {
+					if (event.key !== "Enter") return;
+					event.preventDefault();
+					this.submit();
+				});
+				text.inputEl.focus();
+				text.inputEl.select();
+		});
+
+		const actionsEl = this.contentEl.createDiv({ cls: "baseboard-modal__actions" });
+		actionsEl
+			.createEl("button", { text: this.options.cancelLabel })
+			.addEventListener("click", () => {
+				this.close();
+			});
+		const submitButton = actionsEl.createEl("button", {
+			text: this.options.submitLabel,
+			cls: "mod-cta",
+		});
+		submitButton.addEventListener("click", () => {
+			this.submit();
+		});
+	}
+
+	onClose(): void {
+		this.contentEl.empty();
+	}
+
+	private submit(): void {
+		const label = this.value.trim();
+		if (!label) return;
+
+		this.onSubmit(label);
+		this.close();
 	}
 }
 
@@ -3349,7 +3660,7 @@ export function buildBaseboardViewOptions(t: TranslateFn): BasesAllOptions[] {
 					type: "slider",
 					key: VIEW_CONFIG_KEYS.nodeWidth,
 					displayName: t("basesOptions.nodeWidth"),
-					default: 260,
+					default: DEFAULT_SETTINGS.nodeWidth,
 					min: 160,
 					max: 520,
 					step: 20,
@@ -3358,7 +3669,7 @@ export function buildBaseboardViewOptions(t: TranslateFn): BasesAllOptions[] {
 					type: "slider",
 					key: VIEW_CONFIG_KEYS.nodeHeight,
 					displayName: t("basesOptions.nodeHeight"),
-					default: 110,
+					default: DEFAULT_SETTINGS.nodeHeight,
 					min: 80,
 					max: 320,
 					step: 10,
@@ -3382,7 +3693,7 @@ function getBooleanConfig(
 	return typeof value === "boolean" ? value : fallback;
 }
 
-function createTextCardId(): string {
+function createItemId(): string {
 	return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
 		? crypto.randomUUID()
 		: `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -3463,9 +3774,7 @@ function getTaskEdgeCacheKey(
 		return null;
 	}
 
-	const paths = snapshot.groups
-		.flatMap((group) => group.entries.map((entry) => entry.path))
-		.sort();
+	const paths = getSnapshotPaths(snapshot).sort();
 
 	return [options.taskNotesRelationships, ...paths].join("\u0000");
 }
@@ -3483,6 +3792,14 @@ function applyStoredNodePositions(
 				...entry,
 				position: positions[getFileNodeId(entry.path)],
 			})),
+		})),
+		manualEntries: snapshot.manualEntries.map((entry) => ({
+			...entry,
+			position: positions[getFileNodeId(entry.path)],
+		})),
+		manualGroups: snapshot.manualGroups.map((group) => ({
+			...group,
+			position: positions[getManualGroupNodeId(group.id)],
 		})),
 		textCards: snapshot.textCards.map((card) => ({
 			...card,
@@ -3552,6 +3869,44 @@ function applyCanvasNodePosition<TNode extends CanvasRenderableNode>(
 	position: BaseboardNodePosition | undefined
 ): TNode {
 	return position ? { ...node, ...position } : node;
+}
+
+function buildGroupContainmentMap(
+	nodes: CanvasRenderableNode[],
+	positions: Map<string, BaseboardNodePosition>
+): Map<string, string[]> {
+	const positionedNodes = nodes.map((node) => ({
+		node,
+		position: positions.get(node.id) ?? getCanvasNodePosition(node),
+	}));
+	const cards = positionedNodes.filter(
+		(entry) => entry.node.type === "file" || entry.node.type === "text"
+	);
+	const groups = positionedNodes.filter((entry) => entry.node.type === "group");
+	const containment = new Map<string, string[]>();
+
+	for (const group of groups) {
+		containment.set(
+			group.node.id,
+			cards
+				.filter((card) => positionsOverlap(card.position, group.position))
+				.map((card) => card.node.id)
+		);
+	}
+
+	return containment;
+}
+
+function positionsOverlap(
+	first: BaseboardNodePosition,
+	second: BaseboardNodePosition
+): boolean {
+	return (
+		first.x < second.x + second.width &&
+		first.x + first.width > second.x &&
+		first.y < second.y + second.height &&
+		first.y + first.height > second.y
+	);
 }
 
 function setNodeGeometry(element: HTMLElement, position: BaseboardNodePosition): void {

@@ -297,12 +297,26 @@
 }
 
 .baseboard-canvas-group__title {
+	flex: 1 1 auto;
+	min-width: 0;
 	overflow: hidden;
 	font-size: 0.8125rem;
 	font-weight: 600;
 	line-height: 1.25;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.baseboard-canvas-group__count {
+	flex: 0 0 auto;
+}
+
+.baseboard-canvas-group .baseboard-canvas-card-action {
+	flex: 0 0 auto;
+	width: 22px;
+	height: 22px;
+	margin-left: 0;
+	opacity: 0.74;
 }
 
 .baseboard-canvas-file {

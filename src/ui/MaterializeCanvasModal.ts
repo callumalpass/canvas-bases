@@ -69,7 +69,10 @@ export class MaterializeCanvasModal extends Modal {
 			cls: "baseboard-modal__summary-meta",
 			text: [
 				this.tp("common.note", this.snapshot.totalEntries),
-				this.tp("common.group", this.snapshot.groups.length),
+				this.tp(
+					"common.group",
+					this.snapshot.groups.length + this.snapshot.manualGroups.length
+				),
 				this.snapshot.textCards.length > 0
 					? this.tp("common.card", this.snapshot.textCards.length)
 					: null,

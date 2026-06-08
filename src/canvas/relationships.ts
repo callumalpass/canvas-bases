@@ -4,6 +4,7 @@ import type {
 	BaseboardViewSnapshot,
 	MaterializeOptions,
 } from "../types";
+import { getSnapshotEntries } from "../bases/snapshotEntries";
 
 type LinkLike = {
 	link: string;
@@ -16,25 +17,22 @@ export function collectRelationships(
 ): BaseboardRelationship[] {
 	if (options.edgeMode === "none") return [];
 
-	const visiblePaths = new Set(
-		snapshot.groups.flatMap((group) => group.entries.map((entry) => entry.path))
-	);
+	const visibleEntries = getSnapshotEntries(snapshot);
+	const visiblePaths = new Set(visibleEntries.map((entry) => entry.path));
 	const relationships: BaseboardRelationship[] = [];
 
-	for (const group of snapshot.groups) {
-		for (const entry of group.entries) {
-			const file = getFile(app, entry.path);
-			if (!file) continue;
+	for (const entry of visibleEntries) {
+		const file = getFile(app, entry.path);
+		if (!file) continue;
 
-			if (options.edgeMode === "wikilinks" || options.edgeMode === "all") {
-				relationships.push(...collectContentLinks(app, file, visiblePaths));
-			}
+		if (options.edgeMode === "wikilinks" || options.edgeMode === "all") {
+			relationships.push(...collectContentLinks(app, file, visiblePaths));
+		}
 
-			if (options.edgeMode === "properties" || options.edgeMode === "all") {
-				relationships.push(
-					...collectPropertyLinks(app, file, visiblePaths, options.edgeProperties)
-				);
-			}
+		if (options.edgeMode === "properties" || options.edgeMode === "all") {
+			relationships.push(
+				...collectPropertyLinks(app, file, visiblePaths, options.edgeProperties)
+			);
 		}
 	}
 

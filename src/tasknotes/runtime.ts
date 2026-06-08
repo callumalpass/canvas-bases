@@ -5,6 +5,7 @@ import type {
 	BaseboardViewSnapshot,
 } from "../types";
 import type { TranslateFn } from "../i18n";
+import { getSnapshotPaths } from "../bases/snapshotEntries";
 
 export interface BaseboardTaskBadge {
 	kind: BaseboardTaskPropertyKind;
@@ -257,9 +258,7 @@ export class TaskNotesRuntime {
 			return [];
 		}
 
-		const visiblePaths = new Set(
-			snapshot.groups.flatMap((group) => group.entries.map((entry) => entry.path))
-		);
+		const visiblePaths = new Set(getSnapshotPaths(snapshot));
 		const relationships: BaseboardRelationship[] = [];
 
 		await Promise.all(

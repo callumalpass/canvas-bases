@@ -78,6 +78,12 @@ export interface BaseboardGroupSnapshot {
 	position?: BaseboardNodePosition;
 }
 
+export interface BaseboardManualGroupSnapshot {
+	id: string;
+	label: string;
+	position?: BaseboardNodePosition;
+}
+
 export interface BaseboardTextCardSnapshot {
 	id: string;
 	text: string;
@@ -87,6 +93,8 @@ export interface BaseboardTextCardSnapshot {
 export interface BaseboardViewSnapshot {
 	viewName: string;
 	groups: BaseboardGroupSnapshot[];
+	manualEntries: BaseboardEntrySnapshot[];
+	manualGroups: BaseboardManualGroupSnapshot[];
 	textCards: BaseboardTextCardSnapshot[];
 	totalEntries: number;
 }

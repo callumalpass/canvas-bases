@@ -22,6 +22,8 @@
   and link-property configuration as canvas materialization.
 - Added card-to-card link controls for creating TaskNotes dependency/project
   relationships and frontmatter property links from the Baseboard view.
+- Added Canvas-style manual group frames that can be created, renamed, moved,
+  resized, removed, and used with pinned notes in the Baseboard view.
 - Changed TaskNotes project relationship wording and edges to show tasks as
   subtasks of their parent task, with edges running from subtask to parent.
 - Fixed dependency edge removal so it uses the exact TaskNotes dependency

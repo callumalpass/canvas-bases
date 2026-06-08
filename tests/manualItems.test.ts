@@ -6,7 +6,7 @@ import { applyManualViewItems } from "../src/bases/manualItems";
 import type { BaseboardViewSnapshot } from "../src/types";
 
 describe("applyManualViewItems", () => {
-	it("adds pinned markdown notes as a separate group without duplicating visible notes", () => {
+	it("adds pinned markdown notes as manual cards without duplicating visible notes", () => {
 		const app = makeApp([
 			makeTFile("Tasks/Visible.md"),
 			makeTFile("Tasks/Pinned.md"),
@@ -17,8 +17,14 @@ describe("applyManualViewItems", () => {
 		}));
 
 		expect(snapshot.totalEntries).toBe(2);
-		expect(snapshot.groups.map((group) => group.label)).toEqual(["Active", "Pinned notes"]);
-		expect(snapshot.groups[1].entries).toMatchObject([
+		expect(snapshot.groups.map((group) => group.label)).toEqual(["Active"]);
+		expect(snapshot.manualGroups).toEqual([
+			{
+				id: "pinned",
+				label: "Pinned notes",
+			},
+		]);
+		expect(snapshot.manualEntries).toMatchObject([
 			{
 				path: "Tasks/Pinned.md",
 				isManual: true,
@@ -43,12 +49,30 @@ describe("applyManualViewItems", () => {
 			},
 		]);
 	});
+
+	it("does not recreate the pinned group when manual groups are explicitly empty", () => {
+		const app = makeApp([makeTFile("Tasks/Pinned.md")]);
+		const snapshot = applyManualViewItems(app, baseSnapshot(), makeConfig({
+			[VIEW_CONFIG_KEYS.manualNotePaths]: ["Tasks/Pinned.md"],
+			[VIEW_CONFIG_KEYS.manualGroups]: [],
+		}));
+
+		expect(snapshot.manualEntries).toMatchObject([
+			{
+				path: "Tasks/Pinned.md",
+				isManual: true,
+			},
+		]);
+		expect(snapshot.manualGroups).toEqual([]);
+	});
 });
 
 function baseSnapshot(): BaseboardViewSnapshot {
 	return {
 		viewName: "Planning",
 		totalEntries: 1,
+		manualEntries: [],
+		manualGroups: [],
 		textCards: [],
 		groups: [
 			{

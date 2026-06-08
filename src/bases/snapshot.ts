@@ -40,6 +40,8 @@ export function buildBaseboardSnapshot(
 	return {
 		viewName,
 		groups,
+		manualEntries: [],
+		manualGroups: [],
 		textCards: [],
 		totalEntries: groups.reduce((count, group) => count + group.entries.length, 0),
 	};

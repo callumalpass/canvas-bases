@@ -3,6 +3,7 @@ import {
 	buildBaseboardCanvas,
 	getFileNodeId,
 	getGroupNodeId,
+	getManualGroupNodeId,
 	getTextCardNodeId,
 	initializeTextCardPositions,
 } from "../src/canvas/canvasBuilder";
@@ -295,6 +296,42 @@ describe("buildBaseboardCanvas", () => {
 			y: 362,
 			width: 260,
 			height: 120,
+		});
+	});
+
+	it("materializes manual group frames separately from manual note cards", () => {
+		const canvas = buildBaseboardCanvas({
+			...snapshot,
+			manualEntries: [
+				{
+					path: "Tasks/Pinned.md",
+					name: "Pinned",
+					isManual: true,
+				},
+			],
+			manualGroups: [
+				{
+					id: "pinned",
+					label: "Pinned notes",
+				},
+			],
+		}, baseOptions);
+		const manualGroup = canvas.nodes?.find(
+			(node): node is CanvasGroupNode => node.id === getManualGroupNodeId("pinned")
+		);
+		const manualFile = canvas.nodes?.find((node) => node.id === getFileNodeId("Tasks/Pinned.md"));
+
+		expect(manualGroup).toMatchObject({
+			type: "group",
+			label: "Pinned notes",
+			x: 0,
+			y: 362,
+		});
+		expect(manualFile).toMatchObject({
+			type: "file",
+			file: "Tasks/Pinned.md",
+			x: 18,
+			y: 422,
 		});
 	});
 

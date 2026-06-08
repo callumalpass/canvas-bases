@@ -38,6 +38,8 @@ describe("getActiveBasesViewSource", () => {
 		expect(source?.snapshot).toEqual({
 			viewName: "Table",
 			totalEntries: 2,
+			manualEntries: [],
+			manualGroups: [],
 			textCards: [],
 			groups: [
 				{

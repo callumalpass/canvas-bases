@@ -6,6 +6,7 @@ import type {
 	MaterializeOptions,
 } from "../types";
 import { stableBaseboardId } from "../utils/hash";
+import { getSnapshotEntries } from "../bases/snapshotEntries";
 import { getEdgeAttachmentSides } from "./edgeRouting";
 import type {
 	CanvasEdge,
@@ -48,9 +49,27 @@ export function buildBaseboardCanvas(
 					layoutGroup(snapshot, group, groupIndex, options, existingNodes)
 				);
 
-	const generatedLayoutNodes = generatedGroups.flatMap((group) =>
+	const generatedDataNodes = generatedGroups.flatMap((group) =>
 		group.groupNode ? [group.groupNode, ...group.fileNodes] : group.fileNodes
 	);
+	const generatedManualGroups = layoutManualGroups(
+		snapshot,
+		options,
+		existingNodes,
+		generatedDataNodes
+	);
+	const generatedManualFiles = layoutManualEntries(
+		snapshot,
+		options,
+		existingNodes,
+		generatedDataNodes,
+		generatedManualGroups
+	);
+	const generatedLayoutNodes = [
+		...generatedDataNodes,
+		...generatedManualGroups,
+		...generatedManualFiles,
+	];
 	const generatedTextNodes = layoutTextCards(
 		snapshot,
 		options,
@@ -128,6 +147,10 @@ export function getFileNodeId(path: string): string {
 
 export function getTextCardNodeId(id: string): string {
 	return stableBaseboardId("text", id);
+}
+
+export function getManualGroupNodeId(id: string): string {
+	return stableBaseboardId("manual-group", id);
 }
 
 export function getGroupNodeId(viewName: string, label: string): string {
@@ -209,7 +232,7 @@ function layoutUngroupedGrid(
 	options: MaterializeOptions,
 	existingNodes: Map<string, CanvasNode>
 ): PositionedGroup {
-	const entries = snapshot.groups.flatMap((group) => group.entries);
+	const entries = getSnapshotEntries(snapshot);
 	const columns = Math.min(GRID_COLUMNS, Math.max(1, Math.ceil(Math.sqrt(entries.length))));
 	const fileNodes = entries.map((entry, index) => {
 		const row = Math.floor(index / columns);
@@ -229,6 +252,76 @@ function layoutUngroupedGrid(
 	});
 
 	return { groupNode: null, fileNodes };
+}
+
+function layoutManualGroups(
+	snapshot: BaseboardViewSnapshot,
+	options: MaterializeOptions,
+	existingNodes: Map<string, CanvasNode>,
+	generatedDataNodes: CanvasNode[]
+): CanvasGroupNode[] {
+	const defaultWidth = Math.max(320, options.nodeWidth + GROUP_PADDING * 2);
+	const defaultHeight =
+		GROUP_HEADER_HEIGHT + GROUP_PADDING * 2 + options.nodeHeight + NODE_GAP;
+	const origin = getTextCardOrigin(generatedDataNodes);
+
+	return (snapshot.manualGroups ?? []).map((group, index) => {
+		const groupId = getManualGroupNodeId(group.id);
+		const generatedNode: CanvasGroupNode = {
+			id: groupId,
+			type: "group",
+			label: group.label,
+			x: origin.x,
+			y: origin.y + index * (defaultHeight + GROUP_GAP),
+			width: defaultWidth,
+			height: defaultHeight,
+		};
+		const positionedNode = applySnapshotPosition(generatedNode, group.position);
+
+		return applyExistingNodePosition(positionedNode, existingNodes, options, Boolean(group.position));
+	});
+}
+
+function layoutManualEntries(
+	snapshot: BaseboardViewSnapshot,
+	options: MaterializeOptions,
+	existingNodes: Map<string, CanvasNode>,
+	generatedDataNodes: CanvasNode[],
+	manualGroupNodes: CanvasGroupNode[]
+): CanvasFileNode[] {
+	const nodeWidth = options.nodeWidth;
+	const nodeHeight = options.nodeHeight;
+	const origin = getManualEntryOrigin(generatedDataNodes, manualGroupNodes);
+
+	return (snapshot.manualEntries ?? []).map((entry, index) => {
+		const generatedNode: CanvasFileNode = {
+			id: getFileNodeId(entry.path),
+			type: "file",
+			file: entry.path,
+			x: origin.x,
+			y: origin.y + index * (nodeHeight + NODE_GAP),
+			width: nodeWidth,
+			height: nodeHeight,
+		};
+		const positionedNode = applySnapshotPosition(generatedNode, entry.position);
+
+		return applyExistingNodePosition(positionedNode, existingNodes, options, Boolean(entry.position));
+	});
+}
+
+function getManualEntryOrigin(
+	generatedDataNodes: CanvasNode[],
+	manualGroupNodes: CanvasGroupNode[]
+): { x: number; y: number } {
+	const firstGroup = manualGroupNodes[0];
+	if (firstGroup) {
+		return {
+			x: firstGroup.x + GROUP_PADDING,
+			y: firstGroup.y + GROUP_HEADER_HEIGHT + GROUP_PADDING,
+		};
+	}
+
+	return getTextCardOrigin(generatedDataNodes);
 }
 
 function layoutTextCards(
@@ -408,9 +501,7 @@ function buildRelationshipEdges(
 	relationships: BaseboardRelationship[],
 	generatedNodes: CanvasNode[]
 ): CanvasEdge[] {
-	const visiblePaths = new Set(
-		snapshot.groups.flatMap((group) => group.entries.map((entry) => entry.path))
-	);
+	const visiblePaths = new Set(getSnapshotEntries(snapshot).map((entry) => entry.path));
 	const generatedNodesById = new Map(generatedNodes.map((node) => [node.id, node]));
 	const deduped = new Map<string, CanvasEdge>();
 

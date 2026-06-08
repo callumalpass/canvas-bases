@@ -31,7 +31,7 @@ export async function materializeCanvas({
 	return {
 		canvasPath,
 		nodeCount: canvas.nodes?.length ?? 0,
-		groupCount: snapshot.groups.length,
+		groupCount: snapshot.groups.length + snapshot.manualGroups.length,
 		edgeCount: canvas.edges?.length ?? 0,
 	};
 }

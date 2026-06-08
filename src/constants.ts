@@ -16,5 +16,6 @@ export const VIEW_CONFIG_KEYS = {
 	nodeHeight: "baseboardNodeHeight",
 	nodePositions: "baseboardNodePositions",
 	manualNotePaths: "baseboardManualNotePaths",
+	manualGroups: "baseboardManualGroups",
 	textCards: "baseboardTextCards",
 } as const;
