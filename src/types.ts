@@ -9,6 +9,7 @@ export type BaseboardTaskNotesMode = "auto" | "off";
 export type BaseboardTaskNotesRelationshipMode = "none" | "dependencies" | "all";
 
 export interface BaseboardSettings {
+	locale: string;
 	defaultCanvasFolder: string;
 	defaultLayout: BaseboardLayout;
 	defaultEdgeMode: BaseboardEdgeMode;
@@ -93,7 +94,30 @@ export interface BaseboardRelationship {
 	sourcePath: string;
 	targetPath: string;
 	label?: string;
+	metadata?: BaseboardRelationshipMetadata;
 }
+
+export type BaseboardRelationshipMetadata =
+	| {
+			source: "tasknotes";
+			kind: "dependency";
+			blockedPath: string;
+			blockingPath: string;
+			dependencyUid: string;
+	  }
+	| {
+			source: "tasknotes";
+			kind: "project";
+			parentPath: string;
+			childPath: string;
+	  }
+	| {
+			source: "property";
+			property: string;
+	  }
+	| {
+			source: "wikilink";
+	  };
 
 export interface BaseboardGenerationSummary {
 	canvasPath: string;

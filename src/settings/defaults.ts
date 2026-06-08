@@ -18,6 +18,7 @@ const TASKNOTES_RELATIONSHIP_MODES = new Set<BaseboardTaskNotesRelationshipMode>
 ]);
 
 export const DEFAULT_SETTINGS: BaseboardSettings = {
+	locale: "system",
 	defaultCanvasFolder: "Baseboards",
 	defaultLayout: "columns",
 	defaultEdgeMode: "none",
@@ -40,6 +41,7 @@ export function normalizeSettings(
 	const settings = input ?? {};
 
 	return {
+		locale: settings.locale?.trim() || DEFAULT_SETTINGS.locale,
 		defaultCanvasFolder:
 			settings.defaultCanvasFolder?.trim() || DEFAULT_SETTINGS.defaultCanvasFolder,
 		defaultLayout: normalizeLayout(settings.defaultLayout, DEFAULT_SETTINGS.defaultLayout),

@@ -51,7 +51,11 @@ function collectContentLinks(
 
 	return links
 		.map((link) => resolveRelationship(app, file, link.link, visiblePaths))
-		.filter((relationship): relationship is BaseboardRelationship => relationship !== null);
+		.filter((relationship): relationship is BaseboardRelationship => relationship !== null)
+		.map((relationship) => ({
+			...relationship,
+			metadata: { source: "wikilink" as const },
+		}));
 }
 
 function collectPropertyLinks(
@@ -72,7 +76,12 @@ function collectPropertyLinks(
 		const rawValue = frontmatter[property];
 		for (const target of extractLinkTargets(rawValue)) {
 			const relationship = resolveRelationship(app, file, target, visiblePaths, property);
-			if (relationship) relationships.push(relationship);
+			if (relationship) {
+				relationships.push({
+					...relationship,
+					metadata: { source: "property", property },
+				});
+			}
 		}
 	}
 

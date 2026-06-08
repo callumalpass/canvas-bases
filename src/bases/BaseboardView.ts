@@ -23,6 +23,7 @@ import type {
 	BaseboardEntrySnapshot,
 	BaseboardNodePosition,
 	BaseboardNodePositionMap,
+	BaseboardRelationship,
 	BaseboardTextCardSnapshot,
 	BaseboardViewSnapshot,
 	MaterializeOptions,
@@ -32,7 +33,9 @@ import type { BasesViewAction } from "./actions";
 import {
 	buildBaseboardCanvas,
 	getFileNodeId,
+	getRelationshipEdgeId,
 	getTextCardNodeId,
+	initializeTextCardPositions,
 } from "../canvas/canvasBuilder";
 import type {
 	CanvasEdge,
@@ -67,6 +70,11 @@ import {
 	splitPropertyList,
 } from "../settings/defaults";
 import type { BaseboardTaskCard, BaseboardTaskPropertyKind } from "../tasknotes/runtime";
+import type { InterpolationValues, TranslateFn } from "../i18n";
+import {
+	createBaseboardInlineMarkdownEditor,
+	type BaseboardInlineMarkdownEditor,
+} from "../editor/inlineMarkdownEditor";
 
 const MIN_CANVAS_WIDTH = 1200;
 const MIN_CANVAS_HEIGHT = 760;
@@ -120,6 +128,22 @@ interface PanState {
 	viewportEl: HTMLElement;
 }
 
+interface LinkDragState {
+	pointerId: number;
+	sourcePath: string;
+	sourceElement: HTMLElement;
+	sourcePoint: LinkPoint;
+	previewEl: SVGSVGElement;
+	previewPathEl: SVGPathElement;
+	targetElement: HTMLElement | null;
+	targetPath: string | null;
+}
+
+interface LinkPoint {
+	x: number;
+	y: number;
+}
+
 interface CanvasViewportState {
 	scrollLeft: number;
 	scrollTop: number;
@@ -145,6 +169,14 @@ interface CanvasRenderState {
 	planeEl: HTMLElement;
 	bounds: { width: number; height: number };
 	taskCards: Map<string, BaseboardTaskCard>;
+	edgeRelationships: Map<string, BaseboardRelationship>;
+}
+
+interface InlineEditorState {
+	path: string;
+	editor: BaseboardInlineMarkdownEditor;
+	statusEl: HTMLElement;
+	original: string;
 }
 
 export class BaseboardView extends BasesView {
@@ -156,16 +188,22 @@ export class BaseboardView extends BasesView {
 	private dragState: DragState | null = null;
 	private resizeState: ResizeState | null = null;
 	private panState: PanState | null = null;
+	private linkDragState: LinkDragState | null = null;
 	private canvasViewportEl: HTMLElement | null = null;
 	private canvasWorldEl: HTMLElement | null = null;
 	private canvasPlaneEl: HTMLElement | null = null;
 	private zoomLabelEl: HTMLElement | null = null;
 	private edgeLayerEl: SVGSVGElement | null = null;
 	private canvasNodeElements = new Map<string, HTMLElement>();
+	private inlineEditors = new Map<string, InlineEditorState>();
 	private renderedEdges: RenderedBaseboardEdge[] = [];
 	private canvasBounds: { width: number; height: number } | null = null;
 	private canvasRenderState: CanvasRenderState | null = null;
-	private taskEdgeCache: { key: string; edges: CanvasEdge[] } | null = null;
+	private taskEdgeCache: {
+		key: string;
+		edges: CanvasEdge[];
+		relationships: BaseboardRelationship[];
+	} | null = null;
 	private zoom = 1;
 	private renderFrame: number | null = null;
 	private virtualRenderFrame: number | null = null;
@@ -175,12 +213,22 @@ export class BaseboardView extends BasesView {
 	private resizeEndHandler: ((event: PointerEvent) => void) | null = null;
 	private panMoveHandler: ((event: PointerEvent) => void) | null = null;
 	private panEndHandler: ((event: PointerEvent) => void) | null = null;
+	private linkMoveHandler: ((event: PointerEvent) => void) | null = null;
+	private linkEndHandler: ((event: PointerEvent) => void) | null = null;
 	private renderToken = 0;
 
 	constructor(controller: QueryController, containerEl: HTMLElement, plugin: BaseboardPlugin) {
 		super(controller);
 		this.plugin = plugin;
 		this.containerEl = containerEl;
+	}
+
+	private t(key: string, params?: InterpolationValues): string {
+		return this.plugin.t(key, params);
+	}
+
+	private tp(key: string, count: number, params?: InterpolationValues): string {
+		return this.plugin.tp(key, count, params);
 	}
 
 	onload(): void {
@@ -246,7 +294,7 @@ export class BaseboardView extends BasesView {
 	getMaterializeOptions(): MaterializeOptions {
 		const defaults = buildDefaultMaterializeOptions(
 			this.plugin.settings,
-			this.config?.name ?? "Baseboard",
+			this.config?.name ?? this.t("common.appName"),
 			this.config ? getStringConfig(this.config, VIEW_CONFIG_KEYS.canvasPath) ?? undefined : undefined
 		);
 
@@ -340,21 +388,21 @@ export class BaseboardView extends BasesView {
 	getViewActions(): BasesViewAction[] {
 		return [
 			{
-				name: "Create canvas from view",
+				name: this.t("modal.title"),
 				icon: "lucide-layout-dashboard",
 				callback: () => {
 					void this.plugin.configureAndMaterialize(this);
 				},
 			},
 			{
-				name: "Update linked canvas",
+				name: this.t("commands.updateLinkedCanvas"),
 				icon: "lucide-refresh-cw",
 				callback: () => {
 					void this.plugin.materializeWithSavedOptions(this);
 				},
 			},
 			{
-				name: "Open linked canvas",
+				name: this.t("commands.openLinkedCanvas"),
 				icon: "lucide-panel-top-open",
 				callback: () => {
 					void this.plugin.openLinkedCanvas(this);
@@ -436,8 +484,8 @@ export class BaseboardView extends BasesView {
 
 		const viewportState = this.captureViewportState();
 		this.cancelVirtualRenderFrame();
-		rootEl.empty();
 		this.clearCanvasReferences();
+		rootEl.empty();
 		const snapshot = this.getSnapshot();
 
 		this.renderToolbar(rootEl, snapshot);
@@ -458,47 +506,47 @@ export class BaseboardView extends BasesView {
 		const summaryEl = toolbarEl.createDiv({ cls: "baseboard-view__summary" });
 		summaryEl.createDiv({
 			cls: "baseboard-view__title",
-			text: snapshot?.viewName || "Baseboard",
+			text: snapshot?.viewName || this.t("common.appName"),
 		});
 		summaryEl.createDiv({
 			cls: "baseboard-view__meta",
-			text: snapshot ? formatSnapshotMeta(snapshot) : "Waiting for Bases data",
+			text: snapshot ? this.formatSnapshotMeta(snapshot) : this.t("view.waitingForBasesData"),
 		});
 
 		const actionsEl = toolbarEl.createDiv({ cls: "baseboard-view__actions" });
 		this.addToolbarButton(actionsEl, {
 			icon: "lucide-file-plus",
-			label: "Pin note",
+			label: this.t("view.toolbar.pinNote"),
 			onClick: () => this.openManualNotePicker(),
 			isPrimary: false,
 		});
 		this.addToolbarButton(actionsEl, {
 			icon: "lucide-sticky-note",
-			label: "Add card",
+			label: this.t("view.toolbar.addCard"),
 			onClick: () => this.addTextCard(),
 			isPrimary: false,
 		});
 		this.addToolbarButton(actionsEl, {
 			icon: "lucide-layout-dashboard",
-			label: "Create canvas",
+			label: this.t("view.toolbar.createCanvas"),
 			onClick: () => this.plugin.configureAndMaterialize(this),
 			isPrimary: !this.getCanvasPath(),
 		});
 		this.addToolbarButton(actionsEl, {
 			icon: "lucide-refresh-cw",
-			label: "Update canvas",
+			label: this.t("view.toolbar.updateCanvas"),
 			onClick: () => this.plugin.materializeWithSavedOptions(this),
 			isPrimary: Boolean(this.getCanvasPath()),
 		});
 		this.addToolbarButton(actionsEl, {
 			icon: "lucide-panel-top-open",
-			label: "Open canvas",
+			label: this.t("view.toolbar.openCanvas"),
 			onClick: () => this.plugin.openLinkedCanvas(this),
 			isPrimary: false,
 		});
 		this.addToolbarButton(actionsEl, {
 			icon: "lucide-rotate-ccw",
-			label: "Reset layout",
+			label: this.t("view.toolbar.resetLayout"),
 			onClick: () => this.resetLayout(),
 			isPrimary: false,
 		});
@@ -534,11 +582,26 @@ export class BaseboardView extends BasesView {
 
 	private renderEmpty(containerEl: HTMLElement): void {
 		const emptyEl = containerEl.createDiv({ cls: "baseboard-view__empty" });
-		emptyEl.createDiv({ cls: "baseboard-view__empty-title", text: "No notes in this view" });
+		emptyEl.createDiv({
+			cls: "baseboard-view__empty-title",
+			text: this.t("view.empty.title"),
+		});
 		emptyEl.createDiv({
 			cls: "baseboard-view__empty-text",
-			text: "Change the Base filters, pin a note, or add a card.",
+			text: this.t("view.empty.body"),
 		});
+	}
+
+	private formatSnapshotMeta(snapshot: BaseboardViewSnapshot): string {
+		return [
+			this.tp("common.note", snapshot.totalEntries),
+			this.tp("common.group", snapshot.groups.length),
+			snapshot.textCards.length > 0
+				? this.tp("common.card", snapshot.textCards.length)
+				: null,
+		]
+			.filter((part): part is string => part !== null)
+			.join(", ");
 	}
 
 	private async openManualNotePicker(): Promise<void> {
@@ -552,7 +615,7 @@ export class BaseboardView extends BasesView {
 		const pinnedPaths = this.getManualNotePaths();
 		const unavailablePaths = new Set([...visiblePaths, ...pinnedPaths]);
 
-		new ManualNoteSuggestModal(this.app, unavailablePaths, (file) => {
+		new ManualNoteSuggestModal(this.app, unavailablePaths, this.t.bind(this), (file) => {
 			this.addManualNote(file.path);
 		}).open();
 	}
@@ -660,7 +723,18 @@ export class BaseboardView extends BasesView {
 			...this.getMaterializeOptions(),
 			preservePositions: true,
 		};
+		const initializedTextCards = initializeTextCardPositions(
+			snapshot,
+			options,
+			this.getNodePositions()
+		);
+		if (initializedTextCards.changed) {
+			this.setNodePositions(initializedTextCards.positions);
+			snapshot = initializedTextCards.snapshot;
+		}
+
 		const relationships = collectRelationships(this.app, snapshot, options);
+		const genericEdgeRelationships = buildEdgeRelationshipMap(relationships);
 		const canvas = buildBaseboardCanvas(
 			snapshot,
 			options,
@@ -675,7 +749,17 @@ export class BaseboardView extends BasesView {
 			this.taskEdgeCache?.key === taskEdgeCacheKey
 				? this.taskEdgeCache.edges
 				: [];
+		const cachedTaskRelationships =
+			this.plugin.taskNotes.isAvailable() &&
+			taskEdgeCacheKey &&
+			this.taskEdgeCache?.key === taskEdgeCacheKey
+				? this.taskEdgeCache.relationships
+				: [];
 		const initialEdges = mergeCanvasEdges(genericEdges, cachedTaskEdges);
+		const initialEdgeRelationships = mergeEdgeRelationshipMaps(
+			genericEdgeRelationships,
+			buildEdgeRelationshipMap(cachedTaskRelationships)
+		);
 		const nodes = (canvas.nodes ?? []).filter(isRenderableCanvasNode);
 		const nodePositions = new Map(
 			nodes.map((node) => [node.id, getCanvasNodePosition(node)])
@@ -723,6 +807,7 @@ export class BaseboardView extends BasesView {
 			planeEl,
 			bounds,
 			taskCards: new Map(),
+			edgeRelationships: initialEdgeRelationships,
 		};
 		this.renderVirtualCanvas();
 		this.renderCanvasControls(containerEl);
@@ -731,7 +816,15 @@ export class BaseboardView extends BasesView {
 			this.scheduleVirtualCanvasRender();
 		});
 		this.applyZoom();
-		void this.hydrateTaskNotes(snapshot, options, renderToken, planeEl, genericEdges, bounds);
+		void this.hydrateTaskNotes(
+			snapshot,
+			options,
+			renderToken,
+			planeEl,
+			genericEdges,
+			genericEdgeRelationships,
+			bounds
+		);
 	}
 
 	private renderVirtualCanvas(): void {
@@ -753,6 +846,7 @@ export class BaseboardView extends BasesView {
 		for (const [nodeId, element] of [...this.canvasNodeElements]) {
 			if (nextNodeIds.has(nodeId)) continue;
 
+			this.destroyInlineEditor(nodeId, true);
 			element.remove();
 			this.canvasNodeElements.delete(nodeId);
 		}
@@ -842,6 +936,12 @@ export class BaseboardView extends BasesView {
 		if (this.resizeState) {
 			nodeIds.add(this.resizeState.id);
 		}
+		if (this.linkDragState) {
+			nodeIds.add(getFileNodeId(this.linkDragState.sourcePath));
+			if (this.linkDragState.targetPath) {
+				nodeIds.add(getFileNodeId(this.linkDragState.targetPath));
+			}
+		}
 
 		return nodeIds;
 	}
@@ -876,8 +976,8 @@ export class BaseboardView extends BasesView {
 			cls: "baseboard-canvas-group__count",
 			text: String(childNodeIds.length),
 		});
-		setTooltip(headerEl, "Drag group");
-		this.addResizeHandle(groupEl, "Resize group");
+		setTooltip(headerEl, this.t("view.tooltips.dragGroup"));
+		this.addResizeHandle(groupEl, this.t("view.tooltips.resizeGroup"));
 
 		return groupEl;
 	}
@@ -896,7 +996,7 @@ export class BaseboardView extends BasesView {
 		fileEl.setAttr("data-baseboard-node-id", node.id);
 		fileEl.setAttr("data-baseboard-node-kind", "file");
 		setNodeGeometry(fileEl, node);
-		setTooltip(fileEl, "Drag note. Double-click to open.");
+		setTooltip(fileEl, this.t("view.tooltips.dragNote"));
 		const showBodyEditor = this.getMaterializeOptions().showBodyEditor;
 		fileEl.toggleClass("is-body-editor-hidden", !showBodyEditor);
 
@@ -909,10 +1009,11 @@ export class BaseboardView extends BasesView {
 		if (entry?.isManual) {
 			headerEl.createDiv({
 				cls: "baseboard-canvas-file__manual-badge",
-				text: "Pinned",
+				text: this.t("view.card.pinned"),
 			});
 		}
-		this.renderCardActionButton(headerEl, "Note actions", (event) => {
+		this.renderCardLinkHandle(headerEl, node.file, fileEl);
+		this.renderCardActionButton(headerEl, this.t("view.card.noteActions"), (event) => {
 			void this.openFileCardMenu(event, node.file, entry);
 		});
 		fileEl.createDiv({
@@ -921,7 +1022,7 @@ export class BaseboardView extends BasesView {
 		});
 		this.renderCardProperties(fileEl, entry);
 		if (showBodyEditor) {
-			this.renderInlineEditor(fileEl, node.file);
+			this.renderInlineEditor(fileEl, node.id, node.file);
 		}
 
 		this.addElementEvent(fileEl, "dblclick", (event) => {
@@ -937,9 +1038,32 @@ export class BaseboardView extends BasesView {
 			event.preventDefault();
 			void this.app.workspace.openLinkText(node.file, "", Keymap.isModEvent(event));
 		};
-		this.addResizeHandle(fileEl, "Resize card");
+		this.addResizeHandle(fileEl, this.t("view.tooltips.resizeCard"));
 
 		return fileEl;
+	}
+
+	private renderCardLinkHandle(
+		containerEl: HTMLElement,
+		path: string,
+		cardEl: HTMLElement
+	): void {
+		const buttonEl = containerEl.createEl("button", {
+			cls: "baseboard-canvas-link-handle",
+			attr: {
+				"aria-label": this.t("view.card.linkFromNote"),
+				type: "button",
+			},
+		});
+		setIcon(buttonEl, "lucide-link-2");
+		setTooltip(buttonEl, this.t("view.tooltips.dragToLinkNotes"));
+		this.addElementEvent(buttonEl, "pointerdown", (event) => {
+			this.startLinkDrag(event, path, cardEl);
+		});
+		this.addElementEvent(buttonEl, "click", (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+		});
 	}
 
 	private renderTextNode(
@@ -956,23 +1080,23 @@ export class BaseboardView extends BasesView {
 		textEl.setAttr("data-baseboard-node-id", node.id);
 		textEl.setAttr("data-baseboard-node-kind", "text");
 		setNodeGeometry(textEl, node);
-		setTooltip(textEl, "Drag card");
+		setTooltip(textEl, this.t("view.tooltips.dragCard"));
 
 		const headerEl = textEl.createDiv({ cls: "baseboard-canvas-text-card__header" });
 		setIcon(headerEl.createSpan({ cls: "baseboard-canvas-text-card__icon" }), "lucide-sticky-note");
 		headerEl.createDiv({
 			cls: "baseboard-canvas-text-card__title",
-			text: "Card",
+			text: this.t("view.card.textCardTitle"),
 		});
-		this.renderCardActionButton(headerEl, "Card actions", (event) => {
+		this.renderCardActionButton(headerEl, this.t("view.card.cardActions"), (event) => {
 			this.openTextCardMenu(event, card);
 		});
 
 		const editorEl = textEl.createEl("textarea", {
 			cls: "baseboard-canvas-text-card__editor",
 			attr: {
-				"aria-label": "Edit card",
-				placeholder: "Write a note",
+				"aria-label": this.t("view.card.editCard"),
+				placeholder: this.t("view.card.writeNote"),
 				spellcheck: "true",
 			},
 		});
@@ -996,7 +1120,7 @@ export class BaseboardView extends BasesView {
 			event.preventDefault();
 			this.openTextCardMenu(event, card);
 		});
-		this.addResizeHandle(textEl, "Resize card");
+		this.addResizeHandle(textEl, this.t("view.tooltips.resizeCard"));
 
 		return textEl;
 	}
@@ -1031,17 +1155,26 @@ export class BaseboardView extends BasesView {
 		entry: BaseboardEntrySnapshot | undefined
 	): Promise<void> {
 		const menu = new Menu();
-		const taskActionsAdded =
-			this.getMaterializeOptions().taskNotesMode !== "off" &&
-			this.getMaterializeOptions().taskNotesShowActions &&
-			(await this.plugin.taskNotes.populateTaskMenu(menu, path, () => this.scheduleRender()));
+		const options = this.getMaterializeOptions();
+		let taskActionsAdded = false;
+		if (options.taskNotesMode !== "off" && options.taskNotesShowActions) {
+			taskActionsAdded = await this.plugin.taskNotes.populateTaskMenu(menu, path, () =>
+				this.scheduleRender()
+			);
+			if (!taskActionsAdded) {
+				const shown = await this.plugin.taskNotes.showTaskMenu(path, event, () =>
+					this.scheduleRender()
+				);
+				if (shown) return;
+			}
+		}
 		if (taskActionsAdded) {
 			menu.addSeparator();
 		}
 
 		menu.addItem((item) => {
 			item
-				.setTitle("Open note")
+				.setTitle(this.t("view.menu.openNote"))
 				.setIcon("lucide-file-text")
 				.onClick(() => {
 					void this.app.workspace.openLinkText(path, "", Keymap.isModEvent(event));
@@ -1052,7 +1185,7 @@ export class BaseboardView extends BasesView {
 			menu.addSeparator();
 			menu.addItem((item) => {
 				item
-					.setTitle("Unpin from board")
+					.setTitle(this.t("view.menu.unpinFromBoard"))
 					.setIcon("lucide-pin-off")
 					.onClick(() => {
 						this.removeManualNote(path);
@@ -1070,7 +1203,7 @@ export class BaseboardView extends BasesView {
 		const menu = new Menu();
 		menu.addItem((item) => {
 			item
-				.setTitle("Remove card")
+				.setTitle(this.t("view.menu.removeCard"))
 				.setIcon("lucide-trash-2")
 				.setWarning(true)
 				.setDisabled(!card)
@@ -1079,6 +1212,453 @@ export class BaseboardView extends BasesView {
 				});
 		});
 		menu.showAtMouseEvent(event);
+	}
+
+	private openLinkCreationMenu(
+		event: MouseEvent,
+		sourcePath: string,
+		targetPath: string
+	): void {
+		const sourceName = formatPathName(sourcePath);
+		const targetName = formatPathName(targetPath);
+		const menu = new Menu();
+
+		if (this.plugin.taskNotes.getTaskLinkingEnabled()) {
+			const sourceBlocksTarget = this.t("view.menu.sourceBlocksTarget", {
+				source: sourceName,
+				target: targetName,
+			});
+			const targetBlocksSource = this.t("view.menu.targetBlocksSource", {
+				source: sourceName,
+				target: targetName,
+			});
+			const targetSubtaskOfSource = this.t("view.menu.targetSubtaskOfSource", {
+				source: sourceName,
+				target: targetName,
+			});
+			const sourceSubtaskOfTarget = this.t("view.menu.sourceSubtaskOfTarget", {
+				source: sourceName,
+				target: targetName,
+			});
+			menu.addItem((item) => {
+				item
+					.setTitle(sourceBlocksTarget)
+					.setIcon("lucide-arrow-right")
+					.onClick(() => {
+						void this.addTaskDependency(
+							targetPath,
+							sourcePath,
+							sourceBlocksTarget
+						);
+					});
+			});
+			menu.addItem((item) => {
+				item
+					.setTitle(targetBlocksSource)
+					.setIcon("lucide-arrow-left")
+					.onClick(() => {
+						void this.addTaskDependency(
+							sourcePath,
+							targetPath,
+							targetBlocksSource
+						);
+					});
+			});
+			menu.addSeparator();
+			menu.addItem((item) => {
+				item
+					.setTitle(targetSubtaskOfSource)
+					.setIcon("lucide-git-branch")
+					.onClick(() => {
+						void this.addTaskProject(
+							targetPath,
+							sourcePath,
+							targetSubtaskOfSource
+						);
+					});
+			});
+			menu.addItem((item) => {
+				item
+					.setTitle(sourceSubtaskOfTarget)
+					.setIcon("lucide-git-branch")
+					.onClick(() => {
+						void this.addTaskProject(
+							sourcePath,
+							targetPath,
+							sourceSubtaskOfTarget
+						);
+					});
+			});
+			menu.addSeparator();
+		}
+
+		for (const property of this.getConfiguredLinkProperties().slice(0, 6)) {
+			menu.addItem((item) => {
+				item
+					.setTitle(this.t("view.menu.addPropertyLink", {
+						property,
+						source: sourceName,
+						target: targetName,
+					}))
+					.setIcon("lucide-link")
+					.onClick(() => {
+						void this.addPropertyLink(sourcePath, targetPath, property);
+					});
+			});
+		}
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.chooseProperty"))
+				.setIcon("lucide-list-plus")
+				.onClick(() => {
+					this.openPropertyLinkPicker(sourcePath, targetPath);
+				});
+		});
+
+		menu.showAtMouseEvent(event);
+	}
+
+	private openEdgeMenu(event: MouseEvent, relationship: BaseboardRelationship): void {
+		const menu = new Menu();
+		const sourceName = formatPathName(relationship.sourcePath);
+		const targetName = formatPathName(relationship.targetPath);
+
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.openPath", { name: sourceName }))
+				.setIcon("lucide-file-text")
+				.onClick(() => {
+					void this.app.workspace.openLinkText(
+						relationship.sourcePath,
+						"",
+						Keymap.isModEvent(event)
+					);
+				});
+		});
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.openPath", { name: targetName }))
+				.setIcon("lucide-file-text")
+				.onClick(() => {
+					void this.app.workspace.openLinkText(
+						relationship.targetPath,
+						"",
+						Keymap.isModEvent(event)
+					);
+				});
+		});
+
+		if (isRemovableRelationship(relationship)) {
+			menu.addSeparator();
+		}
+
+		const metadata = relationship.metadata;
+		if (metadata?.source === "tasknotes" && metadata.kind === "dependency") {
+			menu.addItem((item) => {
+				item
+					.setTitle(this.t("view.menu.removeDependency"))
+					.setIcon("lucide-unlink")
+					.setWarning(true)
+					.onClick(() => {
+						void this.removeTaskDependency(metadata.blockedPath, metadata.dependencyUid);
+					});
+			});
+		}
+
+		if (metadata?.source === "tasknotes" && metadata.kind === "project") {
+			menu.addItem((item) => {
+				item
+					.setTitle(this.t("view.menu.removeProjectRelationship"))
+					.setIcon("lucide-unlink")
+					.setWarning(true)
+					.onClick(() => {
+						void this.removeTaskProject(metadata.childPath, metadata.parentPath);
+					});
+			});
+		}
+
+		if (metadata?.source === "property") {
+			menu.addItem((item) => {
+				item
+					.setTitle(this.t("view.menu.removePropertyLink", {
+						property: metadata.property,
+					}))
+					.setIcon("lucide-unlink")
+					.setWarning(true)
+					.onClick(() => {
+						void this.removePropertyLink(
+							relationship.sourcePath,
+							relationship.targetPath,
+							metadata.property
+						);
+					});
+			});
+		}
+
+		menu.showAtMouseEvent(event);
+	}
+
+	private async addTaskDependency(
+		blockedPath: string,
+		blockingPath: string,
+		label: string
+	): Promise<void> {
+		await this.runLinkMutation(
+			async () => this.plugin.taskNotes.addDependency(blockedPath, blockingPath),
+			this.t("notices.addedDependency", { label }),
+			() => this.ensureTaskRelationshipRendering("dependency")
+		);
+	}
+
+	private async removeTaskDependency(
+		blockedPath: string,
+		dependencyUid: string
+	): Promise<void> {
+		await this.runLinkMutation(
+			async () => this.plugin.taskNotes.removeDependency(blockedPath, dependencyUid),
+			this.t("notices.removedDependency"),
+			() => {
+				this.removeRelationshipsFromLiveView((relationship) =>
+					isTaskDependencyRelationship(relationship, blockedPath, dependencyUid)
+				);
+			}
+		);
+	}
+
+	private async addTaskProject(
+		childPath: string,
+		parentPath: string,
+		label: string
+	): Promise<void> {
+		await this.runLinkMutation(
+			async () => this.plugin.taskNotes.addProject(childPath, parentPath),
+			this.t("notices.addedProjectRelationship", { label }),
+			() => this.ensureTaskRelationshipRendering("project")
+		);
+	}
+
+	private async removeTaskProject(childPath: string, parentPath: string): Promise<void> {
+		await this.runLinkMutation(
+			async () => this.plugin.taskNotes.removeProject(childPath, parentPath),
+			this.t("notices.removedProjectRelationship"),
+			() => {
+				this.removeRelationshipsFromLiveView((relationship) =>
+					isTaskProjectRelationship(relationship, childPath, parentPath)
+				);
+			}
+		);
+	}
+
+	private async runLinkMutation(
+		mutation: () => Promise<boolean>,
+		successMessage: string,
+		onSuccess?: () => void
+	): Promise<void> {
+		try {
+			const changed = await mutation();
+			if (!changed) {
+				new Notice(this.t("notices.linkActionUnavailable"));
+				return;
+			}
+
+			onSuccess?.();
+			this.taskEdgeCache = null;
+			this.scheduleRender();
+			new Notice(successMessage);
+		} catch (error) {
+			new Notice(this.t("notices.couldNotUpdateLink", { message: getErrorMessage(error) }));
+		}
+	}
+
+	private removeRelationshipsFromLiveView(
+		matchesRelationship: (relationship: BaseboardRelationship) => boolean
+	): void {
+		const edgeIds = new Set<string>();
+		for (const relationship of this.taskEdgeCache?.relationships ?? []) {
+			if (matchesRelationship(relationship)) {
+				edgeIds.add(getRelationshipEdgeId(relationship));
+			}
+		}
+		for (const relationship of this.canvasRenderState?.edgeRelationships.values() ?? []) {
+			if (matchesRelationship(relationship)) {
+				edgeIds.add(getRelationshipEdgeId(relationship));
+			}
+		}
+
+		if (edgeIds.size === 0) return;
+
+		if (this.taskEdgeCache) {
+			this.taskEdgeCache = {
+				...this.taskEdgeCache,
+				edges: this.taskEdgeCache.edges.filter((edge) => !edgeIds.has(edge.id)),
+				relationships: this.taskEdgeCache.relationships.filter(
+					(relationship) => !matchesRelationship(relationship)
+				),
+			};
+		}
+
+		if (!this.canvasRenderState) return;
+
+		this.canvasRenderState.allEdges = this.canvasRenderState.allEdges.filter(
+			(edge) => !edgeIds.has(edge.id)
+		);
+		for (const edgeId of edgeIds) {
+			this.canvasRenderState.edgeRelationships.delete(edgeId);
+		}
+		this.renderVirtualCanvas();
+	}
+
+	private openPropertyLinkPicker(sourcePath: string, targetPath: string): void {
+		const properties = this.getAvailableLinkProperties();
+		if (properties.length === 0) {
+			new Notice(this.t("notices.noVisibleLinkProperties"));
+			return;
+		}
+
+		new PropertyLinkSuggestModal(this.app, properties, this.t.bind(this), (property) => {
+			void this.addPropertyLink(sourcePath, targetPath, property);
+		}).open();
+	}
+
+	private getConfiguredLinkProperties(): string[] {
+		return this.getMaterializeOptions().edgeProperties
+			.map(toFrontmatterPropertyName)
+			.filter((property): property is string => property !== null);
+	}
+
+	private getAvailableLinkProperties(): string[] {
+		const properties = new Set<string>(this.getConfiguredLinkProperties());
+		for (const group of this.getSnapshot()?.groups ?? []) {
+			for (const entry of group.entries) {
+				for (const property of entry.properties ?? []) {
+					const propertyName = toFrontmatterPropertyName(property.id);
+					if (propertyName) properties.add(propertyName);
+				}
+			}
+		}
+
+		return [...properties].sort((a, b) => a.localeCompare(b));
+	}
+
+	private async addPropertyLink(
+		sourcePath: string,
+		targetPath: string,
+		property: string
+	): Promise<void> {
+		const propertyName = toFrontmatterPropertyName(property);
+		if (!propertyName) {
+			new Notice(this.t("notices.chooseLinkProperty"));
+			return;
+		}
+
+		const file = this.app.vault.getAbstractFileByPath(sourcePath);
+		if (!(file instanceof TFile)) {
+			new Notice(this.t("notices.couldNotFind", { path: sourcePath }));
+			return;
+		}
+
+		try {
+			const link = createNoteWikiLink(targetPath);
+			await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+				frontmatter[propertyName] = appendPropertyLinkValue(
+					frontmatter[propertyName],
+					link,
+					(value) => this.valueReferencesPath(value, sourcePath, targetPath)
+				);
+			});
+			this.ensurePropertyEdgeRendering(propertyName);
+			this.scheduleRender();
+			new Notice(this.t("notices.addedPropertyLink", {
+				property: propertyName,
+				source: formatPathName(sourcePath),
+				target: formatPathName(targetPath),
+			}));
+		} catch (error) {
+			new Notice(this.t("notices.couldNotAddPropertyLink", { message: getErrorMessage(error) }));
+		}
+	}
+
+	private async removePropertyLink(
+		sourcePath: string,
+		targetPath: string,
+		property: string
+	): Promise<void> {
+		const file = this.app.vault.getAbstractFileByPath(sourcePath);
+		if (!(file instanceof TFile)) {
+			new Notice(this.t("notices.couldNotFind", { path: sourcePath }));
+			return;
+		}
+
+		try {
+			await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+				const nextValue = removePropertyLinkValue(
+					frontmatter[property],
+					(value) => this.valueReferencesPath(value, sourcePath, targetPath)
+				);
+				if (typeof nextValue === "undefined") {
+					delete frontmatter[property];
+				} else {
+					frontmatter[property] = nextValue;
+				}
+			});
+			this.scheduleRender();
+			new Notice(this.t("notices.removedPropertyLink", { property }));
+		} catch (error) {
+			new Notice(this.t("notices.couldNotRemovePropertyLink", { message: getErrorMessage(error) }));
+		}
+	}
+
+	private valueReferencesPath(value: unknown, sourcePath: string, targetPath: string): boolean {
+		return extractReferenceCandidates(value).some((reference) =>
+			this.referenceMatchesPath(reference, sourcePath, targetPath)
+		);
+	}
+
+	private referenceMatchesPath(reference: string, sourcePath: string, targetPath: string): boolean {
+		const linkPath = normalizeLinkText(reference);
+		if (!linkPath) return false;
+
+		const resolvedFile = this.app.metadataCache.getFirstLinkpathDest(linkPath, sourcePath);
+		if (resolvedFile?.path === targetPath) return true;
+
+		return taskReferencePathCandidates(linkPath).some((candidate) => candidate === targetPath);
+	}
+
+	private ensureTaskRelationshipRendering(kind: "dependency" | "project"): void {
+		if (!this.config) return;
+
+		if (getStringConfig(this.config, VIEW_CONFIG_KEYS.taskNotesMode) === "off") {
+			this.config.set(VIEW_CONFIG_KEYS.taskNotesMode, "auto");
+		}
+
+		const mode = normalizeTaskNotesRelationshipMode(
+			getStringConfig(this.config, VIEW_CONFIG_KEYS.taskNotesRelationships),
+			this.plugin.settings.defaultTaskNotesRelationships
+		);
+		if (kind === "dependency" && mode === "none") {
+			this.config.set(VIEW_CONFIG_KEYS.taskNotesRelationships, "dependencies");
+		}
+		if (kind === "project" && mode !== "all") {
+			this.config.set(VIEW_CONFIG_KEYS.taskNotesRelationships, "all");
+		}
+	}
+
+	private ensurePropertyEdgeRendering(property: string): void {
+		if (!this.config) return;
+
+		const properties = new Set(this.getConfiguredLinkProperties());
+		properties.add(property);
+		this.config.set(VIEW_CONFIG_KEYS.edgeProperties, [...properties].join(", "));
+
+		const mode = normalizeEdgeMode(
+			getStringConfig(this.config, VIEW_CONFIG_KEYS.edgeMode),
+			this.plugin.settings.defaultEdgeMode
+		);
+		if (mode === "none") {
+			this.config.set(VIEW_CONFIG_KEYS.edgeMode, "properties");
+		} else if (mode === "wikilinks") {
+			this.config.set(VIEW_CONFIG_KEYS.edgeMode, "all");
+		}
 	}
 
 	private renderCardProperties(
@@ -1174,6 +1754,15 @@ export class BaseboardView extends BasesView {
 			const groupEl = createSvgElement("g");
 			groupEl.addClass("baseboard-canvas-edge");
 			groupEl.setAttribute("data-baseboard-edge-id", edge.id);
+			const relationship = this.canvasRenderState?.edgeRelationships.get(edge.id);
+			if (relationship && isRemovableRelationship(relationship)) {
+				groupEl.addClass("is-actionable");
+				groupEl.addEventListener("contextmenu", (event) => {
+					event.preventDefault();
+					event.stopPropagation();
+					this.openEdgeMenu(event, relationship);
+				});
+			}
 
 			const pathEl = createSvgElement("path");
 			pathEl.addClass("baseboard-canvas-edge__path");
@@ -1251,6 +1840,7 @@ export class BaseboardView extends BasesView {
 		renderToken: number,
 		planeEl: HTMLElement,
 		genericEdges: CanvasEdge[],
+		genericEdgeRelationships: Map<string, BaseboardRelationship>,
 		bounds: { width: number; height: number }
 	): Promise<void> {
 		if (options.taskNotesMode === "off") return;
@@ -1296,10 +1886,18 @@ export class BaseboardView extends BasesView {
 
 		const taskCanvas = buildBaseboardCanvas(snapshot, options, taskRelationships, {});
 		const taskEdges = taskCanvas.edges ?? [];
-		this.taskEdgeCache = taskEdgeCacheKey ? { key: taskEdgeCacheKey, edges: taskEdges } : null;
+		const taskEdgeRelationships = buildEdgeRelationshipMap(taskRelationships);
+		this.taskEdgeCache = taskEdgeCacheKey
+			? { key: taskEdgeCacheKey, edges: taskEdges, relationships: taskRelationships }
+			: null;
 		const mergedEdges = mergeCanvasEdges(genericEdges, taskEdges);
+		const mergedEdgeRelationships = mergeEdgeRelationshipMaps(
+			genericEdgeRelationships,
+			taskEdgeRelationships
+		);
 		if (this.canvasRenderState?.planeEl === planeEl) {
 			this.canvasRenderState.allEdges = mergedEdges;
+			this.canvasRenderState.edgeRelationships = mergedEdgeRelationships;
 			this.renderVirtualCanvas();
 			return;
 		}
@@ -1467,6 +2065,7 @@ export class BaseboardView extends BasesView {
 	}
 
 	private clearCanvasReferences(): void {
+		this.destroyAllInlineEditors(true);
 		this.edgeLayerEl = null;
 		this.renderedEdges = [];
 		this.canvasNodeElements = new Map();
@@ -1478,17 +2077,123 @@ export class BaseboardView extends BasesView {
 		this.canvasRenderState = null;
 	}
 
-	private renderInlineEditor(containerEl: HTMLElement, path: string): void {
+	private renderInlineEditor(containerEl: HTMLElement, nodeId: string, path: string): void {
+		const editorShellEl = containerEl.createDiv({ cls: "baseboard-canvas-file__editor-shell" });
+		const statusEl = containerEl.createDiv({ cls: "baseboard-canvas-file__status" });
+
+		this.addElementEvent(editorShellEl, "pointerdown", (event) => {
+			event.stopPropagation();
+		});
+		this.addElementEvent(editorShellEl, "dblclick", (event) => {
+			event.stopPropagation();
+		});
+		this.addElementEvent(editorShellEl, "keydown", (event) => {
+			event.stopPropagation();
+		});
+
+		void this.mountInlineEditor(editorShellEl, nodeId, path, statusEl);
+	}
+
+	private async mountInlineEditor(
+		containerEl: HTMLElement,
+		nodeId: string,
+		path: string,
+		statusEl: HTMLElement
+	): Promise<void> {
+		const file = this.app.vault.getAbstractFileByPath(path);
+		if (!(file instanceof TFile)) {
+			this.renderInlineEditorFallback(containerEl, path, statusEl, "", true);
+			statusEl.setText(this.t("view.editor.missing"));
+			return;
+		}
+
+		let content: string;
+		try {
+			content = await this.app.vault.read(file);
+		} catch (error) {
+			if (containerEl.isConnected) {
+				const fallbackEl = this.renderInlineEditorFallback(containerEl, path, statusEl, "", true);
+				fallbackEl.setAttr("placeholder", this.t("view.editor.unableToLoad"));
+				statusEl.setText(this.t("view.editor.error"));
+			}
+			throw error;
+		}
+
+		if (!containerEl.isConnected) return;
+
+		try {
+			const editorContainerEl = containerEl.createDiv({
+				cls: "baseboard-canvas-file__markdown-editor",
+				attr: {
+					"aria-label": this.t("view.editor.editPath", { path }),
+				},
+			});
+			let creationOriginal = content;
+			const editor = await createBaseboardInlineMarkdownEditor(this.app, editorContainerEl, {
+				value: content,
+				placeholder: "",
+				file,
+				onChange: (value) => {
+					const original = this.inlineEditors.get(nodeId)?.original ?? creationOriginal;
+					const isDirty = value !== original;
+					editorContainerEl.toggleClass("is-dirty", isDirty);
+					containerEl.toggleClass("is-dirty", isDirty);
+					statusEl.setText(isDirty ? this.t("view.editor.unsaved") : "");
+				},
+				onSubmit: () => {
+					void this.saveInlineEditorState(nodeId);
+				},
+				onEscape: () => {
+					const state = this.inlineEditors.get(nodeId);
+					if (!state) return;
+					state.editor.setValue(state.original);
+					editorContainerEl.removeClass("is-dirty");
+					containerEl.removeClass("is-dirty");
+					statusEl.setText("");
+					state.editor.blur();
+				},
+				onBlur: () => {
+					void this.saveInlineEditorState(nodeId);
+				},
+			});
+
+			creationOriginal = content;
+			this.inlineEditors.set(nodeId, {
+				path,
+				editor,
+				statusEl,
+				original: content,
+			});
+			statusEl.setText("");
+		} catch {
+			if (containerEl.isConnected) {
+				containerEl.empty();
+				this.renderInlineEditorFallback(containerEl, path, statusEl, content);
+				statusEl.setText("");
+			}
+		}
+	}
+
+	private renderInlineEditorFallback(
+		containerEl: HTMLElement,
+		path: string,
+		statusEl: HTMLElement,
+		value: string,
+		disabled = false
+	): HTMLTextAreaElement {
 		const editorEl = containerEl.createEl("textarea", {
 			cls: "baseboard-canvas-file__editor",
 			attr: {
-				"aria-label": `Edit ${path}`,
+				"aria-label": this.t("view.editor.editPath", { path }),
 				spellcheck: "false",
 			},
 		});
-		const statusEl = containerEl.createDiv({ cls: "baseboard-canvas-file__status" });
-		editorEl.disabled = true;
-		editorEl.setAttr("placeholder", "Loading");
+		editorEl.value = value;
+		editorEl.dataset.baseboardOriginal = value;
+		editorEl.disabled = disabled;
+		if (disabled) {
+			editorEl.setAttr("placeholder", this.t("view.editor.missingFile"));
+		}
 
 		this.addElementEvent(editorEl, "pointerdown", (event) => {
 			event.stopPropagation();
@@ -1500,7 +2205,8 @@ export class BaseboardView extends BasesView {
 			const original = editorEl.dataset.baseboardOriginal ?? "";
 			const isDirty = editorEl.value !== original;
 			editorEl.toggleClass("is-dirty", isDirty);
-			statusEl.setText(isDirty ? "Unsaved" : "");
+			containerEl.toggleClass("is-dirty", isDirty);
+			statusEl.setText(isDirty ? this.t("view.editor.unsaved") : "");
 		});
 		this.addElementEvent(editorEl, "keydown", (event) => {
 			event.stopPropagation();
@@ -1513,6 +2219,7 @@ export class BaseboardView extends BasesView {
 				event.preventDefault();
 				editorEl.value = editorEl.dataset.baseboardOriginal ?? editorEl.value;
 				editorEl.removeClass("is-dirty");
+				containerEl.removeClass("is-dirty");
 				statusEl.setText("");
 				editorEl.blur();
 			}
@@ -1521,7 +2228,7 @@ export class BaseboardView extends BasesView {
 			void this.saveInlineEditor(path, editorEl, statusEl);
 		});
 
-		void this.loadInlineEditor(path, editorEl, statusEl);
+		return editorEl;
 	}
 
 	private async loadInlineEditor(
@@ -1531,8 +2238,8 @@ export class BaseboardView extends BasesView {
 	): Promise<void> {
 		const file = this.app.vault.getAbstractFileByPath(path);
 		if (!(file instanceof TFile)) {
-			editorEl.setAttr("placeholder", "Missing file");
-			statusEl.setText("Missing");
+			editorEl.setAttr("placeholder", this.t("view.editor.missingFile"));
+			statusEl.setText(this.t("view.editor.missing"));
 			return;
 		}
 
@@ -1545,8 +2252,8 @@ export class BaseboardView extends BasesView {
 			editorEl.setAttr("placeholder", "");
 			statusEl.setText("");
 		} catch (error) {
-			editorEl.setAttr("placeholder", "Unable to load");
-			statusEl.setText("Error");
+			editorEl.setAttr("placeholder", this.t("view.editor.unableToLoad"));
+			statusEl.setText(this.t("view.editor.error"));
 			throw error;
 		}
 	}
@@ -1563,36 +2270,93 @@ export class BaseboardView extends BasesView {
 
 		const file = this.app.vault.getAbstractFileByPath(path);
 		if (!(file instanceof TFile)) {
-			statusEl.setText("Missing");
+			statusEl.setText(this.t("view.editor.missing"));
 			return;
 		}
 
-		statusEl.setText("Saving");
+		statusEl.setText(this.t("view.editor.saving"));
 		await this.app.vault.modify(file, editorEl.value);
 		editorEl.dataset.baseboardOriginal = editorEl.value;
 		editorEl.removeClass("is-dirty");
-		statusEl.setText("Saved");
+		editorEl.parentElement?.removeClass("is-dirty");
+		statusEl.setText(this.t("view.editor.saved"));
 
 		window.setTimeout(() => {
-			if (statusEl.isConnected && statusEl.getText() === "Saved") {
+			if (statusEl.isConnected && statusEl.getText() === this.t("view.editor.saved")) {
 				statusEl.setText("");
 			}
 		}, 1500);
 	}
 
+	private saveInlineEditorState(nodeId: string): Promise<void> {
+		const state = this.inlineEditors.get(nodeId);
+		if (!state) return Promise.resolve();
+
+		return this.saveInlineEditorValue(nodeId, state.editor.getValue());
+	}
+
+	private async saveInlineEditorValue(nodeId: string, value: string): Promise<void> {
+		const state = this.inlineEditors.get(nodeId);
+		if (!state || value === state.original) return;
+
+		const file = this.app.vault.getAbstractFileByPath(state.path);
+		if (!(file instanceof TFile)) {
+			state.statusEl.setText(this.t("view.editor.missing"));
+			return;
+		}
+
+		state.statusEl.setText(this.t("view.editor.saving"));
+		await this.app.vault.modify(file, value);
+		state.original = value;
+		state.statusEl.setText(this.t("view.editor.saved"));
+		const editorEl = state.statusEl.parentElement?.querySelector(
+			".baseboard-canvas-file__markdown-editor"
+		);
+		if (editorEl instanceof HTMLElement) {
+			editorEl.removeClass("is-dirty");
+		}
+		state.statusEl.parentElement
+			?.querySelector(".baseboard-canvas-file__editor-shell")
+			?.removeClass("is-dirty");
+
+		window.setTimeout(() => {
+			if (state.statusEl.isConnected && state.statusEl.getText() === this.t("view.editor.saved")) {
+				state.statusEl.setText("");
+			}
+		}, 1500);
+	}
+
+	private destroyInlineEditor(nodeId: string, saveDirty: boolean): void {
+		const state = this.inlineEditors.get(nodeId);
+		if (!state) return;
+
+		const value = state.editor.getValue();
+		if (saveDirty && value !== state.original) {
+			void this.saveInlineEditorValue(nodeId, value);
+		}
+		state.editor.destroy();
+		this.inlineEditors.delete(nodeId);
+	}
+
+	private destroyAllInlineEditors(saveDirty: boolean): void {
+		for (const nodeId of [...this.inlineEditors.keys()]) {
+			this.destroyInlineEditor(nodeId, saveDirty);
+		}
+	}
+
 	private renderCanvasControls(containerEl: HTMLElement): void {
 		const controlsEl = containerEl.createDiv({ cls: "baseboard-canvas-controls" });
-		this.addCanvasControlButton(controlsEl, "lucide-minus", "Zoom out", () => {
+		this.addCanvasControlButton(controlsEl, "lucide-minus", this.t("view.tooltips.zoomOut"), () => {
 			this.setZoom(this.zoom - ZOOM_STEP);
 		});
 		this.zoomLabelEl = controlsEl.createDiv({ cls: "baseboard-canvas-zoom-label" });
-		this.addCanvasControlButton(controlsEl, "lucide-plus", "Zoom in", () => {
+		this.addCanvasControlButton(controlsEl, "lucide-plus", this.t("view.tooltips.zoomIn"), () => {
 			this.setZoom(this.zoom + ZOOM_STEP);
 		});
-		this.addCanvasControlButton(controlsEl, "lucide-maximize", "Fit view", () => {
+		this.addCanvasControlButton(controlsEl, "lucide-maximize", this.t("view.tooltips.fitView"), () => {
 			this.fitCanvasToViewport();
 		});
-		this.addCanvasControlButton(controlsEl, "lucide-locate-fixed", "Reset view", () => {
+		this.addCanvasControlButton(controlsEl, "lucide-locate-fixed", this.t("view.tooltips.resetView"), () => {
 			this.resetCanvasView();
 		});
 	}
@@ -1638,6 +2402,127 @@ export class BaseboardView extends BasesView {
 			},
 		});
 		setTooltip(handleEl, tooltip);
+	}
+
+	private startLinkDrag(event: PointerEvent, sourcePath: string, sourceElement: HTMLElement): void {
+		if (event.button !== 0 || !this.canvasPlaneEl || !this.canvasBounds) return;
+
+		const sourcePoint = getElementCenter(sourceElement);
+		if (!sourcePoint) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+		this.clearDragListeners();
+
+		const previewEl = createSvgElement("svg");
+		previewEl.addClass("baseboard-canvas-link-preview");
+		setSvgAttributes(previewEl, {
+			width: String(this.canvasBounds.width),
+			height: String(this.canvasBounds.height),
+			viewBox: `0 0 ${this.canvasBounds.width} ${this.canvasBounds.height}`,
+		});
+		const previewPathEl = createSvgElement("path");
+		previewPathEl.addClass("baseboard-canvas-link-preview__path");
+		previewEl.appendChild(previewPathEl);
+		this.canvasPlaneEl.appendChild(previewEl);
+
+		sourceElement.addClass("is-linking");
+		this.linkDragState = {
+			pointerId: event.pointerId,
+			sourcePath,
+			sourceElement,
+			sourcePoint,
+			previewEl,
+			previewPathEl,
+			targetElement: null,
+			targetPath: null,
+		};
+		this.updateLinkPreview(event);
+		this.updateLinkDragTarget(event);
+
+		this.linkMoveHandler = (moveEvent) => this.handleLinkMove(moveEvent);
+		this.linkEndHandler = (endEvent) => this.handleLinkEnd(endEvent);
+		window.addEventListener("pointermove", this.linkMoveHandler);
+		window.addEventListener("pointerup", this.linkEndHandler);
+		window.addEventListener("pointercancel", this.linkEndHandler);
+	}
+
+	private handleLinkMove(event: PointerEvent): void {
+		if (!this.linkDragState || event.pointerId !== this.linkDragState.pointerId) return;
+
+		event.preventDefault();
+		this.updateLinkPreview(event);
+		this.updateLinkDragTarget(event);
+	}
+
+	private handleLinkEnd(event: PointerEvent): void {
+		if (!this.linkDragState || event.pointerId !== this.linkDragState.pointerId) return;
+
+		event.preventDefault();
+		const sourcePath = this.linkDragState.sourcePath;
+		const targetPath = this.linkDragState.targetPath;
+		this.clearDragListeners();
+
+		if (!targetPath || targetPath === sourcePath) return;
+
+		this.openLinkCreationMenu(event, sourcePath, targetPath);
+	}
+
+	private updateLinkPreview(event: PointerEvent): void {
+		if (!this.linkDragState) return;
+
+		const targetPoint = this.getPlanePoint(event.clientX, event.clientY);
+		if (!targetPoint) return;
+
+		const source = this.linkDragState.sourcePoint;
+		const controlOffset = Math.max(48, Math.abs(targetPoint.x - source.x) * 0.4);
+		this.linkDragState.previewPathEl.setAttribute(
+			"d",
+			`M ${source.x} ${source.y} C ${source.x + controlOffset} ${source.y}, ${
+				targetPoint.x - controlOffset
+			} ${targetPoint.y}, ${targetPoint.x} ${targetPoint.y}`
+		);
+	}
+
+	private updateLinkDragTarget(event: PointerEvent): void {
+		if (!this.linkDragState) return;
+
+		const target = this.getFileTargetAtPoint(event.clientX, event.clientY);
+		const targetPath = target?.path === this.linkDragState.sourcePath ? null : target?.path ?? null;
+		const targetElement = targetPath ? target?.element ?? null : null;
+
+		if (this.linkDragState.targetElement !== targetElement) {
+			this.linkDragState.targetElement?.removeClass("is-link-target");
+			targetElement?.addClass("is-link-target");
+		}
+
+		this.linkDragState.targetElement = targetElement;
+		this.linkDragState.targetPath = targetPath;
+	}
+
+	private getPlanePoint(clientX: number, clientY: number): LinkPoint | null {
+		if (!this.canvasViewportEl) return null;
+
+		const rect = this.canvasViewportEl.getBoundingClientRect();
+		return {
+			x: (this.canvasViewportEl.scrollLeft + clientX - rect.left) / this.zoom,
+			y: (this.canvasViewportEl.scrollTop + clientY - rect.top) / this.zoom,
+		};
+	}
+
+	private getFileTargetAtPoint(
+		clientX: number,
+		clientY: number
+	): { element: HTMLElement; path: string } | null {
+		const element = this.rootEl?.ownerDocument.elementFromPoint(clientX, clientY);
+		const fileEl = element instanceof HTMLElement
+			? element.closest(".baseboard-canvas-file")
+			: null;
+		if (!(fileEl instanceof HTMLElement)) return null;
+
+		const nodeId = fileEl.getAttribute("data-baseboard-node-id");
+		const path = nodeId ? this.canvasRenderState?.filePathsByNodeId.get(nodeId) : null;
+		return path ? { element: fileEl, path } : null;
 	}
 
 	private startDrag(
@@ -1988,18 +2873,56 @@ export class BaseboardView extends BasesView {
 			window.removeEventListener("pointercancel", this.panEndHandler);
 			this.panEndHandler = null;
 		}
+		if (this.linkMoveHandler) {
+			window.removeEventListener("pointermove", this.linkMoveHandler);
+			this.linkMoveHandler = null;
+		}
+		if (this.linkEndHandler) {
+			window.removeEventListener("pointerup", this.linkEndHandler);
+			window.removeEventListener("pointercancel", this.linkEndHandler);
+			this.linkEndHandler = null;
+		}
 		for (const node of this.dragState?.nodes ?? []) {
 			node.element?.removeClass("is-dragging");
 		}
 		this.resizeState?.element.removeClass("is-resizing");
 		this.panState?.viewportEl.removeClass("is-panning");
+		this.linkDragState?.sourceElement.removeClass("is-linking");
+		this.linkDragState?.targetElement?.removeClass("is-link-target");
+		this.linkDragState?.previewEl.remove();
 		this.dragState = null;
 		this.resizeState = null;
 		this.panState = null;
+		this.linkDragState = null;
 	}
 
 	notifyUnavailable(): void {
-		new Notice("Open a baseboard view first.");
+		new Notice(this.t("notices.openBaseboardViewFirst"));
+	}
+}
+
+class PropertyLinkSuggestModal extends FuzzySuggestModal<string> {
+	private readonly properties: string[];
+	private readonly onChoose: (property: string) => void;
+
+	constructor(app: App, properties: string[], t: TranslateFn, onChoose: (property: string) => void) {
+		super(app);
+		this.properties = properties;
+		this.onChoose = onChoose;
+		this.setPlaceholder(t("view.suggest.propertyPlaceholder"));
+		this.emptyStateText = t("view.suggest.noMatchingProperties");
+	}
+
+	getItems(): string[] {
+		return this.properties;
+	}
+
+	getItemText(item: string): string {
+		return item;
+	}
+
+	onChooseItem(item: string): void {
+		this.onChoose(item);
 	}
 }
 
@@ -2008,13 +2931,13 @@ class ManualNoteSuggestModal extends FuzzySuggestModal<TFile> {
 	private readonly unavailablePaths: Set<string>;
 	private readonly onChoose: (file: TFile) => void;
 
-	constructor(app: App, unavailablePaths: Set<string>, onChoose: (file: TFile) => void) {
+	constructor(app: App, unavailablePaths: Set<string>, t: TranslateFn, onChoose: (file: TFile) => void) {
 		super(app);
 		this.appRef = app;
 		this.unavailablePaths = unavailablePaths;
 		this.onChoose = onChoose;
-		this.setPlaceholder("Pin a note to this board");
-		this.emptyStateText = "No matching notes";
+		this.setPlaceholder(t("view.suggest.notePlaceholder"));
+		this.emptyStateText = t("view.suggest.noMatchingNotes");
 	}
 
 	getItems(): TFile[] {
@@ -2032,46 +2955,46 @@ class ManualNoteSuggestModal extends FuzzySuggestModal<TFile> {
 	}
 }
 
-export function buildBaseboardViewOptions(): BasesAllOptions[] {
+export function buildBaseboardViewOptions(t: TranslateFn): BasesAllOptions[] {
 	return [
 		{
 			type: "group",
-			displayName: "Canvas",
+			displayName: t("basesOptions.canvas"),
 			items: [
 				{
 					type: "text",
 					key: VIEW_CONFIG_KEYS.canvasPath,
-					displayName: "Canvas path",
+					displayName: t("basesOptions.canvasPath"),
 					placeholder: "Baseboards/My View.canvas",
 					default: "",
 				},
 				{
 					type: "dropdown",
 					key: VIEW_CONFIG_KEYS.layout,
-					displayName: "Layout",
+					displayName: t("basesOptions.layout"),
 					default: "columns",
 					options: {
-						columns: "Grouped columns",
-						rows: "Grouped rows",
-						grid: "Grid",
+						columns: t("options.layout.columns"),
+						rows: t("options.layout.rows"),
+						grid: t("options.layout.grid"),
 					},
 				},
 				{
 					type: "dropdown",
 					key: VIEW_CONFIG_KEYS.edgeMode,
-					displayName: "Edges",
+					displayName: t("basesOptions.edges"),
 					default: "none",
 					options: {
-						none: "None",
-						wikilinks: "Links within view",
-						properties: "Selected properties",
-						all: "Links and selected properties",
+						none: t("common.none"),
+						wikilinks: t("options.edgeMode.wikilinks"),
+						properties: t("options.edgeMode.properties"),
+						all: t("options.edgeMode.all"),
 					},
 				},
 				{
 					type: "text",
 					key: VIEW_CONFIG_KEYS.edgeProperties,
-					displayName: "Link properties",
+					displayName: t("basesOptions.linkProperties"),
 					placeholder: "depends_on, related",
 					default: "",
 				},
@@ -2079,87 +3002,87 @@ export function buildBaseboardViewOptions(): BasesAllOptions[] {
 		},
 		{
 			type: "group",
-			displayName: "Cards",
+			displayName: t("basesOptions.cards"),
 			items: [
 				{
 					type: "toggle",
 					key: VIEW_CONFIG_KEYS.showBodyEditor,
-					displayName: "Show body editor",
+					displayName: t("basesOptions.showBodyEditor"),
 					default: true,
 				},
 			],
 		},
 		{
 			type: "group",
-			displayName: "TaskNotes",
+			displayName: t("basesOptions.tasknotes"),
 			items: [
 				{
 					type: "dropdown",
 					key: VIEW_CONFIG_KEYS.taskNotesMode,
-					displayName: "TaskNotes integration",
+					displayName: t("basesOptions.tasknotesIntegration"),
 					default: "auto",
 					options: {
-						auto: "Automatic",
-						off: "Off",
+						auto: t("common.automatic"),
+						off: t("common.off"),
 					},
 				},
 				{
 					type: "toggle",
 					key: VIEW_CONFIG_KEYS.taskNotesShowBadges,
-					displayName: "Show task badges",
+					displayName: t("basesOptions.showTaskBadges"),
 					default: true,
 				},
 				{
 					type: "toggle",
 					key: VIEW_CONFIG_KEYS.taskNotesShowActions,
-					displayName: "Show task actions",
+					displayName: t("basesOptions.showTaskActions"),
 					default: true,
 				},
 				{
 					type: "dropdown",
 					key: VIEW_CONFIG_KEYS.taskNotesRelationships,
-					displayName: "Task relationship edges",
+					displayName: t("basesOptions.taskRelationshipEdges"),
 					default: "dependencies",
 					options: {
-						none: "None",
-						dependencies: "Dependencies",
-						all: "Dependencies and subtasks",
+						none: t("common.none"),
+						dependencies: t("options.relationships.dependencies"),
+						all: t("options.relationships.all"),
 					},
 				},
 			],
 		},
 		{
 			type: "group",
-			displayName: "Manual cards",
+			displayName: t("basesOptions.manualCards"),
 			items: [
 				{
 					type: "multitext",
 					key: VIEW_CONFIG_KEYS.manualNotePaths,
-					displayName: "Pinned notes",
+					displayName: t("basesOptions.pinnedNotes"),
 					default: [],
 				},
 			],
 		},
 		{
 			type: "group",
-			displayName: "Update rules",
+			displayName: t("basesOptions.updateRules"),
 			items: [
 				{
 					type: "toggle",
 					key: VIEW_CONFIG_KEYS.preservePositions,
-					displayName: "Preserve positions",
+					displayName: t("basesOptions.preservePositions"),
 					default: true,
 				},
 				{
 					type: "toggle",
 					key: VIEW_CONFIG_KEYS.removeMissingNodes,
-					displayName: "Remove missing notes",
+					displayName: t("basesOptions.removeMissingNotes"),
 					default: true,
 				},
 				{
 					type: "slider",
 					key: VIEW_CONFIG_KEYS.nodeWidth,
-					displayName: "Node width",
+					displayName: t("basesOptions.nodeWidth"),
 					default: 260,
 					min: 160,
 					max: 520,
@@ -2168,7 +3091,7 @@ export function buildBaseboardViewOptions(): BasesAllOptions[] {
 				{
 					type: "slider",
 					key: VIEW_CONFIG_KEYS.nodeHeight,
-					displayName: "Node height",
+					displayName: t("basesOptions.nodeHeight"),
 					default: 110,
 					min: 80,
 					max: 320,
@@ -2193,20 +3116,6 @@ function getBooleanConfig(
 	return typeof value === "boolean" ? value : fallback;
 }
 
-function formatSnapshotMeta(snapshot: BaseboardViewSnapshot): string {
-	return [
-		formatCount(snapshot.totalEntries, "note"),
-		formatCount(snapshot.groups.length, "group"),
-		snapshot.textCards.length > 0 ? formatCount(snapshot.textCards.length, "card") : null,
-	]
-		.filter((part): part is string => part !== null)
-		.join(", ");
-}
-
-function formatCount(count: number, noun: string): string {
-	return `${count} ${noun}${count === 1 ? "" : "s"}`;
-}
-
 function createTextCardId(): string {
 	return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
 		? crypto.randomUUID()
@@ -2221,6 +3130,63 @@ function mergeCanvasEdges(...edgeGroups: CanvasEdge[][]): CanvasEdge[] {
 	}
 
 	return [...edges.values()];
+}
+
+function buildEdgeRelationshipMap(
+	relationships: BaseboardRelationship[]
+): Map<string, BaseboardRelationship> {
+	const map = new Map<string, BaseboardRelationship>();
+	for (const relationship of relationships) {
+		map.set(getRelationshipEdgeId(relationship), relationship);
+	}
+
+	return map;
+}
+
+function mergeEdgeRelationshipMaps(
+	...maps: Array<Map<string, BaseboardRelationship>>
+): Map<string, BaseboardRelationship> {
+	const merged = new Map<string, BaseboardRelationship>();
+	for (const map of maps) {
+		for (const [edgeId, relationship] of map) {
+			merged.set(edgeId, relationship);
+		}
+	}
+
+	return merged;
+}
+
+function isRemovableRelationship(relationship: BaseboardRelationship): boolean {
+	return (
+		relationship.metadata?.source === "property" ||
+		relationship.metadata?.source === "tasknotes"
+	);
+}
+
+function isTaskDependencyRelationship(
+	relationship: BaseboardRelationship,
+	blockedPath: string,
+	dependencyUid: string
+): boolean {
+	return (
+		relationship.metadata?.source === "tasknotes" &&
+		relationship.metadata.kind === "dependency" &&
+		relationship.metadata.blockedPath === blockedPath &&
+		relationship.metadata.dependencyUid === dependencyUid
+	);
+}
+
+function isTaskProjectRelationship(
+	relationship: BaseboardRelationship,
+	childPath: string,
+	parentPath: string
+): boolean {
+	return (
+		relationship.metadata?.source === "tasknotes" &&
+		relationship.metadata.kind === "project" &&
+		relationship.metadata.childPath === childPath &&
+		relationship.metadata.parentPath === parentPath
+	);
 }
 
 function getTaskEdgeCacheKey(
@@ -2339,6 +3305,16 @@ function getElementNodePosition(element: HTMLElement): BaseboardNodePosition | n
 	return { x, y, width, height };
 }
 
+function getElementCenter(element: HTMLElement): LinkPoint | null {
+	const position = getElementNodePosition(element);
+	if (!position) return null;
+
+	return {
+		x: position.x + position.width / 2,
+		y: position.y + position.height / 2,
+	};
+}
+
 function getElementPixelStyle(
 	element: HTMLElement,
 	property: "left" | "top" | "width" | "height"
@@ -2377,6 +3353,88 @@ function clampZoom(value: number): number {
 	return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round(value * 100) / 100));
 }
 
+function formatPathName(path: string): string {
+	return path.split("/").pop()?.replace(/\.md$/iu, "") || path;
+}
+
+function createNoteWikiLink(path: string): string {
+	return `[[${path.replace(/\.md$/iu, "")}]]`;
+}
+
+function toFrontmatterPropertyName(propertyId: string): string | null {
+	const property = propertyId.trim();
+	if (!property || property.startsWith("file.") || property.startsWith("task.")) return null;
+
+	return property.replace(/^(note\.|properties\.)/iu, "");
+}
+
+function appendPropertyLinkValue(
+	value: unknown,
+	link: string,
+	containsTarget: (value: unknown) => boolean
+): unknown {
+	if (containsTarget(value)) return value;
+
+	if (typeof value === "undefined" || value === null || value === "") {
+		return link;
+	}
+
+	if (Array.isArray(value)) {
+		return [...value, link];
+	}
+
+	return [value, link];
+}
+
+function removePropertyLinkValue(
+	value: unknown,
+	matchesTarget: (value: unknown) => boolean
+): unknown {
+	if (Array.isArray(value)) {
+		const nextValue = value.filter((entry) => !matchesTarget(entry));
+		return nextValue.length > 0 ? nextValue : undefined;
+	}
+
+	return matchesTarget(value) ? undefined : value;
+}
+
+function extractReferenceCandidates(value: unknown): string[] {
+	if (typeof value === "string") return [value];
+
+	if (Array.isArray(value)) {
+		return value.flatMap(extractReferenceCandidates);
+	}
+
+	if (isRecord(value)) {
+		return [value.path, value.file, value.link, value.uid].filter(
+			(candidate): candidate is string => typeof candidate === "string"
+		);
+	}
+
+	return [];
+}
+
+function normalizeLinkText(value: string): string {
+	return value
+		.trim()
+		.replace(/^\[\[/u, "")
+		.replace(/\]\]$/u, "")
+		.split("|")[0]
+		.split("#")[0]
+		.trim();
+}
+
+function taskReferencePathCandidates(path: string): string[] {
+	const normalizedPath = path.trim().replace(/\\/gu, "/");
+	if (!normalizedPath) return [];
+
+	return /\.md$/iu.test(normalizedPath) ? [normalizedPath] : [normalizedPath, `${normalizedPath}.md`];
+}
+
+function getErrorMessage(error: unknown): string {
+	return error instanceof Error ? error.message : String(error);
+}
+
 function isNodeControlTarget(target: EventTarget | null): boolean {
 	return (
 		target instanceof HTMLElement &&
@@ -2386,6 +3444,7 @@ function isNodeControlTarget(target: EventTarget | null): boolean {
 					".baseboard-canvas-control-button",
 					".baseboard-canvas-resize-handle",
 					".baseboard-canvas-card-action",
+					".baseboard-canvas-link-handle",
 					".baseboard-canvas-file__editor",
 					".baseboard-canvas-text-card__editor",
 				].join(", ")

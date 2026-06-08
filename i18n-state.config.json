@@ -1,0 +1,26 @@
+{
+  "sourceLocale": "en",
+  "resourcesDir": "src/i18n/resources",
+  "manifestPath": "i18n.manifest.json",
+  "statePath": "i18n.state.json",
+  "scanDirs": ["src", "main.ts"],
+  "scanExtensions": ["ts", "tsx", "js", "jsx"],
+  "patterns": [
+    {
+      "name": "this.t()",
+      "regex": "this\\.t\\([\"']([^\"']+)[\"']"
+    },
+    {
+      "name": "plugin.t()",
+      "regex": "plugin\\.t\\([\"']([^\"']+)[\"']"
+    },
+    {
+      "name": "plugin.i18n.translate()",
+      "regex": "plugin\\.i18n\\.translate\\([\"']([^\"']+)[\"']"
+    },
+    {
+      "name": "i18n.translate()",
+      "regex": "i18n\\.translate\\([\"']([^\"']+)[\"']"
+    }
+  ]
+}

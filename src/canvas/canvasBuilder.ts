@@ -1,5 +1,6 @@
 import type {
 	BaseboardNodePosition,
+	BaseboardNodePositionMap,
 	BaseboardRelationship,
 	BaseboardViewSnapshot,
 	MaterializeOptions,
@@ -26,6 +27,12 @@ type PositionedGroup = {
 	groupNode: CanvasGroupNode | null;
 	fileNodes: CanvasFileNode[];
 };
+
+export interface InitializedTextCardPositions {
+	snapshot: BaseboardViewSnapshot;
+	positions: BaseboardNodePositionMap;
+	changed: boolean;
+}
 
 export function buildBaseboardCanvas(
 	snapshot: BaseboardViewSnapshot,
@@ -73,6 +80,48 @@ export function buildBaseboardCanvas(
 	};
 }
 
+export function initializeTextCardPositions(
+	snapshot: BaseboardViewSnapshot,
+	options: MaterializeOptions,
+	positions: BaseboardNodePositionMap
+): InitializedTextCardPositions {
+	const missingCardNodeIds = snapshot.textCards
+		.map((card) => getTextCardNodeId(card.id))
+		.filter((nodeId) => !positions[nodeId]);
+
+	if (missingCardNodeIds.length === 0) {
+		return { snapshot, positions, changed: false };
+	}
+
+	const missingIds = new Set(missingCardNodeIds);
+	const canvas = buildBaseboardCanvas(snapshot, options);
+	const nextPositions = { ...positions };
+	let changed = false;
+
+	for (const node of canvas.nodes ?? []) {
+		if (node.type !== "text" || !missingIds.has(node.id)) continue;
+
+		nextPositions[node.id] = getCanvasNodePosition(node);
+		changed = true;
+	}
+
+	if (!changed) {
+		return { snapshot, positions, changed: false };
+	}
+
+	return {
+		snapshot: {
+			...snapshot,
+			textCards: snapshot.textCards.map((card) => ({
+				...card,
+				position: nextPositions[getTextCardNodeId(card.id)] ?? card.position,
+			})),
+		},
+		positions: nextPositions,
+		changed,
+	};
+}
+
 export function getFileNodeId(path: string): string {
 	return stableBaseboardId("file", path);
 }
@@ -85,7 +134,7 @@ export function getGroupNodeId(viewName: string, label: string): string {
 	return stableBaseboardId("group", `${viewName}:${label}`);
 }
 
-function getEdgeId(relationship: BaseboardRelationship): string {
+export function getRelationshipEdgeId(relationship: BaseboardRelationship): string {
 	return stableBaseboardId(
 		"edge",
 		`${relationship.sourcePath}->${relationship.targetPath}:${relationship.label ?? ""}`
@@ -219,6 +268,15 @@ function getTextCardOrigin(generatedNodes: CanvasNode[]): { x: number; y: number
 	return {
 		x: left,
 		y: bottom + GROUP_GAP,
+	};
+}
+
+function getCanvasNodePosition(node: CanvasNode): BaseboardNodePosition {
+	return {
+		x: node.x,
+		y: node.y,
+		width: node.width,
+		height: node.height,
 	};
 }
 
@@ -372,8 +430,8 @@ function buildRelationshipEdges(
 		if (!fromNode || !toNode) continue;
 
 		const { fromSide, toSide } = getEdgeAttachmentSides(fromNode, toNode);
-		const edge: CanvasEdge = {
-			id: getEdgeId(relationship),
+			const edge: CanvasEdge = {
+				id: getRelationshipEdgeId(relationship),
 			fromNode: fromNodeId,
 			fromSide,
 			toNode: toNodeId,

@@ -3,6 +3,8 @@ import {
 	buildBaseboardCanvas,
 	getFileNodeId,
 	getGroupNodeId,
+	getTextCardNodeId,
+	initializeTextCardPositions,
 } from "../src/canvas/canvasBuilder";
 import type { CanvasEdge, CanvasGroupNode, JsonCanvas } from "../src/canvas/jsonCanvas";
 import type { BaseboardViewSnapshot, MaterializeOptions } from "../src/types";
@@ -294,6 +296,58 @@ describe("buildBaseboardCanvas", () => {
 			width: 260,
 			height: 120,
 		});
+	});
+
+	it("initializes text card positions once so later note moves do not reflow them", () => {
+		const snapshotWithCard: BaseboardViewSnapshot = {
+			...snapshot,
+			textCards: [
+				{
+					id: "planning-note",
+					text: "Check dependencies before scheduling.",
+				},
+			],
+		};
+		const initialized = initializeTextCardPositions(snapshotWithCard, baseOptions, {});
+		const textCardNodeId = getTextCardNodeId("planning-note");
+
+		expect(initialized.changed).toBe(true);
+		expect(initialized.positions[textCardNodeId]).toMatchObject({
+			x: 0,
+			y: 362,
+			width: 260,
+			height: 120,
+		});
+
+		const movedSnapshot: BaseboardViewSnapshot = {
+			...initialized.snapshot,
+			groups: initialized.snapshot.groups.map((group) => ({
+				...group,
+				entries: group.entries.map((entry) =>
+					entry.path === "Tasks/B.md"
+						? {
+								...entry,
+								position: {
+									x: 18,
+									y: 900,
+									width: 260,
+									height: 110,
+								},
+							}
+						: entry
+				),
+			})),
+		};
+		const afterNoteMove = initializeTextCardPositions(
+			movedSnapshot,
+			baseOptions,
+			initialized.positions
+		);
+
+		expect(afterNoteMove.changed).toBe(false);
+		expect(afterNoteMove.positions[textCardNodeId]).toEqual(
+			initialized.positions[textCardNodeId]
+		);
 	});
 });
 

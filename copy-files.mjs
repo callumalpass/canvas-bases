@@ -9,6 +9,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const pluginId = "baseboard";
 const defaultPaths = [
 	join(homedir(), "testvault", "test", ".obsidian", "plugins", pluginId),
+	join(homedir(), "testvault", "public_test", ".obsidian", "plugins", pluginId),
 	join(__dirname, "..", "tasknotes", "tasknotes-e2e-vault", ".obsidian", "plugins", pluginId),
 ];
 

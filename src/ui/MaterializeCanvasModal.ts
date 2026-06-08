@@ -12,12 +12,16 @@ import {
 	normalizeTaskNotesRelationshipMode,
 	splitPropertyList,
 } from "../settings/defaults";
+import type { InterpolationValues, TranslateFn } from "../i18n";
 
 type SubmitHandler = (options: MaterializeOptions) => Promise<void>;
+type TranslatePluralFn = (key: string, count: number, params?: InterpolationValues) => string;
 
 export class MaterializeCanvasModal extends Modal {
 	private options: MaterializeOptions;
 	private readonly snapshot: BaseboardViewSnapshot;
+	private readonly t: TranslateFn;
+	private readonly tp: TranslatePluralFn;
 	private readonly onSubmit: SubmitHandler;
 	private submitButtonEl: HTMLButtonElement | null = null;
 
@@ -25,11 +29,15 @@ export class MaterializeCanvasModal extends Modal {
 		app: App,
 		snapshot: BaseboardViewSnapshot,
 		options: MaterializeOptions,
+		t: TranslateFn,
+		tp: TranslatePluralFn,
 		onSubmit: SubmitHandler
 	) {
 		super(app);
 		this.snapshot = snapshot;
 		this.options = { ...options };
+		this.t = t;
+		this.tp = tp;
 		this.onSubmit = onSubmit;
 	}
 
@@ -38,7 +46,7 @@ export class MaterializeCanvasModal extends Modal {
 		contentEl.empty();
 		contentEl.addClass("baseboard-modal");
 
-		contentEl.createEl("h2", { text: "Create canvas from view" });
+		contentEl.createEl("h2", { text: this.t("modal.title") });
 		this.renderSummary(contentEl);
 		this.renderDestination(contentEl);
 		this.renderLayout(contentEl);
@@ -60,10 +68,10 @@ export class MaterializeCanvasModal extends Modal {
 		summaryEl.createDiv({
 			cls: "baseboard-modal__summary-meta",
 			text: [
-				formatCount(this.snapshot.totalEntries, "note"),
-				formatCount(this.snapshot.groups.length, "group"),
+				this.tp("common.note", this.snapshot.totalEntries),
+				this.tp("common.group", this.snapshot.groups.length),
 				this.snapshot.textCards.length > 0
-					? formatCount(this.snapshot.textCards.length, "card")
+					? this.tp("common.card", this.snapshot.textCards.length)
 					: null,
 			]
 				.filter((part): part is string => part !== null)
@@ -73,8 +81,8 @@ export class MaterializeCanvasModal extends Modal {
 
 	private renderDestination(containerEl: HTMLElement): void {
 		new Setting(containerEl)
-			.setName("Canvas path")
-			.setDesc("Vault path for the generated JSON canvas file.")
+			.setName(this.t("modal.canvasPath.name"))
+			.setDesc(this.t("modal.canvasPath.description"))
 			.addText((text) => {
 				text.setValue(this.options.canvasPath).onChange((value) => {
 					this.options = {
@@ -87,13 +95,13 @@ export class MaterializeCanvasModal extends Modal {
 
 	private renderLayout(containerEl: HTMLElement): void {
 		new Setting(containerEl)
-			.setName("Layout")
-			.setDesc("How base groups are arranged in the generated canvas.")
+			.setName(this.t("modal.layout.name"))
+			.setDesc(this.t("modal.layout.description"))
 			.addDropdown((dropdown) => {
 				dropdown
-					.addOption("columns", "Grouped columns")
-					.addOption("rows", "Grouped rows")
-					.addOption("grid", "Grid")
+					.addOption("columns", this.t("options.layout.columns"))
+					.addOption("rows", this.t("options.layout.rows"))
+					.addOption("grid", this.t("options.layout.grid"))
 					.setValue(this.options.layout)
 					.onChange((value) => {
 						this.options = {
@@ -104,10 +112,10 @@ export class MaterializeCanvasModal extends Modal {
 			});
 
 		new Setting(containerEl)
-			.setName("Node size")
-			.setDesc("Width and height for new canvas file nodes.")
+			.setName(this.t("modal.nodeSize.name"))
+			.setDesc(this.t("modal.nodeSize.description"))
 			.addText((text) => {
-				text.setPlaceholder("Width")
+				text.setPlaceholder(this.t("modal.nodeSize.width"))
 					.setValue(String(this.options.nodeWidth))
 					.onChange((value) => {
 						this.options = {
@@ -117,7 +125,7 @@ export class MaterializeCanvasModal extends Modal {
 					});
 			})
 			.addText((text) => {
-				text.setPlaceholder("Height")
+				text.setPlaceholder(this.t("modal.nodeSize.height"))
 					.setValue(String(this.options.nodeHeight))
 					.onChange((value) => {
 						this.options = {
@@ -130,14 +138,14 @@ export class MaterializeCanvasModal extends Modal {
 
 	private renderEdges(containerEl: HTMLElement): void {
 		new Setting(containerEl)
-			.setName("Edges")
-			.setDesc("Draw edges only when both notes are in this base result.")
+			.setName(this.t("modal.edges.name"))
+			.setDesc(this.t("modal.edges.description"))
 			.addDropdown((dropdown) => {
 				dropdown
-					.addOption("none", "None")
-					.addOption("wikilinks", "Links within view")
-					.addOption("properties", "Selected properties")
-					.addOption("all", "Links and selected properties")
+					.addOption("none", this.t("common.none"))
+					.addOption("wikilinks", this.t("options.edgeMode.wikilinks"))
+					.addOption("properties", this.t("options.edgeMode.properties"))
+					.addOption("all", this.t("options.edgeMode.all"))
 					.setValue(this.options.edgeMode)
 					.onChange((value) => {
 						this.options = {
@@ -148,10 +156,10 @@ export class MaterializeCanvasModal extends Modal {
 			});
 
 		new Setting(containerEl)
-			.setName("Link properties")
-			.setDesc("Comma-separated frontmatter properties used for property edges.")
+			.setName(this.t("modal.linkProperties.name"))
+			.setDesc(this.t("modal.linkProperties.description"))
 			.addText((text) => {
-				text.setPlaceholder("Depends_on, related")
+				text.setPlaceholder(this.t("modal.linkProperties.placeholder"))
 					.setValue(this.options.edgeProperties.join(", "))
 					.onChange((value) => {
 						this.options = {
@@ -162,13 +170,13 @@ export class MaterializeCanvasModal extends Modal {
 			});
 
 		new Setting(containerEl)
-			.setName("Task relationship edges")
-			.setDesc("Add task relationship edges to the generated canvas.")
+			.setName(this.t("modal.taskRelationships.name"))
+			.setDesc(this.t("modal.taskRelationships.description"))
 			.addDropdown((dropdown) => {
 				dropdown
-					.addOption("none", "None")
-					.addOption("dependencies", "Dependencies")
-					.addOption("all", "Dependencies and subtasks")
+					.addOption("none", this.t("common.none"))
+					.addOption("dependencies", this.t("options.relationships.dependencies"))
+					.addOption("all", this.t("options.relationships.all"))
 					.setValue(this.options.taskNotesRelationships)
 					.onChange((value) => {
 						this.options = {
@@ -180,11 +188,11 @@ export class MaterializeCanvasModal extends Modal {
 	}
 
 	private renderUpdateRules(containerEl: HTMLElement): void {
-		new Setting(containerEl).setName("Update rules").setHeading();
+		new Setting(containerEl).setName(this.t("settings.updateRules.heading")).setHeading();
 
 		new Setting(containerEl)
-			.setName("Preserve positions")
-			.setDesc("Keep positions for baseboard nodes already present in the canvas.")
+			.setName(this.t("settings.updateRules.preservePositions.name"))
+			.setDesc(this.t("modal.preservePositions.description"))
 			.addToggle((toggle) => {
 				toggle.setValue(this.options.preservePositions).onChange((value) => {
 					this.options = {
@@ -195,8 +203,8 @@ export class MaterializeCanvasModal extends Modal {
 			});
 
 		new Setting(containerEl)
-			.setName("Remove missing notes")
-			.setDesc("Remove baseboard nodes that no longer appear in the current base result.")
+			.setName(this.t("settings.updateRules.removeMissingNotes.name"))
+			.setDesc(this.t("settings.updateRules.removeMissingNotes.description"))
 			.addToggle((toggle) => {
 				toggle.setValue(this.options.removeMissingNodes).onChange((value) => {
 					this.options = {
@@ -209,12 +217,12 @@ export class MaterializeCanvasModal extends Modal {
 
 	private renderActions(containerEl: HTMLElement): void {
 		const actionsEl = containerEl.createDiv({ cls: "baseboard-modal__actions" });
-		const cancelButton = actionsEl.createEl("button", { text: "Cancel" });
+		const cancelButton = actionsEl.createEl("button", { text: this.t("common.cancel") });
 		cancelButton.onClickEvent(() => this.close());
 
 		this.submitButtonEl = actionsEl.createEl("button", {
 			cls: "mod-cta",
-			text: "Create canvas",
+			text: this.t("modal.createCanvas"),
 		});
 		this.submitButtonEl.onClickEvent(() => {
 			void this.handleSubmit();
@@ -224,7 +232,7 @@ export class MaterializeCanvasModal extends Modal {
 	private async handleSubmit(): Promise<void> {
 		const canvasPath = normalizeCanvasPath(this.options.canvasPath);
 		if (!canvasPath || canvasPath === ".canvas") {
-			new Notice("Choose a canvas path.");
+			new Notice(this.t("notices.chooseCanvasPath"));
 			return;
 		}
 
@@ -246,8 +254,4 @@ export class MaterializeCanvasModal extends Modal {
 			this.submitButtonEl?.removeAttribute("disabled");
 		}
 	}
-}
-
-function formatCount(count: number, noun: string): string {
-	return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }

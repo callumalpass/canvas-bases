@@ -1,4 +1,4 @@
-import { PluginSettingTab, Setting } from "obsidian";
+import { Notice, PluginSettingTab, Setting } from "obsidian";
 import type BaseboardPlugin from "../plugin";
 import {
 	DEFAULT_SETTINGS,
@@ -18,15 +18,47 @@ export class BaseboardSettingTab extends PluginSettingTab {
 	}
 
 	display(): void {
+		this.renderSettings();
+	}
+
+	private renderSettings(): void {
 		const { containerEl } = this;
 		containerEl.empty();
 		containerEl.addClass("baseboard-settings");
 
-		new Setting(containerEl).setName("Defaults").setHeading();
+		new Setting(containerEl)
+			.setName(this.baseboardPlugin.t("settings.language.heading"))
+			.setDesc(this.baseboardPlugin.t("settings.language.description"))
+			.setHeading();
 
 		new Setting(containerEl)
-			.setName("Default canvas folder")
-			.setDesc("Folder used when a baseboard view has no canvas path yet.")
+			.setName(this.baseboardPlugin.t("settings.language.name"))
+			.setDesc(this.baseboardPlugin.t("settings.language.dropdownDescription"))
+			.addDropdown((dropdown) => {
+				dropdown.addOption("system", this.baseboardPlugin.t("common.systemDefault"));
+				for (const locale of this.baseboardPlugin.i18n.getAvailableLocales()) {
+					dropdown.addOption(locale, this.baseboardPlugin.i18n.getNativeLanguageName(locale));
+				}
+				dropdown.setValue(this.baseboardPlugin.settings.locale).onChange((value) => {
+					void this.baseboardPlugin.updateSettings({ locale: value }).then(() => {
+						new Notice(this.baseboardPlugin.t("notices.languageChanged", {
+							language:
+								value === "system"
+									? this.baseboardPlugin.t("common.systemDefault")
+									: this.baseboardPlugin.i18n.getNativeLanguageName(value),
+						}));
+						this.renderSettings();
+					});
+				});
+			});
+
+		new Setting(containerEl)
+			.setName(this.baseboardPlugin.t("settings.defaults.heading"))
+			.setHeading();
+
+		new Setting(containerEl)
+			.setName(this.baseboardPlugin.t("settings.defaults.canvasFolder.name"))
+			.setDesc(this.baseboardPlugin.t("settings.defaults.canvasFolder.description"))
 			.addText((text) => {
 				text.setPlaceholder(DEFAULT_SETTINGS.defaultCanvasFolder)
 					.setValue(this.baseboardPlugin.settings.defaultCanvasFolder)
@@ -39,13 +71,13 @@ export class BaseboardSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Default layout")
-			.setDesc("Initial layout used for new canvas snapshots.")
+			.setName(this.baseboardPlugin.t("settings.defaults.layout.name"))
+			.setDesc(this.baseboardPlugin.t("settings.defaults.layout.description"))
 			.addDropdown((dropdown) => {
 				dropdown
-					.addOption("columns", "Grouped columns")
-					.addOption("rows", "Grouped rows")
-					.addOption("grid", "Grid")
+					.addOption("columns", this.baseboardPlugin.t("options.layout.columns"))
+					.addOption("rows", this.baseboardPlugin.t("options.layout.rows"))
+					.addOption("grid", this.baseboardPlugin.t("options.layout.grid"))
 					.setValue(this.baseboardPlugin.settings.defaultLayout)
 					.onChange((value) => {
 						void this.baseboardPlugin.updateSettings({
@@ -55,14 +87,14 @@ export class BaseboardSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Default edges")
-			.setDesc("Initial edge source for new canvas snapshots.")
+			.setName(this.baseboardPlugin.t("settings.defaults.edges.name"))
+			.setDesc(this.baseboardPlugin.t("settings.defaults.edges.description"))
 			.addDropdown((dropdown) => {
 				dropdown
-					.addOption("none", "None")
-					.addOption("wikilinks", "Links within view")
-					.addOption("properties", "Selected properties")
-					.addOption("all", "Links and selected properties")
+					.addOption("none", this.baseboardPlugin.t("common.none"))
+					.addOption("wikilinks", this.baseboardPlugin.t("options.edgeMode.wikilinks"))
+					.addOption("properties", this.baseboardPlugin.t("options.edgeMode.properties"))
+					.addOption("all", this.baseboardPlugin.t("options.edgeMode.all"))
 					.setValue(this.baseboardPlugin.settings.defaultEdgeMode)
 					.onChange((value) => {
 						void this.baseboardPlugin.updateSettings({
@@ -72,10 +104,10 @@ export class BaseboardSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Default edge properties")
-			.setDesc("Comma-separated frontmatter properties used when property edges are enabled.")
+			.setName(this.baseboardPlugin.t("settings.defaults.edgeProperties.name"))
+			.setDesc(this.baseboardPlugin.t("settings.defaults.edgeProperties.description"))
 			.addText((text) => {
-				text.setPlaceholder("Depends_on, related")
+				text.setPlaceholder(this.baseboardPlugin.t("modal.linkProperties.placeholder"))
 					.setValue(this.baseboardPlugin.settings.defaultEdgeProperties)
 					.onChange((value) => {
 						void this.baseboardPlugin.updateSettings({
@@ -85,8 +117,8 @@ export class BaseboardSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Show body editor")
-			.setDesc("Show editable note body text on live baseboard cards by default.")
+			.setName(this.baseboardPlugin.t("settings.defaults.bodyEditor.name"))
+			.setDesc(this.baseboardPlugin.t("settings.defaults.bodyEditor.description"))
 			.addToggle((toggle) => {
 				toggle
 					.setValue(this.baseboardPlugin.settings.defaultShowBodyEditor)
@@ -97,15 +129,17 @@ export class BaseboardSettingTab extends PluginSettingTab {
 					});
 			});
 
-		new Setting(containerEl).setName("Tasknotes").setHeading();
+		new Setting(containerEl)
+			.setName(this.baseboardPlugin.t("settings.tasknotes.heading"))
+			.setHeading();
 
 		new Setting(containerEl)
-			.setName("Tasknotes integration")
-			.setDesc("Default tasknotes behavior for new baseboard views.")
+			.setName(this.baseboardPlugin.t("settings.tasknotes.integration.name"))
+			.setDesc(this.baseboardPlugin.t("settings.tasknotes.integration.description"))
 			.addDropdown((dropdown) => {
 				dropdown
-					.addOption("auto", "Automatic")
-					.addOption("off", "Off")
+					.addOption("auto", this.baseboardPlugin.t("common.automatic"))
+					.addOption("off", this.baseboardPlugin.t("common.off"))
 					.setValue(this.baseboardPlugin.settings.defaultTaskNotesMode)
 					.onChange((value) => {
 						void this.baseboardPlugin.updateSettings({
@@ -115,8 +149,8 @@ export class BaseboardSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Show task badges")
-			.setDesc("Show tasknotes status, priority, due dates, and blockers on live cards by default.")
+			.setName(this.baseboardPlugin.t("settings.tasknotes.badges.name"))
+			.setDesc(this.baseboardPlugin.t("settings.tasknotes.badges.description"))
 			.addToggle((toggle) => {
 				toggle
 					.setValue(this.baseboardPlugin.settings.defaultTaskNotesShowBadges)
@@ -128,8 +162,8 @@ export class BaseboardSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Show task actions")
-			.setDesc("Use the tasknotes task menu from card actions by default.")
+			.setName(this.baseboardPlugin.t("settings.tasknotes.actions.name"))
+			.setDesc(this.baseboardPlugin.t("settings.tasknotes.actions.description"))
 			.addToggle((toggle) => {
 				toggle
 					.setValue(this.baseboardPlugin.settings.defaultTaskNotesShowActions)
@@ -141,13 +175,13 @@ export class BaseboardSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Task relationship edges")
-			.setDesc("Default tasknotes relationship edges for generated canvases and live boards.")
+			.setName(this.baseboardPlugin.t("settings.tasknotes.relationships.name"))
+			.setDesc(this.baseboardPlugin.t("settings.tasknotes.relationships.description"))
 			.addDropdown((dropdown) => {
 				dropdown
-					.addOption("none", "None")
-					.addOption("dependencies", "Dependencies")
-					.addOption("all", "Dependencies and subtasks")
+					.addOption("none", this.baseboardPlugin.t("common.none"))
+					.addOption("dependencies", this.baseboardPlugin.t("options.relationships.dependencies"))
+					.addOption("all", this.baseboardPlugin.t("options.relationships.all"))
 					.setValue(this.baseboardPlugin.settings.defaultTaskNotesRelationships)
 					.onChange((value) => {
 						void this.baseboardPlugin.updateSettings({
@@ -157,8 +191,12 @@ export class BaseboardSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Preserve positions")
-			.setDesc("Keep existing baseboard node positions when updating a canvas.")
+			.setName(this.baseboardPlugin.t("settings.updateRules.heading"))
+			.setHeading();
+
+		new Setting(containerEl)
+			.setName(this.baseboardPlugin.t("settings.updateRules.preservePositions.name"))
+			.setDesc(this.baseboardPlugin.t("settings.updateRules.preservePositions.description"))
 			.addToggle((toggle) => {
 				toggle.setValue(this.baseboardPlugin.settings.preservePositions).onChange((value) => {
 					void this.baseboardPlugin.updateSettings({ preservePositions: value });
@@ -166,8 +204,8 @@ export class BaseboardSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Remove missing notes")
-			.setDesc("Remove baseboard nodes that no longer appear in the current base result.")
+			.setName(this.baseboardPlugin.t("settings.updateRules.removeMissingNotes.name"))
+			.setDesc(this.baseboardPlugin.t("settings.updateRules.removeMissingNotes.description"))
 			.addToggle((toggle) => {
 				toggle.setValue(this.baseboardPlugin.settings.removeMissingNodes).onChange((value) => {
 					void this.baseboardPlugin.updateSettings({ removeMissingNodes: value });
@@ -175,8 +213,8 @@ export class BaseboardSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Node width")
-			.setDesc("Default canvas file node width.")
+			.setName(this.baseboardPlugin.t("settings.updateRules.nodeWidth.name"))
+			.setDesc(this.baseboardPlugin.t("settings.updateRules.nodeWidth.description"))
 			.addText((text) => {
 				text.setPlaceholder(String(DEFAULT_SETTINGS.nodeWidth))
 					.setValue(String(this.baseboardPlugin.settings.nodeWidth))
@@ -193,8 +231,8 @@ export class BaseboardSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Node height")
-			.setDesc("Default canvas file node height.")
+			.setName(this.baseboardPlugin.t("settings.updateRules.nodeHeight.name"))
+			.setDesc(this.baseboardPlugin.t("settings.updateRules.nodeHeight.description"))
 			.addText((text) => {
 				text.setPlaceholder(String(DEFAULT_SETTINGS.nodeHeight))
 					.setValue(String(this.baseboardPlugin.settings.nodeHeight))

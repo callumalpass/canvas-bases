@@ -15,6 +15,15 @@
   background-drag panning to the Baseboard board.
 - Added live relationship edges to the Baseboard board using the same wikilink
   and link-property configuration as canvas materialization.
+- Added card-to-card link controls for creating TaskNotes dependency/project
+  relationships and frontmatter property links from the Baseboard view.
+- Changed TaskNotes project relationship wording and edges to show tasks as
+  subtasks of their parent task, with edges running from subtask to parent.
+- Fixed dependency edge removal so it uses the exact TaskNotes dependency
+  reference stored on the blocked task.
+- Fixed Baseboard card actions so TaskNotes menus are requested only for
+  recognized TaskNotes tasks and fall back cleanly when composed menu
+  population is unavailable.
 - Fixed TaskNotes property chip styling so it follows TaskNotes field mappings
   instead of hardcoded Bases property names.
 - Fixed Baseboard view materialization so the generated Canvas uses the live

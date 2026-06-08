@@ -27,6 +27,12 @@ import {
 import { materializeCanvas, openCanvas } from "./canvas/materializeCanvas";
 import { collectRelationships } from "./canvas/relationships";
 import { TaskNotesRuntime } from "./tasknotes/runtime";
+import {
+	createI18nService,
+	type InterpolationValues,
+	type TranslateFn,
+} from "./i18n";
+import type { I18nService } from "./i18n/I18nService";
 
 type InternalPluginManager = {
 	getEnabledPluginById?: (id: string) => {
@@ -49,12 +55,14 @@ interface BaseboardMaterializeSource {
 export default class BaseboardPlugin extends Plugin {
 	settings: BaseboardSettings = DEFAULT_SETTINGS;
 	taskNotes!: TaskNotesRuntime;
+	i18n!: I18nService;
 	private views = new Set<BaseboardView>();
 	private activeView: BaseboardView | null = null;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
-		this.taskNotes = new TaskNotesRuntime(this.app);
+		this.i18n = createI18nService({ initialLocale: this.settings.locale });
+		this.taskNotes = new TaskNotesRuntime(this.app, this.t.bind(this) as TranslateFn);
 		this.addSettingTab(new BaseboardSettingTab(this));
 		this.registerBaseboardBasesView();
 		this.registerCommands();
@@ -71,7 +79,16 @@ export default class BaseboardPlugin extends Plugin {
 			...this.settings,
 			...settings,
 		});
+		this.i18n.setLocale(this.settings.locale);
 		await this.saveData(this.settings);
+	}
+
+	t(key: string, params?: InterpolationValues): string {
+		return this.i18n.translate(key, params);
+	}
+
+	tp(key: string, count: number, params?: InterpolationValues): string {
+		return this.i18n.translatePlural(key, count, params);
 	}
 
 	registerViewInstance(view: BaseboardView): void {
@@ -93,13 +110,13 @@ export default class BaseboardPlugin extends Plugin {
 	async configureAndMaterialize(view?: BaseboardView): Promise<void> {
 		const source = this.getMaterializeSource(view);
 		if (!source) {
-			new Notice("Open a bases view first.");
+			new Notice(this.t("notices.openBasesViewFirst"));
 			return;
 		}
 
 		const snapshot = source.getSnapshot();
 		if (!snapshot) {
-			new Notice("Baseboard is waiting for bases data.");
+			new Notice(this.t("notices.baseboardWaitingForBasesData"));
 			return;
 		}
 
@@ -107,6 +124,8 @@ export default class BaseboardPlugin extends Plugin {
 			this.app,
 			snapshot,
 			source.getMaterializeOptions(),
+			this.t.bind(this) as TranslateFn,
+			this.tp.bind(this),
 			async (options) => {
 				await source.setMaterializeOptions(options);
 				const summary = await this.materialize(source, options);
@@ -118,13 +137,13 @@ export default class BaseboardPlugin extends Plugin {
 	async materializeWithSavedOptions(view?: BaseboardView): Promise<void> {
 		const source = this.getMaterializeSource(view);
 		if (!source) {
-			new Notice("Open a bases view first.");
+			new Notice(this.t("notices.openBasesViewFirst"));
 			return;
 		}
 
 		const snapshot = source.getSnapshot();
 		if (!snapshot) {
-			new Notice("Baseboard is waiting for bases data.");
+			new Notice(this.t("notices.baseboardWaitingForBasesData"));
 			return;
 		}
 
@@ -141,13 +160,13 @@ export default class BaseboardPlugin extends Plugin {
 	async openLinkedCanvas(view?: BaseboardView): Promise<void> {
 		const source = this.getMaterializeSource(view);
 		if (!source) {
-			new Notice("Open a bases view first.");
+			new Notice(this.t("notices.openBasesViewFirst"));
 			return;
 		}
 
 		const canvasPath = source.getCanvasPath();
 		if (!canvasPath) {
-			new Notice(`${source.sourceLabel} has no linked canvas yet.`);
+			new Notice(this.t("notices.noLinkedCanvas", { source: source.sourceLabel }));
 			return;
 		}
 
@@ -160,17 +179,17 @@ export default class BaseboardPlugin extends Plugin {
 
 	private registerBaseboardBasesView(): void {
 		if (!requireApiVersion("1.10.1")) {
-			new Notice("Baseboard requires Obsidian 1.10.1 or newer.");
+			new Notice(this.t("notices.obsidianVersionRequired"));
 			return;
 		}
 
 		const registration: BasesViewRegistration = {
-			name: "Baseboard",
+			name: this.t("common.appName"),
 			icon: "layout-dashboard",
 			factory: (controller, containerEl) => {
 				return new BaseboardView(controller, containerEl, this);
 			},
-			options: (): BasesAllOptions[] => buildBaseboardViewOptions(),
+			options: (): BasesAllOptions[] => buildBaseboardViewOptions(this.t.bind(this) as TranslateFn),
 		};
 
 		this.registerBasesView(BASEBOARD_VIEW_TYPE, registration);
@@ -187,7 +206,7 @@ export default class BaseboardPlugin extends Plugin {
 	private registerCommands(): void {
 		this.addCommand({
 			id: "create-canvas-from-current-view",
-			name: "Create canvas from current bases view",
+			name: this.t("commands.createCanvasFromCurrentView"),
 			callback: () => {
 				void this.configureAndMaterialize();
 			},
@@ -195,7 +214,7 @@ export default class BaseboardPlugin extends Plugin {
 
 		this.addCommand({
 			id: "update-linked-canvas",
-			name: "Update linked canvas",
+			name: this.t("commands.updateLinkedCanvas"),
 			callback: () => {
 				void this.materializeWithSavedOptions();
 			},
@@ -203,7 +222,7 @@ export default class BaseboardPlugin extends Plugin {
 
 		this.addCommand({
 			id: "open-linked-canvas",
-			name: "Open linked canvas",
+			name: this.t("commands.openLinkedCanvas"),
 			callback: () => {
 				void this.openLinkedCanvas();
 			},
@@ -337,7 +356,11 @@ export default class BaseboardPlugin extends Plugin {
 
 	private showMaterializedNotice(summary: BaseboardGenerationSummary): void {
 		new Notice(
-			`Updated ${summary.canvasPath}: ${summary.nodeCount} nodes, ${summary.edgeCount} edges.`
+			this.t("notices.updatedCanvas", {
+				path: summary.canvasPath,
+				nodes: summary.nodeCount,
+				edges: summary.edgeCount,
+			})
 		);
 	}
 }
