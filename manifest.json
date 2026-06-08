@@ -1,10 +1,10 @@
 {
-	"id": "baseboard",
-	"name": "Baseboard",
-	"version": "0.1.0",
-	"minAppVersion": "1.10.1",
-	"description": "Materialize Obsidian Bases views as Canvas boards.",
-	"author": "Callum Alpass",
-	"authorUrl": "https://github.com/callumalpass",
-	"isDesktopOnly": false
+  "id": "baseboard",
+  "name": "TaskNotes Baseboard",
+  "version": "0.1.0",
+  "minAppVersion": "1.10.1",
+  "description": "Materialize Obsidian Bases views as Canvas boards.",
+  "author": "Callum Alpass",
+  "authorUrl": "https://github.com/callumalpass",
+  "isDesktopOnly": false
 }
