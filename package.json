@@ -1,7 +1,7 @@
 {
 	"name": "canvas-bases",
 	"version": "0.1.0",
-	"description": "TaskNotes canvas companion for Obsidian Bases and Canvas.",
+	"description": "Canvas-style layouts and JSON Canvas materialization for Obsidian Bases.",
 	"type": "module",
 	"main": "main.js",
 	"scripts": {
