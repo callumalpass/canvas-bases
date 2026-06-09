@@ -1,4 +1,4 @@
-import type { BaseboardNodePosition } from "../types";
+import type { CanvasBasesNodePosition } from "../types";
 import {
 	getEdgeAttachmentSides,
 	getNodeAnchor,
@@ -13,7 +13,7 @@ const LABEL_HEIGHT = 20;
 const LABEL_PADDING_X = 8;
 const LABEL_CHAR_WIDTH = 6.8;
 
-export interface BaseboardEdgeLabelGeometry {
+export interface CanvasBasesEdgeLabelGeometry {
 	x: number;
 	y: number;
 	width: number;
@@ -22,15 +22,15 @@ export interface BaseboardEdgeLabelGeometry {
 	textY: number;
 }
 
-export interface BaseboardEdgeGeometry {
+export interface CanvasBasesEdgeGeometry {
 	path: string;
-	label: BaseboardEdgeLabelGeometry | null;
+	label: CanvasBasesEdgeLabelGeometry | null;
 }
 
-export function buildBaseboardEdgeGeometry(
+export function buildCanvasBasesEdgeGeometry(
 	edge: CanvasEdge,
-	nodePositions: ReadonlyMap<string, BaseboardNodePosition>
-): BaseboardEdgeGeometry | null {
+	nodePositions: ReadonlyMap<string, CanvasBasesNodePosition>
+): CanvasBasesEdgeGeometry | null {
 	const fromNode = nodePositions.get(edge.fromNode);
 	const toNode = nodePositions.get(edge.toNode);
 	if (!fromNode || !toNode) return null;
@@ -82,7 +82,7 @@ function getCubicPoint(p0: Point, p1: Point, p2: Point, p3: Point, t: number): P
 	};
 }
 
-function buildLabelGeometry(label: string, point: Point): BaseboardEdgeLabelGeometry {
+function buildLabelGeometry(label: string, point: Point): CanvasBasesEdgeLabelGeometry {
 	const width = Math.max(28, Math.round(label.length * LABEL_CHAR_WIDTH + LABEL_PADDING_X * 2));
 
 	return {

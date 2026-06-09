@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { TFile } from "obsidian";
-import type { App, BasesViewConfig } from "obsidian";
+import type { App, BasesViewConfig, TFile } from "obsidian";
 import { VIEW_CONFIG_KEYS } from "../src/constants";
 import { applyManualViewItems } from "../src/bases/manualItems";
-import type { BaseboardViewSnapshot } from "../src/types";
+import type { CanvasBasesViewSnapshot } from "../src/types";
+import { makeMockTFile } from "./obsidianMockUtils";
 
 describe("applyManualViewItems", () => {
 	it("adds pinned markdown notes as manual cards without duplicating visible notes", () => {
@@ -65,9 +65,32 @@ describe("applyManualViewItems", () => {
 		]);
 		expect(snapshot.manualGroups).toEqual([]);
 	});
+
+	it("renders custom zones as manual group frames from zone config", () => {
+		const snapshot = applyManualViewItems(makeApp([]), baseSnapshot(), makeConfig({
+			[VIEW_CONFIG_KEYS.zones]: [
+				{
+					origin: "custom",
+					id: "zone-1",
+					label: "Triage",
+					property: "note.status",
+					value: "Doing",
+					updateMode: "replace",
+					valueType: "string",
+				},
+			],
+		}));
+
+		expect(snapshot.manualGroups).toEqual([
+			{
+				id: "zone-1",
+				label: "Triage",
+			},
+		]);
+	});
 });
 
-function baseSnapshot(): BaseboardViewSnapshot {
+function baseSnapshot(): CanvasBasesViewSnapshot {
 	return {
 		viewName: "Planning",
 		totalEntries: 1,
@@ -100,15 +123,7 @@ function makeApp(files: TFile[]): App {
 }
 
 function makeTFile(path: string): TFile {
-	const file = Object.create(TFile.prototype) as TFile;
-	const name = path.split("/").pop() ?? path;
-	Object.assign(file, {
-		path,
-		name,
-		basename: name.replace(/\.md$/u, ""),
-		extension: "md",
-	});
-	return file;
+	return makeMockTFile(path);
 }
 
 function makeConfig(values: Record<string, unknown>): BasesViewConfig {

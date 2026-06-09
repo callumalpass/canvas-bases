@@ -9,6 +9,7 @@ import {
 	ensureStarterFiles,
 	getStarterFileSpecs,
 } from "../src/bootstrap/starterFiles";
+import { makeMockTFile } from "./obsidianMockUtils";
 
 describe("starter files", () => {
 	it("creates starter files, opens the start note, and configures property links", async () => {
@@ -18,44 +19,98 @@ describe("starter files", () => {
 
 		expect(openedFiles).toEqual([STARTER_NOTE_PATH]);
 		expect(vault.createdFolders).toEqual([
-			"Baseboard",
-			"Baseboard/Canvases",
-			"Baseboard/Views",
-			"Baseboard/Demo",
+			"Canvas Bases",
+			"Canvas Bases/Canvases",
+			"Canvas Bases/Views",
+			"Canvas Bases/Demo",
 		]);
-		expect(vault.contents.get(STARTER_NOTE_PATH)).toContain(
-			"Baseboard will not recreate it automatically"
+		const startNote = vault.contents.get(STARTER_NOTE_PATH) ?? "";
+		const defaultEmbed = "![[Canvas Bases/Views/Getting Started.base]]";
+		const zonesEmbed = "![[Canvas Bases/Views/Getting Started.base#Assignment zones]]";
+		expect(startNote).toContain("Canvas Bases will not recreate it automatically");
+		expect(startNote).toContain(defaultEmbed);
+		expect(startNote).toContain(zonesEmbed);
+		expect(startNote).not.toContain(`${defaultEmbed}\n\n${zonesEmbed}`);
+		expect(startNote.indexOf(defaultEmbed)).toBeLessThan(
+			startNote.indexOf("## How note links work")
 		);
-		expect(vault.contents.get(STARTER_NOTE_PATH)).toContain(
-			"![[Baseboard/Views/Getting Started.base]]"
+		expect(startNote.indexOf("## How note links work")).toBeLessThan(
+			startNote.indexOf(zonesEmbed)
 		);
-		expect(vault.contents.get(STARTER_NOTE_PATH)).toContain(
-			"## How note links work"
+		expect(startNote.indexOf(zonesEmbed)).toBeLessThan(
+			startNote.indexOf("Grouping still comes from the Base view")
 		);
-		expect(vault.contents.get(STARTER_NOTE_PATH)).toContain(
-			"Baseboard writes a Markdown wiki link"
-		);
-		expect(vault.contents.get(STARTER_NOTE_PATH)).toContain(
-			"[[Baseboard/Demo/Arrange the board]]"
-		);
-		expect(vault.contents.get(STARTER_NOTE_PATH)).not.toContain(
-			"not from TaskNotes"
+		expect(startNote).toContain("## 2. Try active zones and grouping");
+		expect(startNote).toContain("switches the board to columns");
+		expect(startNote).toContain("review: Needs review");
+		expect(startNote).toContain("Canvas Bases writes a Markdown wiki link");
+		expect(startNote).toContain("[[Canvas Bases/Demo/Arrange the board]]");
+		expect(startNote).toContain("canvas-bases-demo");
+		expect(startNote).not.toContain("What to try in this view");
+		expect(startNote).not.toContain("Move and resize the cards");
+		expect(startNote).not.toContain("not from TaskNotes");
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"canvasBasesEdgeMode: properties"
 		);
 		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
-			"baseboardEdgeMode: properties"
+			"canvasBasesEdgeProperties: related"
 		);
 		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
-			"baseboardEdgeProperties: related"
+			"canvasBasesTaskNotesRelationships: none"
 		);
 		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
-			"baseboardTaskNotesRelationships: none"
+			'name: "Assignment zones"'
 		);
 		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
-			"baseboardNodeWidth: 360"
+			"canvasBasesZones:"
 		);
 		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
-			"baseboardNodeHeight: 190"
+			"origin: bases"
 		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"action: set-property"
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"property: note.status"
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"id: review-needed"
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"property: note.review"
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"value: Needs review"
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			'color: "#f59e0b"'
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"canvas-bases-manual-group-57hwgp:"
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain("x: 444");
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain("y: 316");
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain("canvas-bases-text-1yj0j87:");
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"updateMode: replace"
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"valueType: string"
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"canvasBasesTextCards:"
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"canvasBasesNodeWidth: 360"
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"canvasBasesNodeHeight: 190"
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain(
+			"canvas-bases-file-1l8qzm:"
+		);
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain("x: 560");
+		expect(vault.contents.get(STARTER_BASE_PATH)).toContain("y: 250");
 		expect(getStarterFileSpecs().map((spec) => vault.contents.get(spec.path))).toSatisfy(
 			(contents: Array<string | undefined>) =>
 				contents.every((content) => content?.includes("related") ?? false)
@@ -191,10 +246,5 @@ class FakeVault {
 }
 
 function makeTFile(path: string): TFile {
-	const file = Object.create(TFile.prototype) as TFile;
-	file.path = path;
-	file.name = path.split("/").pop() ?? path;
-	file.basename = file.name.replace(/\.[^.]+$/u, "");
-	file.extension = file.name.includes(".") ? file.name.split(".").pop() : "";
-	return file;
+	return makeMockTFile(path);
 }

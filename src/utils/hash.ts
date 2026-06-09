@@ -9,6 +9,6 @@ export function hashString(value: string): string {
 	return (hash >>> 0).toString(36);
 }
 
-export function stableBaseboardId(scope: string, value: string): string {
-	return `bb-${scope}-${hashString(value)}`;
+export function stableCanvasBasesId(scope: string, value: string): string {
+	return `canvas-bases-${scope}-${hashString(value)}`;
 }

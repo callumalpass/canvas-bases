@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { App } from "obsidian";
-import { TFile } from "obsidian";
+import type { App, TFile } from "obsidian";
 import { collectRelationships } from "../src/canvas/relationships";
-import type { BaseboardViewSnapshot, MaterializeOptions } from "../src/types";
+import type { CanvasBasesViewSnapshot, MaterializeOptions } from "../src/types";
+import { makeMockTFile } from "./obsidianMockUtils";
 
 const baseOptions: MaterializeOptions = {
-	canvasPath: "Baseboards/Test.canvas",
+	canvasPath: "Canvas Bases/Test.canvas",
 	layout: "columns",
 	edgeMode: "properties",
 	edgeProperties: ["related"],
@@ -46,7 +46,7 @@ describe("collectRelationships", () => {
 	});
 });
 
-function snapshot(): BaseboardViewSnapshot {
+function snapshot(): CanvasBasesViewSnapshot {
 	return {
 		viewName: "Planning",
 		totalEntries: 2,
@@ -79,10 +79,5 @@ function makeApp(files: TFile[], caches: Record<string, unknown>): App {
 }
 
 function makeTFile(path: string): TFile {
-	const file = Object.create(TFile.prototype) as TFile;
-	file.path = path;
-	file.name = path.split("/").pop() ?? path;
-	file.basename = file.name.replace(/\.md$/u, "");
-	file.extension = "md";
-	return file;
+	return makeMockTFile(path);
 }

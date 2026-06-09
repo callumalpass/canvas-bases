@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { TFile } from "obsidian";
-import type { App, BasesQueryResult, BasesViewConfig } from "obsidian";
+import type { App, BasesQueryResult, BasesViewConfig, TFile } from "obsidian";
 import {
 	buildActiveBasesViewKey,
 	getActiveBasesViewSource,
 } from "../src/bases/activeBasesView";
+import { makeMockTFile } from "./obsidianMockUtils";
 
 describe("getActiveBasesViewSource", () => {
-	it("reads the active native Bases view data as a Baseboard source", () => {
+	it("reads the active native Bases view data as a Canvas Bases source", () => {
 		const baseFile = makeTFile("Views/Planning.base", "Planning", "base");
 		const alphaFile = makeTFile("Tasks/Alpha.md", "Alpha", "md");
 		const betaFile = makeTFile("Tasks/Beta.md", "Beta", "md");
@@ -70,13 +70,11 @@ describe("getActiveBasesViewSource", () => {
 });
 
 function makeTFile(path: string, basename: string, extension: string): TFile {
-	const file = Object.create(TFile.prototype) as TFile;
-	Object.assign(file, {
-		path,
-		basename,
-		name: `${basename}.${extension}`,
-		extension,
-	});
+	const file = makeMockTFile(path);
+	if (file.basename !== basename || file.extension !== extension) {
+		throw new Error(`Mock file metadata does not match ${basename}.${extension}`);
+	}
+
 	return file;
 }
 

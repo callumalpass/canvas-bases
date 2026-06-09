@@ -2,9 +2,10 @@ import type { TranslationTree } from "../types";
 
 export const ja: TranslationTree = {
 	common: {
-		appName: "Baseboard",
+		appName: "Canvas Bases",
 		automatic: "自動",
 		cancel: "キャンセル",
+		close: "閉じる",
 		card: {
 			one: "{count} 枚のカード",
 			other: "{count} 枚のカード"
@@ -34,17 +35,26 @@ export const ja: TranslationTree = {
 		addedDependency: "依存関係を追加しました: {label}。",
 		addedProjectRelationship: "プロジェクトの関係を追加しました: {label}。",
 		addedPropertyLink: "{property} を追加しました: {source} -> {target}。",
-		baseboardWaitingForBasesData: "Baseboard は Bases のデータを待機しています。",
+		activeGroupDisabled: "ゾーンを削除しました: {label}。",
+		activeGroupEnabled: "ゾーンを有効にしました: {label}。",
+		activeGroupReadOnly: "このゾーンは書き込み可能なノートプロパティを更新できません。",
+		activeGroupTaskUpdateUnavailable: "TaskNotes は Canvas Bases からそのタスクプロパティを更新できません。",
+		activeGroupUpdated: "{property} を {value} に更新しました。",
+		activeGroupActionRun: "ゾーンアクションを実行しました: {action}。",
+		activeGroupActionNotTask: "このゾーンアクションは TaskNotes タスクでのみ使えます。",
+		activeGroupActionUnavailable: "この TaskNotes ゾーンアクションは利用できません。",
+		canvasBasesWaitingForBasesData: "Canvas Bases は Bases のデータを待機しています。",
 		couldNotAddPropertyLink: "プロパティリンクを追加できませんでした: {message}",
 		couldNotFind: "{path} が見つかりませんでした。",
 		couldNotRemovePropertyLink: "プロパティリンクを削除できませんでした: {message}",
+		couldNotUpdateActiveGroup: "ゾーンの値を更新できませんでした: {message}",
 		couldNotUpdateLink: "リンクを更新できませんでした: {message}",
 		languageChanged: "言語を {language} に変更しました。",
 		linkActionUnavailable: "これらのノートではそのリンク操作は利用できません。",
 		noLinkedCanvas: "{source} にはまだリンクされたキャンバスがありません。",
 		noVisibleLinkProperties: "リンクに利用できる表示中のノートプロパティはありません。",
-		obsidianVersionRequired: "Baseboard には Obsidian 1.10.1 以上が必要です。",
-		openBaseboardViewFirst: "先に Baseboard ビューを開いてください。",
+		obsidianVersionRequired: "Canvas Bases には Obsidian 1.10.1 以上が必要です。",
+		openCanvasBasesViewFirst: "先に Canvas Bases ビューを開いてください。",
 		openBasesViewFirst: "先に Bases ビューを開いてください。",
 		resolveInlineEditorConflict: "リンクを変更する前にインラインエディターの競合を解決してください。",
 		removedDependency: "依存関係を削除しました。",
@@ -53,7 +63,7 @@ export const ja: TranslationTree = {
 		chooseCanvasPath: "キャンバスのパスを選択してください。",
 		chooseLinkProperty: "このリンクに使用するノートのプロパティを選択してください。",
 		starterFilesBlocked: "スターター用のパスが別のファイルまたはフォルダで既に使われているため、スターターファイルを作成できませんでした。",
-		starterFilesReady: "スターターファイルを Baseboard/ に用意しました。",
+		starterFilesReady: "スターターファイルを Canvas Bases/ に用意しました。",
 		updatedCanvas: "{path} を更新しました: {nodes} ノード、{edges} エッジ。"
 	},
 	settings: {
@@ -61,7 +71,7 @@ export const ja: TranslationTree = {
 			heading: "既定値",
 			canvasFolder: {
 				name: "既定のキャンバスフォルダ",
-				description: "Baseboard ビューにキャンバスのパスがまだ設定されていない場合に使用するフォルダ。"
+				description: "Canvas Bases ビューにキャンバスのパスがまだ設定されていない場合に使用するフォルダ。"
 			},
 			layout: {
 				name: "既定のレイアウト",
@@ -77,14 +87,14 @@ export const ja: TranslationTree = {
 			},
 			bodyEditor: {
 				name: "本文エディタを表示",
-				description: "ライブ Baseboard カードに編集可能なノート本文を既定で表示します。"
+				description: "ライブ Canvas Bases カードに編集可能なノート本文を既定で表示します。"
 			}
 		},
 		tasknotes: {
 			heading: "TaskNotes",
 			integration: {
 				name: "TaskNotes 連携",
-				description: "新しい Baseboard ビューの既定の TaskNotes 動作。"
+				description: "新しい Canvas Bases ビューの既定の TaskNotes 動作。"
 			},
 			badges: {
 				name: "タスクバッジを表示",
@@ -103,11 +113,11 @@ export const ja: TranslationTree = {
 			heading: "更新ルール",
 			preservePositions: {
 				name: "位置を保持",
-				description: "キャンバスを更新する際に、既存の Baseboard ノードの位置を保持します。"
+				description: "キャンバスを更新する際に、既存の Canvas Bases ノードの位置を保持します。"
 			},
 			removeMissingNotes: {
 				name: "見つからないノートを削除",
-				description: "現在の Base の結果に表示されなくなった Baseboard ノードを削除します。"
+				description: "現在の Base の結果に表示されなくなった Canvas Bases ノードを削除します。"
 			},
 			nodeWidth: {
 				name: "ノードの幅",
@@ -120,9 +130,9 @@ export const ja: TranslationTree = {
 		},
 		language: {
 			heading: "インターフェース言語",
-			description: "Baseboard のコマンド、設定、通知、ビューの言語を変更します。",
+			description: "Canvas Bases のコマンド、設定、通知、ビューの言語を変更します。",
 			name: "UI 言語",
-			dropdownDescription: "Baseboard のインターフェーステキストに使用する言語を選択します。"
+			dropdownDescription: "Canvas Bases のインターフェーステキストに使用する言語を選択します。"
 		}
 	},
 	options: {
@@ -151,7 +161,9 @@ export const ja: TranslationTree = {
 			blocking: "ブロック中",
 			subtasks: "サブタスク",
 			estimate: "見積もり",
-			tracked: "追跡中"
+			tracked: "追跡中",
+			tracking: "時間記録中",
+			active: "アクティブ"
 		},
 		relationships: {
 			blocks: "ブロックする",
@@ -188,7 +200,7 @@ export const ja: TranslationTree = {
 			description: "生成されたキャンバスにタスクの関係エッジを追加します。"
 		},
 		preservePositions: {
-			description: "キャンバスに既に存在する Baseboard ノードの位置を保持します。"
+			description: "キャンバスに既に存在する Canvas Bases ノードの位置を保持します。"
 		},
 		createCanvas: "キャンバスを作成"
 	},
@@ -198,6 +210,7 @@ export const ja: TranslationTree = {
 			pinNote: "ノートをピン留め",
 			addCard: "カードを追加",
 			addGroup: "グループを追加",
+			addZone: "ゾーンを追加",
 			createCanvas: "キャンバスを作成",
 			updateCanvas: "キャンバスを更新",
 			openCanvas: "キャンバスを開く",
@@ -213,16 +226,67 @@ export const ja: TranslationTree = {
 			textCardTitle: "カード",
 			cardActions: "カード操作",
 			groupActions: "グループ操作",
+			color: "色",
+			noteColor: "ノートの色",
+			cardColor: "カードの色",
 			editCard: "カードを編集",
 			writeNote: "ノートを書く",
 			linkFromNote: "このノートからリンク"
 		},
+		linkDrag: {
+			releaseToLink: "{target} にリンクするには離します",
+			dragToCard: "別のノートカードにドロップ",
+			cannotLinkHere: "ここにはリンクできません"
+		},
 		group: {
+			active: "ゾーン",
+			activeTitle: "割り当てゾーン",
+			zoneTitle: "割り当てゾーン",
+			label: "ラベル",
+			action: "ドロップ時のアクション",
+			actionSetProperty: "プロパティを更新",
+			actionCompleteTask: "タスクを完了",
+			actionUncompleteTask: "タスクを未完了にする",
+			actionArchiveTask: "タスクをアーカイブ",
+			actionUnarchiveTask: "タスクのアーカイブを解除",
+			actionStartTimeTracking: "時間記録を開始",
+			actionStopTimeTracking: "時間記録を停止",
+			actionStartPomodoro: "ポモドーロを開始",
+			actionAssignPomodoro: "現在のポモドーロに割り当て",
+			actionCompleteRecurring: "繰り返し予定を完了",
+			actionSkipRecurring: "繰り返し予定をスキップ",
+			property: "プロパティ",
+			value: "値",
+			updateMode: "更新モード",
+			valueType: "値の種類",
+			updateModeReplace: "置換",
+			updateModeAppend: "追加",
+			updateModeAppendUnique: "重複なしで追加",
+			updateModeRemove: "削除",
+			updateModeClear: "クリア",
+			valueTypeAuto: "自動",
+			valueTypeString: "テキスト",
+			valueTypeNumber: "数値",
+			valueTypeBoolean: "真偽値",
+			valueTypeDate: "日付",
+			valueTypeList: "リスト",
+			color: "色",
+			writeRule: "書き込みルール",
+			groupRuleLocked: "このゾーンは現在の Base グループに従います。別のプロパティを書き込むにはカスタムゾーンを使用してください。",
+			dropResult: "ドロップ結果",
+			previewWrite: "{mode}: {property} -> {value}.",
+			previewClear: "{mode}: {property}.",
+			previewAction: "{action}.",
+			emptyValue: "空の値",
+			propertyRequired: "保存する前にプロパティを選択してください。",
 			createTitle: "グループを作成",
 			defaultName: "グループ",
+			defaultZoneName: "ゾーン",
 			create: "作成",
+			createZone: "ゾーンを作成",
 			renameTitle: "グループ名を変更",
-			rename: "名前を変更"
+			rename: "名前を変更",
+			saveActiveGroup: "ゾーンを保存"
 		},
 		tooltips: {
 			dragGroup: "グループをドラッグ",
@@ -240,15 +304,25 @@ export const ja: TranslationTree = {
 			openNote: "ノートを開く",
 			unpinFromBoard: "ボードからピン留めを解除",
 			removeCard: "カードを削除",
+			setCardColor: "色を設定",
+			clearCardColor: "色をクリア",
 			addPinnedNote: "ピン留めノートを追加",
 			addCard: "カードを追加",
+			activateGroup: "割り当てゾーンとして使う",
+			configureActiveGroup: "ゾーンを設定",
+			deactivateActiveGroup: "ゾーンを削除",
 			renameGroup: "グループ名を変更",
 			removeGroup: "グループを削除",
+			fitGroupToCards: "グループをカードに合わせる",
 			createGroupFromSelection: "選択範囲からグループを作成",
+			createZoneFromSelection: "選択範囲からゾーンを作成",
 			sourceBlocksTarget: "{source} は {target} をブロックします",
 			targetBlocksSource: "{target} は {source} をブロックします",
 			targetSubtaskOfSource: "{target} は {source} のサブタスクです",
 			sourceSubtaskOfTarget: "{source} は {target} のサブタスクです",
+			dependencyLinks: "依存関係",
+			subtaskLinks: "サブタスク",
+			propertyLinks: "プロパティリンク",
 			addPropertyLink: "{property} を追加: {source} -> {target}",
 			chooseProperty: "プロパティを選択...",
 			openPath: "{name} を開く",

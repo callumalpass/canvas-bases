@@ -1,98 +1,121 @@
-# Baseboard
+# Canvas Bases
 
-Baseboard is an Obsidian plugin for Bases and Canvas.
+Canvas Bases is an Obsidian plugin for Bases and Canvas, and the TaskNotes
+canvas companion plugin.
 
-It adds a Bases layout named **Baseboard** and commands that create or update a
-JSON Canvas file from the active Bases view. Bases remains the source for
-queries, filters, sorting, grouping, and displayed properties. The generated
-`.canvas` file is a snapshot that can be updated from the current view.
+It turns a live Obsidian Bases view into a canvas-style working board. Bases
+still owns the query: filters, sorting, grouping, and visible properties stay in
+the `.base` file. Canvas Bases adds spatial layout, cards, groups, relationship
+edges, assignment zones, and JSON Canvas export on top of that result set.
 
-![Baseboard workflow](media/readme/baseboard-informational.gif)
+![Canvas Bases workflow](media/readme/canvas-bases-informational.gif)
+
+## What It Does
+
+- Adds a **Canvas Bases** layout to Obsidian Bases.
+- Shows Base rows as draggable, resizable file cards on a board.
+- Uses Base grouping as board frames, while ungrouped views place cards directly
+  on the canvas.
+- Persists board geometry, colors, manual cards, groups, zones, and linked
+  Canvas options in Canvas Bases-owned view config keys.
+- Creates or updates `.canvas` snapshots from the active Bases view, including
+  native and third-party Bases layouts.
+- Preserves manual Canvas nodes and edges that Canvas Bases does not own when
+  updating a generated Canvas.
+- Integrates with TaskNotes when available, while degrading cleanly when it is
+  absent.
 
 ## Screenshots
 
-Baseboard layout embedded in a daily note:
+Canvas Bases layout embedded in a daily note:
 
-![Baseboard embedded in a note](media/readme/baseboard-embedded-view.png)
+![Canvas Bases embedded in a note](media/readme/canvas-bases-embedded-view.png)
 
 Dragging a link from one card to another:
 
-![Baseboard link drag](media/readme/baseboard-link-drag.png)
+![Canvas Bases link drag](media/readme/canvas-bases-link-drag.png)
 
 Rendered relationship edge on the board:
 
-![Baseboard relationship edge](media/readme/baseboard-relationship-edge.png)
+![Canvas Bases relationship edge](media/readme/canvas-bases-relationship-edge.png)
 
 ## Requirements
 
 - Obsidian 1.10.1 or newer.
-- The Obsidian Bases core plugin.
-- The Obsidian Canvas core plugin when opening or editing generated `.canvas`
-  files.
-- TaskNotes is optional. TaskNotes-specific badges, actions, and relationship
-  edges are skipped when TaskNotes is not available or does not expose the
-  required runtime capability.
+- Obsidian Bases.
+- Obsidian Canvas when opening or editing generated `.canvas` files.
+- TaskNotes is optional. TaskNotes badges, task menus, task relationship edges,
+  and task zone actions are skipped when TaskNotes is unavailable or does not
+  expose the required runtime capability.
 
-## Workflows
+## Using The Canvas Bases Layout
 
-### Baseboard Bases Layout
+Open a `.base` file, add a view, and set its layout to **Canvas Bases**.
+Configure the query with normal Bases controls, then use Canvas Bases for the
+spatial layer.
 
-1. Open or create a `.base` file.
-2. Add a view and set its layout to **Baseboard**.
-3. Configure the Base filters, sort order, grouping, and displayed properties.
-4. Use the Baseboard toolbar to create, update, open, or reset the linked
-   canvas.
+The board supports:
 
-In this layout, Base rows are shown as file cards on a canvas-like surface. Base
-groups become group frames. The Base sort order is used when cards are first
-placed.
+- Dragging and resizing file cards, group frames, text cards, and manual groups.
+- Background panning, zooming from 10% to 200%, fit view, and reset view.
+- Inline Markdown body editing on file cards when **Show body editor** is
+  enabled. Edits are debounced and saved back to the note.
+- Card colors that carry into generated Canvas nodes.
+- Pinned notes that stay on the board even when they are not in the Base result.
+- Text cards for board-local notes.
+- Marquee selection for creating manual groups or custom assignment zones.
+- Double-clicking file cards to open the underlying note.
 
-Cards and groups can be dragged and resized. Manual group frames can also be
-created, renamed, and removed without changing the underlying Base query.
-Coordinates and dimensions are stored in the `.base` view config. The same
-stored geometry is used when the linked `.canvas` file is created or updated.
+The toolbar can pin notes, add text cards, add manual groups, add assignment
+zones, create or update the linked Canvas, open the linked Canvas, and reset
+stored layout positions.
 
-### Materialize Any Active Bases View
+## Assignment Zones
 
-Baseboard also works from native and third-party Bases layouts. Open a Bases
-view and run:
+Assignment zones are board frames that run a drop action when a note card is
+dropped into them.
+
+Bases-derived zones update the Base group property. Custom zones can be created
+from the toolbar or from a marquee selection and can write a different
+property. Property zones can replace, append, append uniquely, remove, or clear
+values, with automatic or explicit text, number, boolean, date, and list value
+handling.
+
+With TaskNotes available, custom zones can also complete or uncomplete tasks,
+archive or unarchive tasks, start or stop time tracking, start or assign a
+Pomodoro, and complete or skip a recurring occurrence.
+
+## Creating Canvas Snapshots
+
+Canvas Bases can create a JSON Canvas from either the Canvas Bases layout or any
+active native or third-party Bases layout.
+
+Run:
 
 ```text
-Baseboard: Create canvas from current bases view
+Canvas Bases: Create canvas from current bases view
 ```
 
-The command opens a modal for the canvas path, layout, edge mode, node size, and
-update rules. Saved options are reused by:
+The modal lets you choose the Canvas path, layout, edge source, TaskNotes
+relationship edges, node size, and update rules. Saved options are reused by:
 
 ```text
-Baseboard: Update linked canvas
-Baseboard: Open linked canvas
+Canvas Bases: Update linked canvas
+Canvas Bases: Open linked canvas
 ```
 
-Options for non-Baseboard views are stored in Baseboard plugin data. Options for
-the Baseboard layout are stored in the `.base` view config.
+Generated Canvas files use stable Canvas Bases-owned node and edge IDs.
+Updating a Canvas can preserve existing Canvas Bases positions, remove Canvas
+Bases-owned nodes that no longer appear in the Base result, and keep unrelated
+manual Canvas content intact.
 
-## Board Behavior
+The generated `.canvas` file is a snapshot, not a live query. Update it again
+after changing the Base result set or board layout.
 
-- Each Base result row becomes a file card.
-- Base groups become group frames.
-- Displayed Base properties are shown on cards in the same order as the Base
-  properties menu.
-- Inline note-body editing is available when **Show body editor** is enabled.
-  Edits are debounced and saved back to the Markdown file.
-- The board supports background panning, zoom in/out, fit view, reset view,
-  dragging, resizing, and double-click-to-open on file cards.
-- Notes can be pinned manually to the board even when they are not in the
-  current Base result.
-- Text cards and manual groups can be added to a Baseboard view. Manual groups
-  behave like Canvas group frames: removing the frame does not remove the cards.
-- Manual notes, manual groups, text cards, and stored geometry are written to
-  Baseboard-owned keys in the `.base` view config.
+## Edges And Links
 
-## Edges
-
-Baseboard can render and materialize edges when both endpoint notes are present
-on the board.
+Canvas Bases renders live board edges and writes Canvas edges when both endpoint
+notes are present on the board.
 
 Edge sources:
 
@@ -107,56 +130,31 @@ Property edge names are configured as a comma-separated list, for example:
 depends_on, related
 ```
 
-When TaskNotes integration is enabled, Baseboard can also add TaskNotes
-dependency edges, or dependency and subtask edges. Dragging from the link handle
-on one file card to another opens a menu for supported TaskNotes relationships
-and configured property links.
+Dragging from a card's link handle to another card opens a relationship menu.
+Canvas Bases can create configured frontmatter property links, and when
+TaskNotes is available it can also create supported dependency or subtask relationships.
+Existing removable property and TaskNotes relationships can be removed from the
+edge context menu.
 
-Existing relationship edges can be opened from their context menu. Removable
-TaskNotes and property relationships can also be removed from that menu.
+## TaskNotes Integration
 
-## Canvas Updates
+TaskNotes support is optional and capability-based. When available, Canvas Bases
+can show TaskNotes status, priority, due date, blocker, recurrence, time
+estimate, tracked-time, and active-tracking badges on cards. It can also use
+TaskNotes task menus from card actions and render dependency or subtask edges on
+the live board and generated Canvas.
 
-Generated canvases use stable Baseboard-owned node and edge IDs. This lets
-Baseboard update an existing `.canvas` file without replacing unrelated manual
-items.
+If TaskNotes is disabled, absent, or missing a capability, Canvas Bases keeps the
+Bases and Canvas workflows working without TaskNotes-only behavior.
 
-Update behavior:
+## Commands
 
-- Existing non-Baseboard canvas nodes and edges are preserved.
-- Existing Baseboard card positions can be preserved.
-- Baseboard-owned nodes missing from the current Base result can be removed when
-  **Remove missing notes** is enabled.
-- Baseboard layout choices are `columns`, `rows`, and `grid`.
-- The Baseboard layout uses the current live board geometry when updating its
-  linked canvas.
-
-The `.canvas` file is not a live query. Re-run **Update linked canvas** after
-changing the Base result set or board layout.
-
-## Baseboard View Config Keys
-
-These keys are written only for Baseboard behavior:
-
-| Key | Purpose |
-| --- | --- |
-| `baseboardCanvasPath` | Linked `.canvas` path. |
-| `baseboardLayout` | Initial materialization layout: `columns`, `rows`, or `grid`. |
-| `baseboardEdgeMode` | Edge source: `none`, `wikilinks`, `properties`, or `all`. |
-| `baseboardEdgeProperties` | Comma-separated property names used for property edges. |
-| `baseboardShowBodyEditor` | Shows editable note bodies on file cards. |
-| `baseboardTaskNotesMode` | TaskNotes integration mode: `auto` or `off`. |
-| `baseboardTaskNotesShowBadges` | Shows TaskNotes badges on file cards. |
-| `baseboardTaskNotesShowActions` | Uses TaskNotes actions in card menus when available. |
-| `baseboardTaskNotesRelationships` | TaskNotes edge mode: `none`, `dependencies`, or `all`. |
-| `baseboardPreservePositions` | Keeps existing Baseboard node positions when updating a canvas. |
-| `baseboardRemoveMissingNodes` | Removes Baseboard-owned nodes no longer in the Base result. |
-| `baseboardNodeWidth` | Default width for file cards. |
-| `baseboardNodeHeight` | Default height for file cards. |
-| `baseboardNodePositions` | Stored card and group geometry for the live board. |
-| `baseboardManualNotePaths` | Notes manually pinned to the board. |
-| `baseboardManualGroups` | Manual group frames. |
-| `baseboardTextCards` | Manual text cards. |
+```text
+Canvas Bases: Create canvas from current bases view
+Canvas Bases: Update linked canvas
+Canvas Bases: Open linked canvas
+Canvas Bases: Create starter files
+```
 
 ## Development
 
@@ -186,27 +184,26 @@ Build and copy the plugin into the configured test vaults:
 npm run build:test
 ```
 
-Reload Baseboard in a running Obsidian test vault:
+Reload Canvas Bases in a running Obsidian test vault:
 
 ```bash
-obsidian vault=test plugin:reload id=baseboard
+obsidian vault=test plugin:reload id=canvas-bases
 ```
 
 For code or CSS changes, run `npm run build:test` and reload the plugin before
 manual verification.
 
-## Demo Media
+## Media
 
-The README GIF and static screenshots are stored in:
+README media lives in:
 
 ```text
 media/readme/
 ```
 
-The local source captures used to create these files are under the following
-paths in this checkout. They are not required to use the plugin.
+The local source captures used to create the README media are kept under:
 
 ```text
-media/baseboard-release-video/
-media/baseboard-demo/
+media/canvas-bases-release-video/
+media/canvas-bases-demo/
 ```

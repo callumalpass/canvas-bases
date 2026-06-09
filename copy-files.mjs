@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const pluginId = "baseboard";
+const pluginId = "canvas-bases";
 const defaultPaths = [
 	join(homedir(), "testvault", "test", ".obsidian", "plugins", pluginId),
 	join(homedir(), "testvault", "public_test", ".obsidian", "plugins", pluginId),

@@ -1,7 +1,7 @@
 import { Modal, Setting, Notice } from "obsidian";
 import type { App } from "obsidian";
 import type {
-	BaseboardViewSnapshot,
+	CanvasBasesViewSnapshot,
 	MaterializeOptions,
 } from "../types";
 import {
@@ -19,7 +19,7 @@ type TranslatePluralFn = (key: string, count: number, params?: InterpolationValu
 
 export class MaterializeCanvasModal extends Modal {
 	private options: MaterializeOptions;
-	private readonly snapshot: BaseboardViewSnapshot;
+	private readonly snapshot: CanvasBasesViewSnapshot;
 	private readonly t: TranslateFn;
 	private readonly tp: TranslatePluralFn;
 	private readonly onSubmit: SubmitHandler;
@@ -27,7 +27,7 @@ export class MaterializeCanvasModal extends Modal {
 
 	constructor(
 		app: App,
-		snapshot: BaseboardViewSnapshot,
+		snapshot: CanvasBasesViewSnapshot,
 		options: MaterializeOptions,
 		t: TranslateFn,
 		tp: TranslatePluralFn,
@@ -44,7 +44,7 @@ export class MaterializeCanvasModal extends Modal {
 	onOpen(): void {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.addClass("baseboard-modal");
+		contentEl.addClass("canvas-bases-modal");
 
 		contentEl.createEl("h2", { text: this.t("modal.title") });
 		this.renderSummary(contentEl);
@@ -60,13 +60,13 @@ export class MaterializeCanvasModal extends Modal {
 	}
 
 	private renderSummary(containerEl: HTMLElement): void {
-		const summaryEl = containerEl.createDiv({ cls: "baseboard-modal__summary" });
+		const summaryEl = containerEl.createDiv({ cls: "canvas-bases-modal__summary" });
 		summaryEl.createDiv({
-			cls: "baseboard-modal__summary-title",
+			cls: "canvas-bases-modal__summary-title",
 			text: this.snapshot.viewName,
 		});
 		summaryEl.createDiv({
-			cls: "baseboard-modal__summary-meta",
+			cls: "canvas-bases-modal__summary-meta",
 			text: [
 				this.tp("common.note", this.snapshot.totalEntries),
 				this.tp(
@@ -219,7 +219,7 @@ export class MaterializeCanvasModal extends Modal {
 	}
 
 	private renderActions(containerEl: HTMLElement): void {
-		const actionsEl = containerEl.createDiv({ cls: "baseboard-modal__actions" });
+		const actionsEl = containerEl.createDiv({ cls: "canvas-bases-modal__actions" });
 		const cancelButton = actionsEl.createEl("button", { text: this.t("common.cancel") });
 		cancelButton.onClickEvent(() => this.close());
 

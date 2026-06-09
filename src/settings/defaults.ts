@@ -1,26 +1,26 @@
 import type {
-	BaseboardEdgeMode,
-	BaseboardLayout,
-	BaseboardSettings,
-	BaseboardTaskNotesMode,
-	BaseboardTaskNotesRelationshipMode,
+	CanvasBasesEdgeMode,
+	CanvasBasesLayout,
+	CanvasBasesSettings,
+	CanvasBasesTaskNotesMode,
+	CanvasBasesTaskNotesRelationshipMode,
 	MaterializeOptions,
 	StoredMaterializeOptions,
 } from "../types";
 
-const LAYOUTS = new Set<BaseboardLayout>(["columns", "rows", "grid"]);
-const EDGE_MODES = new Set<BaseboardEdgeMode>(["none", "wikilinks", "properties", "all"]);
-const TASKNOTES_MODES = new Set<BaseboardTaskNotesMode>(["auto", "off"]);
-const TASKNOTES_RELATIONSHIP_MODES = new Set<BaseboardTaskNotesRelationshipMode>([
+const LAYOUTS = new Set<CanvasBasesLayout>(["columns", "rows", "grid"]);
+const EDGE_MODES = new Set<CanvasBasesEdgeMode>(["none", "wikilinks", "properties", "all"]);
+const TASKNOTES_MODES = new Set<CanvasBasesTaskNotesMode>(["auto", "off"]);
+const TASKNOTES_RELATIONSHIP_MODES = new Set<CanvasBasesTaskNotesRelationshipMode>([
 	"none",
 	"dependencies",
 	"all",
 ]);
 
-export const DEFAULT_SETTINGS: BaseboardSettings = {
+export const DEFAULT_SETTINGS: CanvasBasesSettings = {
 	locale: "system",
 	starterFilesCreated: false,
-	defaultCanvasFolder: "Baseboards",
+	defaultCanvasFolder: "Canvas Bases",
 	defaultLayout: "columns",
 	defaultEdgeMode: "none",
 	defaultEdgeProperties: "",
@@ -37,8 +37,8 @@ export const DEFAULT_SETTINGS: BaseboardSettings = {
 };
 
 export function normalizeSettings(
-	input: Partial<BaseboardSettings> | null | undefined
-): BaseboardSettings {
+	input: Partial<CanvasBasesSettings> | null | undefined
+): CanvasBasesSettings {
 	const settings = input ?? {};
 
 	return {
@@ -77,38 +77,38 @@ export function normalizeSettings(
 
 export function normalizeLayout(
 	value: unknown,
-	fallback: BaseboardLayout = DEFAULT_SETTINGS.defaultLayout
-): BaseboardLayout {
-	return typeof value === "string" && LAYOUTS.has(value as BaseboardLayout)
-		? (value as BaseboardLayout)
+	fallback: CanvasBasesLayout = DEFAULT_SETTINGS.defaultLayout
+): CanvasBasesLayout {
+	return typeof value === "string" && LAYOUTS.has(value as CanvasBasesLayout)
+		? (value as CanvasBasesLayout)
 		: fallback;
 }
 
 export function normalizeEdgeMode(
 	value: unknown,
-	fallback: BaseboardEdgeMode = DEFAULT_SETTINGS.defaultEdgeMode
-): BaseboardEdgeMode {
-	return typeof value === "string" && EDGE_MODES.has(value as BaseboardEdgeMode)
-		? (value as BaseboardEdgeMode)
+	fallback: CanvasBasesEdgeMode = DEFAULT_SETTINGS.defaultEdgeMode
+): CanvasBasesEdgeMode {
+	return typeof value === "string" && EDGE_MODES.has(value as CanvasBasesEdgeMode)
+		? (value as CanvasBasesEdgeMode)
 		: fallback;
 }
 
 export function normalizeTaskNotesMode(
 	value: unknown,
-	fallback: BaseboardTaskNotesMode = DEFAULT_SETTINGS.defaultTaskNotesMode
-): BaseboardTaskNotesMode {
-	return typeof value === "string" && TASKNOTES_MODES.has(value as BaseboardTaskNotesMode)
-		? (value as BaseboardTaskNotesMode)
+	fallback: CanvasBasesTaskNotesMode = DEFAULT_SETTINGS.defaultTaskNotesMode
+): CanvasBasesTaskNotesMode {
+	return typeof value === "string" && TASKNOTES_MODES.has(value as CanvasBasesTaskNotesMode)
+		? (value as CanvasBasesTaskNotesMode)
 		: fallback;
 }
 
 export function normalizeTaskNotesRelationshipMode(
 	value: unknown,
-	fallback: BaseboardTaskNotesRelationshipMode = DEFAULT_SETTINGS.defaultTaskNotesRelationships
-): BaseboardTaskNotesRelationshipMode {
+	fallback: CanvasBasesTaskNotesRelationshipMode = DEFAULT_SETTINGS.defaultTaskNotesRelationships
+): CanvasBasesTaskNotesRelationshipMode {
 	return typeof value === "string" &&
-		TASKNOTES_RELATIONSHIP_MODES.has(value as BaseboardTaskNotesRelationshipMode)
-		? (value as BaseboardTaskNotesRelationshipMode)
+		TASKNOTES_RELATIONSHIP_MODES.has(value as CanvasBasesTaskNotesRelationshipMode)
+		? (value as CanvasBasesTaskNotesRelationshipMode)
 		: fallback;
 }
 
@@ -131,13 +131,13 @@ export function splitPropertyList(value: string): string[] {
 }
 
 export function buildDefaultMaterializeOptions(
-	settings: BaseboardSettings,
+	settings: CanvasBasesSettings,
 	viewName: string,
 	configCanvasPath?: string
 ): MaterializeOptions {
 	const canvasPath =
 		configCanvasPath?.trim() ||
-		`${settings.defaultCanvasFolder}/${sanitizeFileName(viewName || "Baseboard")}.canvas`;
+		`${settings.defaultCanvasFolder}/${sanitizeFileName(viewName || "Canvas Bases")}.canvas`;
 
 	return {
 		canvasPath,
@@ -194,7 +194,7 @@ export function sanitizeFileName(value: string): string {
 		.replace(/-+/gu, "-")
 		.replace(/^\.+/u, "")
 		.slice(0, 120)
-		.trim() || "Baseboard";
+		.trim() || "Canvas Bases";
 }
 
 export function normalizeCanvasPath(value: string): string {

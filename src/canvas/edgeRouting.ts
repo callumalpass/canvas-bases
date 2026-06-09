@@ -1,4 +1,4 @@
-import type { BaseboardNodePosition } from "../types";
+import type { CanvasBasesNodePosition } from "../types";
 import type { CanvasSide } from "./jsonCanvas";
 
 export interface EdgeAttachmentSides {
@@ -12,8 +12,8 @@ export interface Point {
 }
 
 export function getEdgeAttachmentSides(
-	fromNode: BaseboardNodePosition,
-	toNode: BaseboardNodePosition
+	fromNode: CanvasBasesNodePosition,
+	toNode: CanvasBasesNodePosition
 ): EdgeAttachmentSides {
 	const fromCenter = getNodeCenter(fromNode);
 	const toCenter = getNodeCenter(toNode);
@@ -30,7 +30,7 @@ export function getEdgeAttachmentSides(
 	};
 }
 
-export function getNodeAnchor(node: BaseboardNodePosition, side: CanvasSide): Point {
+export function getNodeAnchor(node: CanvasBasesNodePosition, side: CanvasSide): Point {
 	switch (side) {
 		case "top":
 			return { x: node.x + node.width / 2, y: node.y };
@@ -56,7 +56,7 @@ export function getSideVector(side: CanvasSide): Point {
 	}
 }
 
-function getNodeCenter(node: BaseboardNodePosition): Point {
+function getNodeCenter(node: CanvasBasesNodePosition): Point {
 	return {
 		x: node.x + node.width / 2,
 		y: node.y + node.height / 2,

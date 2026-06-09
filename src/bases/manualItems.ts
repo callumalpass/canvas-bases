@@ -2,25 +2,29 @@ import { TFile } from "obsidian";
 import type { App, BasesViewConfig } from "obsidian";
 import { VIEW_CONFIG_KEYS } from "../constants";
 import type {
-	BaseboardEntrySnapshot,
-	BaseboardManualGroupSnapshot,
-	BaseboardTextCardSnapshot,
-	BaseboardViewSnapshot,
+	CanvasBasesEntrySnapshot,
+	CanvasBasesManualGroupSnapshot,
+	CanvasBasesTextCardSnapshot,
+	CanvasBasesViewSnapshot,
 } from "../types";
+import { normalizeZones } from "./zones";
 
 const MANUAL_GROUP_LABEL = "Pinned notes";
 const DEFAULT_MANUAL_GROUP_ID = "pinned";
 
 export function applyManualViewItems(
 	app: App,
-	snapshot: BaseboardViewSnapshot,
+	snapshot: CanvasBasesViewSnapshot,
 	config: BasesViewConfig
-): BaseboardViewSnapshot {
+): CanvasBasesViewSnapshot {
 	const manualEntries = buildManualEntries(app, snapshot, config);
 	const textCards = normalizeTextCards(config.get(VIEW_CONFIG_KEYS.textCards));
-	const manualGroups = normalizeConfiguredManualGroups(
-		config.get(VIEW_CONFIG_KEYS.manualGroups),
-		manualEntries.length > 0
+	const manualGroups = mergeManualGroups(
+		normalizeConfiguredManualGroups(
+			config.get(VIEW_CONFIG_KEYS.manualGroups),
+			manualEntries.length > 0
+		),
+		getCustomZoneGroups(config)
 	);
 
 	if (manualEntries.length === 0 && textCards.length === 0 && manualGroups.length === 0) {
@@ -57,19 +61,19 @@ export function normalizeManualNotePaths(value: unknown): string[] {
 	return result;
 }
 
-export function normalizeTextCards(value: unknown): BaseboardTextCardSnapshot[] {
+export function normalizeTextCards(value: unknown): CanvasBasesTextCardSnapshot[] {
 	if (!Array.isArray(value)) return [];
 
 	return value
 		.map((entry) => normalizeTextCard(entry))
-		.filter((entry): entry is BaseboardTextCardSnapshot => entry !== null);
+		.filter((entry): entry is CanvasBasesTextCardSnapshot => entry !== null);
 }
 
-export function normalizeManualGroups(value: unknown): BaseboardManualGroupSnapshot[] {
+export function normalizeManualGroups(value: unknown): CanvasBasesManualGroupSnapshot[] {
 	if (!Array.isArray(value)) return [];
 
 	const seen = new Set<string>();
-	const groups: BaseboardManualGroupSnapshot[] = [];
+	const groups: CanvasBasesManualGroupSnapshot[] = [];
 
 	for (const entry of value) {
 		const group = normalizeManualGroup(entry);
@@ -87,7 +91,7 @@ export function setManualNotePaths(config: BasesViewConfig, paths: string[]): vo
 
 export function setManualGroups(
 	config: BasesViewConfig,
-	groups: BaseboardManualGroupSnapshot[]
+	groups: CanvasBasesManualGroupSnapshot[]
 ): void {
 	config.set(
 		VIEW_CONFIG_KEYS.manualGroups,
@@ -98,7 +102,7 @@ export function setManualGroups(
 	);
 }
 
-export function setTextCards(config: BasesViewConfig, cards: BaseboardTextCardSnapshot[]): void {
+export function setTextCards(config: BasesViewConfig, cards: CanvasBasesTextCardSnapshot[]): void {
 	config.set(
 		VIEW_CONFIG_KEYS.textCards,
 		cards.map((card) => ({
@@ -108,7 +112,7 @@ export function setTextCards(config: BasesViewConfig, cards: BaseboardTextCardSn
 	);
 }
 
-export function createDefaultManualGroup(): BaseboardManualGroupSnapshot {
+export function createDefaultManualGroup(): CanvasBasesManualGroupSnapshot {
 	return {
 		id: DEFAULT_MANUAL_GROUP_ID,
 		label: MANUAL_GROUP_LABEL,
@@ -117,14 +121,14 @@ export function createDefaultManualGroup(): BaseboardManualGroupSnapshot {
 
 function buildManualEntries(
 	app: App,
-	snapshot: BaseboardViewSnapshot,
+	snapshot: CanvasBasesViewSnapshot,
 	config: BasesViewConfig
-): BaseboardEntrySnapshot[] {
+): CanvasBasesEntrySnapshot[] {
 	const visiblePaths = new Set(
 		snapshot.groups.flatMap((group) => group.entries.map((entry) => entry.path))
 	);
 	const manualPaths = normalizeManualNotePaths(config.get(VIEW_CONFIG_KEYS.manualNotePaths));
-	const entries: BaseboardEntrySnapshot[] = [];
+	const entries: CanvasBasesEntrySnapshot[] = [];
 
 	for (const path of manualPaths) {
 		if (visiblePaths.has(path)) continue;
@@ -147,7 +151,7 @@ function buildManualEntries(
 function normalizeConfiguredManualGroups(
 	value: unknown,
 	hasManualEntries: boolean
-): BaseboardManualGroupSnapshot[] {
+): CanvasBasesManualGroupSnapshot[] {
 	if (Array.isArray(value)) {
 		return normalizeManualGroups(value);
 	}
@@ -155,7 +159,27 @@ function normalizeConfiguredManualGroups(
 	return hasManualEntries ? [createDefaultManualGroup()] : [];
 }
 
-function normalizeManualGroup(value: unknown): BaseboardManualGroupSnapshot | null {
+function getCustomZoneGroups(config: BasesViewConfig): CanvasBasesManualGroupSnapshot[] {
+	return normalizeZones(config.get(VIEW_CONFIG_KEYS.zones))
+		.filter((zone) => zone.origin === "custom" && typeof zone.id === "string")
+		.map((zone) => ({
+			id: zone.id ?? "",
+			label: zone.label?.trim() || zone.value || zone.property,
+		}));
+}
+
+function mergeManualGroups(
+	manualGroups: CanvasBasesManualGroupSnapshot[],
+	customZoneGroups: CanvasBasesManualGroupSnapshot[]
+): CanvasBasesManualGroupSnapshot[] {
+	const groupsById = new Map<string, CanvasBasesManualGroupSnapshot>();
+	for (const group of manualGroups) groupsById.set(group.id, group);
+	for (const group of customZoneGroups) groupsById.set(group.id, group);
+
+	return [...groupsById.values()];
+}
+
+function normalizeManualGroup(value: unknown): CanvasBasesManualGroupSnapshot | null {
 	if (!isRecord(value) || typeof value.id !== "string") return null;
 
 	const id = value.id.trim();
@@ -168,7 +192,7 @@ function normalizeManualGroup(value: unknown): BaseboardManualGroupSnapshot | nu
 	};
 }
 
-function normalizeTextCard(value: unknown): BaseboardTextCardSnapshot | null {
+function normalizeTextCard(value: unknown): CanvasBasesTextCardSnapshot | null {
 	if (!isRecord(value) || typeof value.id !== "string") return null;
 
 	return {

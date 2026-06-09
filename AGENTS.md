@@ -1,8 +1,8 @@
-# Baseboard - Agent Development Guide
+# Canvas Bases - Agent Development Guide
 
-This is an Obsidian companion plugin for Bases and Canvas. The plugin ID is `baseboard`.
+This is an Obsidian companion plugin for Bases and Canvas. The plugin ID is `canvas-bases`.
 
-Baseboard materializes an active Obsidian Bases view as a JSON Canvas snapshot, and also registers a dedicated Bases layout named `Baseboard` for live canvas-style editing.
+Canvas Bases materializes an active Obsidian Bases view as a JSON Canvas snapshot, and also registers a dedicated Bases layout named `Canvas Bases` for live canvas-style editing.
 
 ## Build & Test
 
@@ -11,7 +11,7 @@ Baseboard materializes an active Obsidian Bases view as a JSON Canvas snapshot, 
 npm run build:test
 
 # After building, reload the plugin in the running Obsidian instance
-obsidian vault=test plugin:reload id=baseboard
+obsidian vault=test plugin:reload id=canvas-bases
 ```
 
 Always run both commands after making code or CSS changes. Obsidian must be running for the CLI reload to work.
@@ -36,7 +36,7 @@ obsidian vault=test dev:errors
 obsidian vault=test dev:console
 
 # Run JavaScript in the Obsidian context
-obsidian vault=test eval code="app.plugins.getPlugin('baseboard')?.settings"
+obsidian vault=test eval code="app.plugins.getPlugin('canvas-bases')?.settings"
 
 # Query a Base view when debugging materialization inputs
 obsidian vault=test base:query path=TaskNotes/Views/tasks.base view=Tasks format=json
@@ -68,19 +68,19 @@ Ensure all code changes pass linting checks. Do not weaken linting rules to get 
 - Node APIs are fine in build, copy, demo, and development scripts.
 - Use Obsidian APIs for vault reads, writes, events, commands, modals, menus, and UI.
 - Use the Bases API and active Bases view data as the source of truth for rows, visible properties, grouping, sorting, and view config.
-- JSON Canvas output should preserve manual non-Baseboard nodes when updating an existing canvas.
-- Keep generated Baseboard-owned IDs stable so positions, dimensions, edges, and linked canvas updates remain durable.
+- JSON Canvas output should preserve manual non-Canvas Bases nodes when updating an existing canvas.
+- Keep generated Canvas Bases-owned IDs stable so positions, dimensions, edges, and linked canvas updates remain durable.
 - Do not directly edit TaskNotes task frontmatter for task behavior. Use the TaskNotes runtime API when reading task state or mutating dependencies/projects.
 - TaskNotes integration must degrade cleanly when TaskNotes is absent, disabled, or missing a capability.
-- Preserve user-authored `.base` view config where possible. Only write Baseboard-owned config keys when saving board layout, edge options, link properties, manual items, or linked canvas state.
+- Preserve user-authored `.base` view config where possible. Only write Canvas Bases-owned config keys when saving board layout, edge options, link properties, manual items, or linked canvas state.
 
 ## UI Expectations
 
-Baseboard is an in-vault working surface, not a marketing page. Keep controls compact, theme-native, accessible, and usable with Obsidian themes.
+Canvas Bases is an in-vault working surface, not a marketing page. Keep controls compact, theme-native, accessible, and usable with Obsidian themes.
 
 For board changes, verify practical interaction paths: panning, zooming, fit/reset view, dragging, resizing, inline editing, relationship edge rendering, link dragging, and materializing to `.canvas` when the touched code affects them.
 
-For Bases integration changes, test both the dedicated Baseboard layout and command-palette materialization from an active native or third-party Bases view when practical.
+For Bases integration changes, test both the dedicated Canvas Bases layout and command-palette materialization from an active native or third-party Bases view when practical.
 
 ## Changelog
 
@@ -94,9 +94,9 @@ You may update `.ops/` files locally as you work on items, but do not commit `.o
 
 When investigating issues, try to reproduce them first. Use the Obsidian CLI to reload the plugin, inspect console/errors, query Bases, open generated canvas files, and take screenshots for UI changes.
 
-If a feature request sounds like a query, filter, sort, grouping, or dashboard request, first consider whether it belongs in Obsidian Bases rather than in Baseboard. Baseboard should materialize and visualize the current Bases result set; Bases should remain the source of truth for selecting that result set.
+If a feature request sounds like a query, filter, sort, grouping, or dashboard request, first consider whether it belongs in Obsidian Bases rather than in Canvas Bases. Canvas Bases should materialize and visualize the current Bases result set; Bases should remain the source of truth for selecting that result set.
 
-If a bug involves TaskNotes cards, menus, dependencies, projects, or property chips, verify the TaskNotes API capabilities available at runtime before assuming Baseboard owns the data model.
+If a bug involves TaskNotes cards, menus, dependencies, projects, or property chips, verify the TaskNotes API capabilities available at runtime before assuming Canvas Bases owns the data model.
 
 ## Prepare for a Release
 

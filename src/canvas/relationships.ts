@@ -1,7 +1,7 @@
 import { App, TFile } from "obsidian";
 import type {
-	BaseboardRelationship,
-	BaseboardViewSnapshot,
+	CanvasBasesRelationship,
+	CanvasBasesViewSnapshot,
 	MaterializeOptions,
 } from "../types";
 import { getSnapshotEntries } from "../bases/snapshotEntries";
@@ -12,14 +12,14 @@ type LinkLike = {
 
 export function collectRelationships(
 	app: App,
-	snapshot: BaseboardViewSnapshot,
+	snapshot: CanvasBasesViewSnapshot,
 	options: MaterializeOptions
-): BaseboardRelationship[] {
+): CanvasBasesRelationship[] {
 	if (options.edgeMode === "none") return [];
 
 	const visibleEntries = getSnapshotEntries(snapshot);
 	const visiblePaths = new Set(visibleEntries.map((entry) => entry.path));
-	const relationships: BaseboardRelationship[] = [];
+	const relationships: CanvasBasesRelationship[] = [];
 
 	for (const entry of visibleEntries) {
 		const file = getFile(app, entry.path);
@@ -43,13 +43,13 @@ function collectContentLinks(
 	app: App,
 	file: TFile,
 	visiblePaths: Set<string>
-): BaseboardRelationship[] {
+): CanvasBasesRelationship[] {
 	const cache = app.metadataCache.getFileCache(file);
 	const links = [...(cache?.links ?? []), ...(cache?.embeds ?? [])] as LinkLike[];
 
 	return links
 		.map((link) => resolveRelationship(app, file, link.link, visiblePaths))
-		.filter((relationship): relationship is BaseboardRelationship => relationship !== null)
+		.filter((relationship): relationship is CanvasBasesRelationship => relationship !== null)
 		.map((relationship) => ({
 			...relationship,
 			metadata: { source: "wikilink" as const },
@@ -61,14 +61,14 @@ function collectPropertyLinks(
 	file: TFile,
 	visiblePaths: Set<string>,
 	properties: string[]
-): BaseboardRelationship[] {
+): CanvasBasesRelationship[] {
 	if (properties.length === 0) return [];
 
 	const cache = app.metadataCache.getFileCache(file);
 	const frontmatter = cache?.frontmatter;
 	if (!frontmatter) return [];
 
-	const relationships: BaseboardRelationship[] = [];
+	const relationships: CanvasBasesRelationship[] = [];
 
 	for (const property of properties) {
 		const rawValue = frontmatter[property];
@@ -92,7 +92,7 @@ function resolveRelationship(
 	linkText: string,
 	visiblePaths: Set<string>,
 	label?: string
-): BaseboardRelationship | null {
+): CanvasBasesRelationship | null {
 	const normalizedLinkText = normalizeLinkText(linkText);
 	if (!normalizedLinkText) return null;
 
@@ -153,10 +153,10 @@ function normalizeLinkText(value: string): string {
 }
 
 function dedupeRelationships(
-	relationships: BaseboardRelationship[]
-): BaseboardRelationship[] {
+	relationships: CanvasBasesRelationship[]
+): CanvasBasesRelationship[] {
 	const seen = new Set<string>();
-	const result: BaseboardRelationship[] = [];
+	const result: CanvasBasesRelationship[] = [];
 
 	for (const relationship of relationships) {
 		const key = `${relationship.sourcePath}\u0000${relationship.targetPath}\u0000${

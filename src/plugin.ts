@@ -1,11 +1,11 @@
 import { Notice, Plugin, requireApiVersion } from "obsidian";
 import type { BasesAllOptions, BasesViewRegistration } from "obsidian";
-import { BASEBOARD_VIEW_TYPE } from "./constants";
+import { CANVAS_BASES_VIEW_TYPE } from "./constants";
 import type {
-	BaseboardGenerationSummary,
-	BaseboardRelationship,
-	BaseboardSettings,
-	BaseboardViewSnapshot,
+	CanvasBasesGenerationSummary,
+	CanvasBasesRelationship,
+	CanvasBasesSettings,
+	CanvasBasesViewSnapshot,
 	MaterializeOptions,
 } from "./types";
 import { MaterializeCanvasModal } from "./ui/MaterializeCanvasModal";
@@ -15,11 +15,11 @@ import {
 	normalizeMaterializeOptions,
 	normalizeSettings,
 } from "./settings/defaults";
-import { BaseboardSettingTab } from "./settings/settingsTab";
+import { CanvasBasesSettingTab } from "./settings/settingsTab";
 import {
-	BaseboardView,
-	buildBaseboardViewOptions,
-} from "./bases/BaseboardView";
+	CanvasBasesView,
+	buildCanvasBasesViewOptions,
+} from "./bases/CanvasBasesView";
 import {
 	type ActiveBasesViewSource,
 	getActiveBasesViewSource,
@@ -45,39 +45,39 @@ type AppWithInternalPlugins = {
 	internalPlugins?: InternalPluginManager;
 };
 
-interface BaseboardMaterializeSource {
+interface CanvasBasesMaterializeSource {
 	sourceLabel: string;
-	getSnapshot(): BaseboardViewSnapshot | null;
+	getSnapshot(): CanvasBasesViewSnapshot | null;
 	getMaterializeOptions(): MaterializeOptions;
 	setMaterializeOptions(options: MaterializeOptions): Promise<void> | void;
 	getCanvasPath(): string | null;
 }
 
-export default class BaseboardPlugin extends Plugin {
-	settings: BaseboardSettings = DEFAULT_SETTINGS;
+export default class CanvasBasesPlugin extends Plugin {
+	settings: CanvasBasesSettings = DEFAULT_SETTINGS;
 	taskNotes!: TaskNotesRuntime;
 	i18n!: I18nService;
-	private views = new Set<BaseboardView>();
-	private activeView: BaseboardView | null = null;
+	private views = new Set<CanvasBasesView>();
+	private activeView: CanvasBasesView | null = null;
 	private shouldCreateStarterFiles = false;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
 		this.i18n = createI18nService({ initialLocale: this.settings.locale });
 		this.taskNotes = new TaskNotesRuntime(this.app, this.t.bind(this) as TranslateFn);
-		this.addSettingTab(new BaseboardSettingTab(this));
-		this.registerBaseboardBasesView();
+		this.addSettingTab(new CanvasBasesSettingTab(this));
+		this.registerCanvasBasesBasesView();
 		this.registerCommands();
 		await this.ensureStarterFiles();
 	}
 
 	onunload(): void {
-		this.unregisterBaseboardBasesView();
+		this.unregisterCanvasBasesBasesView();
 		this.views.clear();
 		this.activeView = null;
 	}
 
-	async updateSettings(settings: Partial<BaseboardSettings>): Promise<void> {
+	async updateSettings(settings: Partial<CanvasBasesSettings>): Promise<void> {
 		this.settings = normalizeSettings({
 			...this.settings,
 			...settings,
@@ -94,23 +94,23 @@ export default class BaseboardPlugin extends Plugin {
 		return this.i18n.translatePlural(key, count, params);
 	}
 
-	registerViewInstance(view: BaseboardView): void {
+	registerViewInstance(view: CanvasBasesView): void {
 		this.views.add(view);
 		this.setActiveView(view);
 	}
 
-	unregisterViewInstance(view: BaseboardView): void {
+	unregisterViewInstance(view: CanvasBasesView): void {
 		this.views.delete(view);
 		if (this.activeView === view) {
 			this.activeView = this.views.values().next().value ?? null;
 		}
 	}
 
-	setActiveView(view: BaseboardView): void {
+	setActiveView(view: CanvasBasesView): void {
 		this.activeView = view;
 	}
 
-	async configureAndMaterialize(view?: BaseboardView): Promise<void> {
+	async configureAndMaterialize(view?: CanvasBasesView): Promise<void> {
 		const source = this.getMaterializeSource(view);
 		if (!source) {
 			new Notice(this.t("notices.openBasesViewFirst"));
@@ -119,7 +119,7 @@ export default class BaseboardPlugin extends Plugin {
 
 		const snapshot = source.getSnapshot();
 		if (!snapshot) {
-			new Notice(this.t("notices.baseboardWaitingForBasesData"));
+			new Notice(this.t("notices.canvasBasesWaitingForBasesData"));
 			return;
 		}
 
@@ -137,7 +137,7 @@ export default class BaseboardPlugin extends Plugin {
 		).open();
 	}
 
-	async materializeWithSavedOptions(view?: BaseboardView): Promise<void> {
+	async materializeWithSavedOptions(view?: CanvasBasesView): Promise<void> {
 		const source = this.getMaterializeSource(view);
 		if (!source) {
 			new Notice(this.t("notices.openBasesViewFirst"));
@@ -146,7 +146,7 @@ export default class BaseboardPlugin extends Plugin {
 
 		const snapshot = source.getSnapshot();
 		if (!snapshot) {
-			new Notice(this.t("notices.baseboardWaitingForBasesData"));
+			new Notice(this.t("notices.canvasBasesWaitingForBasesData"));
 			return;
 		}
 
@@ -160,7 +160,7 @@ export default class BaseboardPlugin extends Plugin {
 		this.showMaterializedNotice(summary);
 	}
 
-	async openLinkedCanvas(view?: BaseboardView): Promise<void> {
+	async openLinkedCanvas(view?: CanvasBasesView): Promise<void> {
 		const source = this.getMaterializeSource(view);
 		if (!source) {
 			new Notice(this.t("notices.openBasesViewFirst"));
@@ -177,12 +177,12 @@ export default class BaseboardPlugin extends Plugin {
 	}
 
 	private async loadSettings(): Promise<void> {
-		const storedSettings = (await this.loadData()) as Partial<BaseboardSettings> | null | undefined;
+		const storedSettings = (await this.loadData()) as Partial<CanvasBasesSettings> | null | undefined;
 		this.shouldCreateStarterFiles = storedSettings == null;
 		this.settings = normalizeSettings(storedSettings);
 	}
 
-	private registerBaseboardBasesView(): void {
+	private registerCanvasBasesBasesView(): void {
 		if (!requireApiVersion("1.10.1")) {
 			new Notice(this.t("notices.obsidianVersionRequired"));
 			return;
@@ -192,19 +192,19 @@ export default class BaseboardPlugin extends Plugin {
 			name: this.t("common.appName"),
 			icon: "layout-dashboard",
 			factory: (controller, containerEl) => {
-				return new BaseboardView(controller, containerEl, this);
+				return new CanvasBasesView(controller, containerEl, this);
 			},
-			options: (): BasesAllOptions[] => buildBaseboardViewOptions(this.t.bind(this) as TranslateFn),
+			options: (): BasesAllOptions[] => buildCanvasBasesViewOptions(this.t.bind(this) as TranslateFn),
 		};
 
-		this.registerBasesView(BASEBOARD_VIEW_TYPE, registration);
+		this.registerBasesView(CANVAS_BASES_VIEW_TYPE, registration);
 	}
 
-	private unregisterBaseboardBasesView(): void {
+	private unregisterCanvasBasesBasesView(): void {
 		const internalPlugins = (this.app as unknown as AppWithInternalPlugins).internalPlugins;
 		const basesPlugin = internalPlugins?.getEnabledPluginById?.("bases");
-		if (basesPlugin?.registrations?.[BASEBOARD_VIEW_TYPE]) {
-			delete basesPlugin.registrations[BASEBOARD_VIEW_TYPE];
+		if (basesPlugin?.registrations?.[CANVAS_BASES_VIEW_TYPE]) {
+			delete basesPlugin.registrations[CANVAS_BASES_VIEW_TYPE];
 		}
 	}
 
@@ -264,7 +264,7 @@ export default class BaseboardPlugin extends Plugin {
 		new Notice(this.t("notices.starterFilesReady"));
 	}
 
-	private getActiveView(): BaseboardView | null {
+	private getActiveView(): CanvasBasesView | null {
 		if (this.activeView && this.views.has(this.activeView)) {
 			return this.activeView;
 		}
@@ -272,14 +272,14 @@ export default class BaseboardPlugin extends Plugin {
 		return this.views.values().next().value ?? null;
 	}
 
-	private getMaterializeSource(view?: BaseboardView): BaseboardMaterializeSource | null {
+	private getMaterializeSource(view?: CanvasBasesView): CanvasBasesMaterializeSource | null {
 		if (view) {
-			return this.createBaseboardViewSource(view);
+			return this.createCanvasBasesViewSource(view);
 		}
 
-		const activeBaseboardView = this.getActiveBaseboardViewFromWorkspace();
-		if (activeBaseboardView) {
-			return this.createBaseboardViewSource(activeBaseboardView);
+		const activeCanvasBasesView = this.getActiveCanvasBasesViewFromWorkspace();
+		if (activeCanvasBasesView) {
+			return this.createCanvasBasesViewSource(activeCanvasBasesView);
 		}
 
 		const activeBasesView = getActiveBasesViewSource(this.app);
@@ -288,12 +288,12 @@ export default class BaseboardPlugin extends Plugin {
 		}
 
 		const fallbackView = this.getActiveView();
-		return fallbackView ? this.createBaseboardViewSource(fallbackView) : null;
+		return fallbackView ? this.createCanvasBasesViewSource(fallbackView) : null;
 	}
 
-	private createBaseboardViewSource(view: BaseboardView): BaseboardMaterializeSource {
+	private createCanvasBasesViewSource(view: CanvasBasesView): CanvasBasesMaterializeSource {
 		return {
-			sourceLabel: view.getSnapshot()?.viewName ?? "Baseboard",
+			sourceLabel: view.getSnapshot()?.viewName ?? "Canvas Bases",
 			getSnapshot: () => view.getMaterializationSnapshot(),
 			getMaterializeOptions: () => view.getMaterializeOptions(),
 			setMaterializeOptions: (options) => {
@@ -305,7 +305,7 @@ export default class BaseboardPlugin extends Plugin {
 
 	private createGenericBasesViewSource(
 		source: ActiveBasesViewSource
-	): BaseboardMaterializeSource {
+	): CanvasBasesMaterializeSource {
 		return {
 			sourceLabel: source.sourceLabel,
 			getSnapshot: () => source.snapshot,
@@ -343,22 +343,22 @@ export default class BaseboardPlugin extends Plugin {
 		});
 	}
 
-	private getActiveBaseboardViewFromWorkspace(): BaseboardView | null {
+	private getActiveCanvasBasesViewFromWorkspace(): CanvasBasesView | null {
 		const workspaceView = this.app.workspace.getMostRecentLeaf()?.view as
 			| { controller?: { view?: unknown } }
 			| undefined;
 		const activeBasesView = workspaceView?.controller?.view;
 
-		return activeBasesView instanceof BaseboardView ? activeBasesView : null;
+		return activeBasesView instanceof CanvasBasesView ? activeBasesView : null;
 	}
 
 	private async materialize(
-		source: BaseboardMaterializeSource,
+		source: CanvasBasesMaterializeSource,
 		options = source.getMaterializeOptions()
-	): Promise<BaseboardGenerationSummary> {
+	): Promise<CanvasBasesGenerationSummary> {
 		const snapshot = source.getSnapshot();
 		if (!snapshot) {
-			throw new Error("Baseboard is waiting for Bases data.");
+			throw new Error("Canvas Bases is waiting for Bases data.");
 		}
 
 		const relationships = await this.collectRelationships(snapshot, options);
@@ -372,9 +372,9 @@ export default class BaseboardPlugin extends Plugin {
 	}
 
 	private async collectRelationships(
-		snapshot: BaseboardViewSnapshot,
+		snapshot: CanvasBasesViewSnapshot,
 		options: MaterializeOptions
-	): Promise<BaseboardRelationship[]> {
+	): Promise<CanvasBasesRelationship[]> {
 		const relationships = collectRelationships(this.app, snapshot, options);
 		if (options.taskNotesRelationships === "none") {
 			return relationships;
@@ -389,7 +389,7 @@ export default class BaseboardPlugin extends Plugin {
 		];
 	}
 
-	private showMaterializedNotice(summary: BaseboardGenerationSummary): void {
+	private showMaterializedNotice(summary: CanvasBasesGenerationSummary): void {
 		new Notice(
 			this.t("notices.updatedCanvas", {
 				path: summary.canvasPath,

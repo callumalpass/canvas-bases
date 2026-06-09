@@ -9,39 +9,79 @@ import path from "node:path";
 const require = createRequire(import.meta.url);
 const { chromium } = require("/home/calluma/projects/tasknotes/node_modules/@playwright/test");
 
-const BASEBOARD_ROOT = path.resolve(new URL("..", import.meta.url).pathname);
+const CANVAS_BASES_ROOT = path.resolve(new URL("..", import.meta.url).pathname);
 const TASKNOTES_ROOT = "/home/calluma/projects/tasknotes";
 const UNPACKED_DIR = path.join(TASKNOTES_ROOT, ".obsidian-unpacked");
 const OBSIDIAN_BINARY =
-	process.env.BASEBOARD_DEMO_OBSIDIAN_BINARY ??
+	process.env.CANVAS_BASES_DEMO_OBSIDIAN_BINARY ??
 	path.join(TASKNOTES_ROOT, ".obsidian-unpacked", "obsidian");
 const UPDATED_OBSIDIAN_ASAR = "/home/calluma/.config/obsidian/obsidian-1.13.0.asar";
 const VAULT_DIR = path.join(TASKNOTES_ROOT, "tasknotes-e2e-vault");
-const USER_DATA_DIR = path.join(TASKNOTES_ROOT, ".obsidian-config-baseboard-demo");
+const USER_DATA_DIR = path.join(TASKNOTES_ROOT, ".obsidian-config-canvas-bases-demo");
 const OUTPUT_DIR =
-	process.env.BASEBOARD_DEMO_OUTPUT_DIR ??
-	path.join(BASEBOARD_ROOT, "media", "baseboard-demo");
+	process.env.CANVAS_BASES_DEMO_OUTPUT_DIR ??
+	path.join(CANVAS_BASES_ROOT, "media", "canvas-bases-demo");
 const FRAME_DIR = path.join(OUTPUT_DIR, "frames");
-const GIF_PATH = path.join(OUTPUT_DIR, "baseboard-daily-note-demo.gif");
-const MP4_PATH = path.join(OUTPUT_DIR, "baseboard-daily-note-demo.mp4");
+const GIF_PATH = path.join(OUTPUT_DIR, "canvas-bases-active-groups-demo.gif");
+const MP4_PATH = path.join(OUTPUT_DIR, "canvas-bases-active-groups-demo.mp4");
 const PALETTE_PATH = path.join(OUTPUT_DIR, "palette.png");
 const REMOTE_DEBUGGING_PORT = 9327;
 const VIEWPORT = { width: 1440, height: 940 };
-const RECORD_FPS = Number(process.env.BASEBOARD_DEMO_FPS ?? 18);
-const WRITE_GIF = process.env.BASEBOARD_DEMO_SKIP_GIF !== "1";
+const RECORD_FPS = Number(process.env.CANVAS_BASES_DEMO_FPS ?? 18);
+const WRITE_GIF = process.env.CANVAS_BASES_DEMO_SKIP_GIF !== "1";
 const LEGACY_HOLD_FPS = 6;
 
-const DAILY_NOTE = "2026-06-08.md";
-const BASE_PATH = "TaskNotes/Views/baseboard-demo-today.base";
-const OPEN_BASE_PATH = "TaskNotes/Views/baseboard-demo-open-board.base";
-const CANVAS_PATH = "Baseboards/Baseboard demo.canvas";
-const DEMO_TASK_TITLES = [
-	"Review launch checklist",
-	"Draft partner update",
-	"Book design review",
-	"Clean up board notes",
+const BASE_PATH = "TaskNotes/Views/canvas-bases-demo-active-groups.base";
+const CANVAS_PATH = "Canvas Bases/Canvas Bases demo.canvas";
+const DEMO_TASKS = [
+	{
+		title: "Plan onboarding",
+		path: "Tasks/Plan onboarding.md",
+		stage: "Backlog",
+		priority: "High",
+		y: 110,
+	},
+	{
+		title: "Draft release notes",
+		path: "Tasks/Draft release notes.md",
+		stage: "Backlog",
+		priority: "Normal",
+		y: 470,
+	},
+	{
+		title: "Book design review",
+		path: "Book design review.md",
+		stage: "Backlog",
+		priority: "Normal",
+		y: 660,
+	},
+	{
+		title: "Clean up board notes",
+		path: "Clean up board notes.md",
+		stage: "Backlog",
+		priority: "Low",
+		y: 820,
+	},
+	{
+		title: "Review launch checklist",
+		path: "Review launch checklist.md",
+		stage: "Backlog",
+		priority: "High",
+		y: 980,
+	},
+	{
+		title: "Draft partner update",
+		path: "Draft partner update.md",
+		stage: "Backlog",
+		priority: "Normal",
+		y: 1140,
+	},
 ];
-const TASK_START_LINE = 4;
+const DEMO_TASK_TITLES = DEMO_TASKS.map((task) => task.title);
+const STALE_DEMO_TASK_PATHS = [
+	"Tasks/Review sample board.md",
+	"Tasks/Publish changelog.md",
+];
 
 let frameIndex = 0;
 let activeRecorder = null;
@@ -62,26 +102,26 @@ async function main() {
 		await sizeElectronWindow(page);
 		await waitForWorkspace(page);
 		await enablePluginsIfPrompted(page);
+		await focusMainWindow(page);
 		await setDemoSettings(page);
-		await openFileByPath(page, DAILY_NOTE);
-		await page.waitForTimeout(1200);
-
-		for (let index = 0; index < DEMO_TASK_TITLES.length; index += 1) {
-			await convertTaskLine(page, TASK_START_LINE + index);
-			await page.waitForTimeout(900);
-		}
-		await waitForDemoTaskFiles(page);
-
-		await openBaseboardInNewLeaf(page);
-		await waitForBaseboard(page);
+		await openCanvasBasesInNewLeaf(page);
+		await waitForCanvasBases(page);
+		await focusMainWindow(page);
 		await injectRecordingCursor(page);
-		await arrangeCardsForRecordingStart(page);
 
 		activeRecorder = createFrameRecorder(page);
 		await activeRecorder.start();
 		await capture(page, 12);
 
-		await dragBlockedTaskRight(page);
+		await createCustomActiveZone(page, "Doing", "Doing", { x: 470, y: 92 });
+		await capture(page, 8);
+		await createCustomActiveZone(page, "Done", "Done", { x: 560, y: 390 });
+		await capture(page, 8);
+		await dragCardIntoGroup(page, "Plan onboarding", "Doing", "Doing");
+		await capture(page, 12);
+		await dragCardIntoGroup(page, "Draft release notes", "Done", "Done");
+		await capture(page, 10);
+		await arrangeCardsForLinkDemo(page);
 		await capture(page, 6);
 		await performLinkDemo(page);
 		await capture(page, 10);
@@ -104,14 +144,13 @@ async function main() {
 }
 
 function resetOutput() {
+	frameIndex = 0;
 	fs.rmSync(OUTPUT_DIR, { recursive: true, force: true });
 	fs.mkdirSync(FRAME_DIR, { recursive: true });
 }
 
 function writeDemoFiles() {
-	fs.rmSync(path.join(VAULT_DIR, CANVAS_PATH), { force: true });
-
-	writeObsidianJson(".obsidian/community-plugins.json", ["tasknotes", "baseboard"]);
+	writeObsidianJson(".obsidian/community-plugins.json", ["tasknotes", "canvas-bases"]);
 	writeObsidianJson(".obsidian/core-plugins.json", [
 		"file-explorer",
 		"global-search",
@@ -143,94 +182,75 @@ function writeDemoFiles() {
 		"bases",
 	]);
 
-	for (const title of DEMO_TASK_TITLES) {
-		for (const file of fs.readdirSync(VAULT_DIR)) {
-			if (file.startsWith(title) && file.endsWith(".md")) {
-				fs.rmSync(path.join(VAULT_DIR, file), { force: true });
-			}
-		}
+	fs.rmSync(path.join(VAULT_DIR, CANVAS_PATH), { force: true });
+	for (const taskPath of [...DEMO_TASKS.map((task) => task.path), ...STALE_DEMO_TASK_PATHS]) {
+		fs.rmSync(path.join(VAULT_DIR, taskPath), { force: true });
 	}
+
+	const nodePositionsYaml = DEMO_TASKS.map(
+		(task) => `      ${getFileNodeId(task.path)}:
+        x: 78
+        y: ${task.y}
+        width: 324
+        height: 144
+`
+	).join("");
 
 	writeVaultFile(
 		BASE_PATH,
 		`filters:
   and:
-    - file.hasTag("task")
-    - due && date(due).date() == date(this.file.basename).date()
+    - file.hasTag("canvas-bases-active-demo")
 views:
-  - type: baseboard
-    name: "Today"
+  - type: canvas-bases
+    name: "Feature tour"
     order:
+      - stage
       - status
+      - blockedBy
       - priority
       - due
       - file.name
     sort:
-      - column: priority
-        direction: DESC
-    groupBy:
-      property: status
-      direction: ASC
-    baseboardLayout: grid
-    baseboardNodeWidth: 292
-    baseboardNodeHeight: 132
-    baseboardShowBodyEditor: false
-    baseboardTaskNotesMode: auto
-    baseboardTaskNotesShowBadges: true
-    baseboardTaskNotesShowActions: true
-    baseboardTaskNotesRelationships: dependencies
-    baseboardCanvasPath: "${CANVAS_PATH}"
-`
+      - column: file.name
+        direction: ASC
+    canvasBasesLayout: grid
+    canvasBasesNodeWidth: 324
+    canvasBasesNodeHeight: 144
+    canvasBasesShowBodyEditor: false
+    canvasBasesTaskNotesMode: auto
+    canvasBasesTaskNotesShowBadges: true
+    canvasBasesTaskNotesShowActions: true
+    canvasBasesTaskNotesRelationships: dependencies
+    canvasBasesLinkedCanvasPath: "${CANVAS_PATH}"
+    canvasBasesPreservePositions: true
+    canvasBasesRemoveMissingNodes: true
+    canvasBasesNodePositions:
+${nodePositionsYaml}`
 	);
 
-	writeVaultFile(
-		OPEN_BASE_PATH,
-		`filters:
-  and:
-    - file.hasTag("task")
-    - due && date(due).date() == today()
-views:
-  - type: baseboard
-    name: "Today board"
-    order:
-      - status
-      - priority
-      - due
-      - file.name
-    sort:
-      - column: priority
-        direction: DESC
-    groupBy:
-      property: status
-      direction: ASC
-    baseboardLayout: grid
-    baseboardNodeWidth: 292
-    baseboardNodeHeight: 132
-    baseboardShowBodyEditor: false
-    baseboardTaskNotesMode: auto
-    baseboardTaskNotesShowBadges: true
-    baseboardTaskNotesShowActions: true
-    baseboardTaskNotesRelationships: dependencies
-    baseboardCanvasPath: "${CANVAS_PATH}"
+	for (const task of DEMO_TASKS) {
+		writeVaultFile(
+			task.path,
+			`---
+tags:
+  - task
+  - canvas-bases-active-demo
+status: open
+stage: ${task.stage}
+priority: ${task.priority.toLowerCase()}
+due: 2026-06-09
+scheduled: 2026-06-09
+dateCreated: 2026-06-09T09:00:00.000+10:00
+dateModified: 2026-06-09T09:00:00.000+10:00
+---
+
+# ${task.title}
+
+This demo note is used by the Canvas Bases feature tour recording.
 `
-	);
-
-	writeVaultFile(
-		DAILY_NOTE,
-		`# Monday, June 8
-
-## Inbox
-
-- [ ] Review launch checklist due today !high
-- [ ] Draft partner update due today !normal
-- [ ] Book design review due today !normal
-- [ ] Clean up board notes due today !low
-
-## Today
-
-![[${BASE_PATH}]]
-`
-	);
+		);
+	}
 }
 
 function writeVaultFile(relativePath, content) {
@@ -241,6 +261,19 @@ function writeVaultFile(relativePath, content) {
 
 function writeObsidianJson(relativePath, value) {
 	writeVaultFile(relativePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function hashString(value) {
+	let hash = 0x811c9dc5;
+	for (let index = 0; index < value.length; index += 1) {
+		hash ^= value.charCodeAt(index);
+		hash = Math.imul(hash, 0x01000193);
+	}
+	return (hash >>> 0).toString(36);
+}
+
+function getFileNodeId(filePath) {
+	return `canvas-bases-file-${hashString(filePath)}`;
 }
 
 async function launchObsidian() {
@@ -276,7 +309,7 @@ async function launchObsidian() {
 	const command = launchWithoutDisplay ? "xvfb-run" : OBSIDIAN_BINARY;
 	const commandArgs = launchWithoutDisplay ? ["-a", OBSIDIAN_BINARY, ...args] : args;
 	const obsidianProcess = spawn(command, commandArgs, {
-		cwd: fs.existsSync(UNPACKED_DIR) ? UNPACKED_DIR : BASEBOARD_ROOT,
+		cwd: fs.existsSync(UNPACKED_DIR) ? UNPACKED_DIR : CANVAS_BASES_ROOT,
 		stdio: ["ignore", "pipe", "pipe"],
 		env: {
 			...process.env,
@@ -371,40 +404,57 @@ async function setDemoSettings(page) {
 		if (!app.internalPlugins?.getEnabledPluginById?.("bases")) {
 			await app.internalPlugins?.enablePlugin?.("bases");
 		}
-		if (!app.plugins.plugins.tasknotes) {
+		if (app.plugins.manifests.tasknotes && !app.plugins.plugins.tasknotes) {
 			await app.plugins.enablePlugin("tasknotes");
 		}
-		if (!app.plugins.plugins.baseboard) {
+		if (!app.plugins.plugins["canvas-bases"]) {
 			try {
-				await app.plugins.enablePlugin("baseboard");
-				const loaded = await app.plugins.loadPlugin("baseboard");
-				console.log(`loadPlugin(baseboard) -> ${loaded}`);
+				await app.plugins.enablePlugin("canvas-bases");
+				const loaded = await app.plugins.loadPlugin("canvas-bases");
+				console.log(`loadPlugin(canvas-bases) -> ${loaded}`);
 			} catch (error) {
-				console.error("enablePlugin(baseboard) failed", error);
+				console.error("enablePlugin(canvas-bases) failed", error);
 			}
 		}
-		const tasknotes = app.plugins.plugins.tasknotes;
-		const baseboard = app.plugins.plugins.baseboard;
-		if (!tasknotes) throw new Error("TaskNotes plugin not loaded");
-		if (!baseboard) {
+		for (let attempt = 0; attempt < 20 && !app.plugins.plugins["canvas-bases"]; attempt += 1) {
+			await new Promise((resolve) => window.setTimeout(resolve, 250));
+		}
+		const canvasBases = app.plugins.plugins["canvas-bases"];
+		if (!canvasBases) {
 			throw new Error(
-				`Baseboard plugin not loaded. methods=${JSON.stringify(Object.getOwnPropertyNames(Object.getPrototypeOf(app.plugins)))} enabled=${JSON.stringify([...app.plugins.enabledPlugins])} manifests=${JSON.stringify(Object.keys(app.plugins.manifests ?? {}))}`
+				`Canvas Bases plugin not loaded. methods=${JSON.stringify(Object.getOwnPropertyNames(Object.getPrototypeOf(app.plugins)))} enabled=${JSON.stringify([...app.plugins.enabledPlugins])} manifests=${JSON.stringify(Object.keys(app.plugins.manifests ?? {}))}`
 			);
 		}
 
-		tasknotes.settings.enableNaturalLanguageInput = true;
-		tasknotes.settings.useDefaultsOnInstantConvert = true;
-		tasknotes.settings.defaultTaskPriority = "normal";
-		tasknotes.settings.inlineTaskConvertFolder = "{{currentNotePath}}";
-		await tasknotes.saveSettings?.();
+		const tasknotes = app.plugins.plugins.tasknotes;
+		if (tasknotes) {
+			tasknotes.settings.enableNaturalLanguageInput = true;
+			tasknotes.settings.useDefaultsOnInstantConvert = true;
+			tasknotes.settings.defaultTaskPriority = "normal";
+			tasknotes.settings.inlineTaskConvertFolder = "{{currentNotePath}}";
+			await tasknotes.saveSettings?.();
+		}
 
-		baseboard.settings.defaultTaskNotesMode = "auto";
-		baseboard.settings.defaultTaskNotesShowBadges = true;
-		baseboard.settings.defaultTaskNotesShowActions = true;
-		baseboard.settings.nodeWidth = 292;
-		baseboard.settings.nodeHeight = 132;
-		await baseboard.saveData?.(baseboard.settings);
+		canvasBases.settings.defaultTaskNotesMode = "auto";
+		canvasBases.settings.defaultTaskNotesShowBadges = true;
+		canvasBases.settings.defaultTaskNotesShowActions = true;
+		canvasBases.settings.nodeWidth = 324;
+		canvasBases.settings.nodeHeight = 144;
+		await canvasBases.saveData?.(canvasBases.settings);
 	});
+}
+
+async function focusMainWindow(page) {
+	await page
+		.evaluate(() => {
+			window.activeWindow = window;
+			window.activeDocument = document;
+			const electron = window.require?.("electron");
+			const currentWindow = electron?.remote?.getCurrentWindow?.();
+			currentWindow?.focus?.();
+		})
+		.catch(() => {});
+	await page.waitForTimeout(250);
 }
 
 async function openFileByPath(page, relativePath) {
@@ -461,10 +511,10 @@ async function switchToReadingView(page) {
 	await page.waitForTimeout(2600);
 }
 
-async function waitForBaseboard(page) {
+async function waitForCanvasBases(page) {
 	await page.waitForFunction(
 		() =>
-			Array.from(document.querySelectorAll(".baseboard-canvas-file")).some((element) => {
+			Array.from(document.querySelectorAll(".canvas-bases-canvas-file")).some((element) => {
 				const rect = element.getBoundingClientRect();
 				return rect.width > 20 && rect.height > 20;
 			}),
@@ -486,22 +536,216 @@ async function sizeElectronWindow(page) {
 	await page.waitForTimeout(500);
 }
 
-async function openBaseboardInNewLeaf(page) {
-	const opened = await page.evaluate(async () => {
+async function openCanvasBasesInNewLeaf(page) {
+	const opened = await page.evaluate(async (basePath) => {
 		const app = window.app;
-		const file = app.vault.getAbstractFileByPath("TaskNotes/Views/baseboard-demo-open-board.base");
+		const file = app.vault.getAbstractFileByPath(basePath);
 		if (!file) return false;
 		const leaf = app.workspace.getLeaf(true);
 		await leaf.openFile(file);
 		return true;
-	});
-	if (!opened) throw new Error("Could not open baseboard base");
+	}, BASE_PATH);
+	if (!opened) throw new Error("Could not open Canvas Bases base");
 	await page.waitForTimeout(2600);
+}
+
+async function createCustomActiveZone(page, groupLabel, groupValue, position) {
+	await focusMainWindow(page);
+	await clickToolbarButton(page, "Add zone");
+	if (!(await page.locator(".canvas-bases-modal").isVisible({ timeout: 1500 }).catch(() => false))) {
+		const opened = await page.evaluate(() => {
+			window.activeWindow = window;
+			window.activeDocument = document;
+			const plugin = window.app.plugins.plugins["canvas-bases"];
+			const view = plugin?.activeView ?? plugin?.views?.values?.().next?.().value;
+			if (!view?.openCreateCustomZoneModal) return false;
+			view.openCreateCustomZoneModal();
+			return true;
+		});
+		if (!opened) throw new Error("Could not open custom zone modal");
+	}
+	await page.waitForSelector(".canvas-bases-modal", { timeout: 5000 });
+	await capture(page, 4);
+
+	const modal = page.locator(".canvas-bases-modal").last();
+	const inputs = modal.locator('input[type="text"]');
+	const labelInput = inputs.nth(0);
+	const propertyInput = inputs.nth(1);
+	const valueInput = inputs.nth(2);
+
+	await clickLocator(page, labelInput);
+	await labelInput.fill(groupLabel);
+	await page.waitForTimeout(250);
+	await capture(page, 2);
+	await clickLocator(page, propertyInput);
+	await propertyInput.fill("note.stage");
+	await page.waitForTimeout(250);
+	await capture(page, 2);
+
+	await clickLocator(page, valueInput);
+	await valueInput.fill(groupValue);
+	await page.waitForTimeout(250);
+	await capture(page, 2);
+
+	await clickLocator(page, modal.locator("button.mod-cta").first());
+	await page.waitForSelector(".canvas-bases-modal", { state: "detached", timeout: 5000 });
+	await page.waitForTimeout(700);
+	await positionCustomZone(page, groupLabel, position);
+
+	const group = page
+		.locator(".workspace-leaf.mod-active .canvas-bases-canvas-group")
+		.filter({ hasText: groupLabel })
+		.first();
+	await group.locator(".canvas-bases-canvas-group__active-badge").waitFor({
+		state: "visible",
+		timeout: 5000,
+	});
+	await capture(page, 6);
+}
+
+async function positionCustomZone(page, groupLabel, position) {
+	const positioned = await page.evaluate(
+		({ label, nextPosition }) => {
+			const plugin = window.app?.plugins?.plugins?.["canvas-bases"];
+			const view = plugin?.activeView ?? plugin?.views?.values?.().next?.().value;
+			const config = view?.config;
+			if (!config) return false;
+
+			const zones = Array.isArray(config.get("canvasBasesZones"))
+				? config.get("canvasBasesZones")
+				: [];
+			const zone = [...zones]
+				.reverse()
+				.find((candidate) => candidate?.origin === "custom" && candidate?.label === label);
+			if (!zone?.id) return false;
+
+			const hashString = (value) => {
+				let hash = 0x811c9dc5;
+				for (let index = 0; index < value.length; index += 1) {
+					hash ^= value.charCodeAt(index);
+					hash = Math.imul(hash, 0x01000193);
+				}
+				return (hash >>> 0).toString(36);
+			};
+			const nodeId = `canvas-bases-manual-group-${hashString(zone.id)}`;
+			const positions = view.getNodePositions?.() ?? config.get("canvasBasesNodePositions") ?? {};
+			positions[nodeId] = {
+				x: nextPosition.x,
+				y: nextPosition.y,
+				width: 360,
+				height: 220,
+			};
+			if (view.setNodePositions) {
+				view.setNodePositions(positions);
+			} else {
+				config.set("canvasBasesNodePositions", positions);
+			}
+			view.scheduleRender?.();
+			return true;
+		},
+		{ label: groupLabel, nextPosition: position }
+	);
+	if (!positioned) throw new Error(`Could not position custom zone: ${groupLabel}`);
+	await page.waitForTimeout(800);
+}
+
+async function moveGroupNextToCard(page, groupLabel, anchorCardTitle, yOffset) {
+	const anchorCard = page
+		.locator(".workspace-leaf.mod-active .canvas-bases-canvas-file")
+		.filter({ hasText: anchorCardTitle })
+		.first();
+	await anchorCard.waitFor({ state: "visible", timeout: 10000 });
+	const anchorBox = await anchorCard.boundingBox();
+	if (!anchorBox) throw new Error(`Could not locate anchor card: ${anchorCardTitle}`);
+	await moveGroupByLabel(page, groupLabel, {
+		x: anchorBox.x + anchorBox.width + 54,
+		y: anchorBox.y + yOffset,
+	});
+}
+
+async function moveGroupByLabel(page, label, targetTopLeft) {
+	const group = page
+		.locator(".workspace-leaf.mod-active .canvas-bases-canvas-group")
+		.filter({ hasText: label })
+		.first();
+	await group.waitFor({ state: "visible", timeout: 10000 });
+	const box = await group.boundingBox();
+	if (!box) throw new Error(`Could not locate group: ${label}`);
+
+	const start = {
+		x: box.x + Math.min(84, box.width / 2),
+		y: box.y + 16,
+	};
+	const end = {
+		x: start.x + (targetTopLeft.x - box.x),
+		y: start.y + (targetTopLeft.y - box.y),
+	};
+
+	await moveMouse(page, start.x, start.y);
+	await page.mouse.down();
+	await moveMouse(page, end.x, end.y, { steps: 18 });
+	await page.mouse.up();
+	await page.waitForTimeout(500);
+}
+
+async function dragCardIntoGroup(page, title, groupLabel, expectedStage) {
+	const card = page
+		.locator(".workspace-leaf.mod-active .canvas-bases-canvas-file")
+		.filter({ hasText: title })
+		.first();
+	const group = page
+		.locator(".workspace-leaf.mod-active .canvas-bases-canvas-group")
+		.filter({ hasText: groupLabel })
+		.first();
+	await card.waitFor({ state: "visible", timeout: 10000 });
+	await group.waitFor({ state: "visible", timeout: 10000 });
+
+	const cardBox = await card.boundingBox();
+	const groupBox = await group.boundingBox();
+	if (!cardBox || !groupBox) throw new Error(`Could not locate ${title} or ${groupLabel}`);
+
+	const start = { x: cardBox.x + cardBox.width / 2, y: cardBox.y + 22 };
+	const midpoint = {
+		x: (start.x + groupBox.x + groupBox.width * 0.32) / 2,
+		y: (start.y + groupBox.y + groupBox.height * 0.52) / 2,
+	};
+	const end = {
+		x: groupBox.x + groupBox.width * 0.34,
+		y: groupBox.y + groupBox.height * 0.56,
+	};
+
+	await moveMouse(page, start.x, start.y);
+	await page.mouse.down();
+	await moveMouse(page, midpoint.x, midpoint.y, { steps: 16 });
+	await capture(page, 2);
+	await moveMouse(page, end.x, end.y, { steps: 18 });
+	await capture(page, 3);
+	await page.mouse.up();
+	await waitForCardStage(page, title, expectedStage);
+	await capture(page, 8);
+}
+
+async function waitForCardStage(page, title, expectedStage) {
+	await page.waitForFunction(
+		({ cardTitle, stage }) => {
+			const cards = Array.from(
+				document.querySelectorAll(".workspace-leaf.mod-active .canvas-bases-canvas-file")
+			);
+			const card = cards.find((element) => element.textContent?.includes(cardTitle));
+			return Boolean(
+				card &&
+					card.textContent?.includes("stage") &&
+					card.textContent?.includes(stage)
+			);
+		},
+		{ cardTitle: title, stage: expectedStage },
+		{ timeout: 10000 }
+	);
 }
 
 async function dragFirstCards(page, limit = 3) {
 	const boxes = await page.evaluate(() =>
-		Array.from(document.querySelectorAll(".baseboard-canvas-file"))
+		Array.from(document.querySelectorAll(".canvas-bases-canvas-file"))
 			.map((element) => {
 				const rect = element.getBoundingClientRect();
 				return {
@@ -569,19 +813,19 @@ async function waitForDemoTaskFiles(page) {
 
 async function performLinkDemo(page) {
 	const sourceTitle = "Review launch checklist";
-	const targetTitle = "Draft partner update";
+	const targetTitle = "Draft release notes";
 	const sourceCard = page
-		.locator(".workspace-leaf.mod-active .baseboard-canvas-file")
+		.locator(".workspace-leaf.mod-active .canvas-bases-canvas-file")
 		.filter({ hasText: sourceTitle })
 		.first();
 	const targetCard = page
-		.locator(".workspace-leaf.mod-active .baseboard-canvas-file")
+		.locator(".workspace-leaf.mod-active .canvas-bases-canvas-file")
 		.filter({ hasText: targetTitle })
 		.first();
 	await sourceCard.waitFor({ state: "attached", timeout: 10000 });
 	await targetCard.waitFor({ state: "attached", timeout: 10000 });
 
-	const handleBox = await sourceCard.locator(".baseboard-canvas-link-handle").first().boundingBox();
+	const handleBox = await sourceCard.locator(".canvas-bases-canvas-link-handle").first().boundingBox();
 	const targetBox = await targetCard.boundingBox();
 	if (!handleBox || !targetBox) throw new Error("Could not locate link demo cards");
 
@@ -605,21 +849,68 @@ async function performLinkDemo(page) {
 	await capture(page, 4);
 
 	const menuItem = page
-		.locator(`.menu-item:has-text("${sourceTitle} blocks ${targetTitle}")`)
+		.locator(".menu-item")
+		.filter({ hasText: sourceTitle })
+		.filter({ hasText: targetTitle })
+		.filter({ hasText: "blocks" })
 		.first();
-	await menuItem.waitFor({ state: "visible", timeout: 5000 });
+	if (!(await menuItem.isVisible({ timeout: 5000 }).catch(() => false))) {
+		const menuTexts = await page.locator(".menu-item").allTextContents();
+		throw new Error(`Could not find dependency menu item. Items: ${JSON.stringify(menuTexts)}`);
+	}
 	await clickLocator(page, menuItem);
 	await page.waitForTimeout(1800);
 	await waitForRelationshipEdge(page);
+	await waitForCardAnyText(page, targetTitle, [
+		"blockedBy",
+		"blocked by",
+		"blocked",
+		"Review launch checklist",
+	]);
 	await capture(page, 6);
 }
 
-async function arrangeCardsForRecordingStart(page) {
-	await moveCardByTitle(page, "Book design review", { x: 420, y: 210 });
-	await moveCardByTitle(page, "Clean up board notes", { x: 420, y: 365 });
-	await moveCardByTitle(page, "Review launch checklist", { x: 420, y: 520 });
-	await moveCardByTitle(page, "Draft partner update", { x: 420, y: 675 });
-	await page.waitForTimeout(500);
+async function arrangeCardsForLinkDemo(page) {
+	await positionFileCards(page, [
+		{ path: "Review launch checklist.md", x: 8, y: 360 },
+		{ path: "Tasks/Draft release notes.md", x: 590, y: 500 },
+	]);
+	await page.waitForTimeout(900);
+}
+
+async function positionFileCards(page, cards) {
+	const positioned = await page.evaluate((updates) => {
+		const plugin = window.app?.plugins?.plugins?.["canvas-bases"];
+		const view = plugin?.activeView ?? plugin?.views?.values?.().next?.().value;
+		const config = view?.config;
+		if (!config) return false;
+
+		const hashString = (value) => {
+			let hash = 0x811c9dc5;
+			for (let index = 0; index < value.length; index += 1) {
+				hash ^= value.charCodeAt(index);
+				hash = Math.imul(hash, 0x01000193);
+			}
+			return (hash >>> 0).toString(36);
+		};
+		const positions = view.getNodePositions?.() ?? config.get("canvasBasesNodePositions") ?? {};
+		for (const update of updates) {
+			positions[`canvas-bases-file-${hashString(update.path)}`] = {
+				x: update.x,
+				y: update.y,
+				width: 324,
+				height: 144,
+			};
+		}
+		if (view.setNodePositions) {
+			view.setNodePositions(positions);
+		} else {
+			config.set("canvasBasesNodePositions", positions);
+		}
+		view.scheduleRender?.();
+		return true;
+	}, cards);
+	if (!positioned) throw new Error("Could not position link demo cards");
 }
 
 async function dragBlockedTaskRight(page) {
@@ -629,7 +920,7 @@ async function dragBlockedTaskRight(page) {
 
 async function moveCardByTitle(page, title, targetTopLeft) {
 	const card = page
-		.locator(".workspace-leaf.mod-active .baseboard-canvas-file")
+		.locator(".workspace-leaf.mod-active .canvas-bases-canvas-file")
 		.filter({ hasText: title })
 		.first();
 	await card.waitFor({ state: "attached", timeout: 10000 });
@@ -655,10 +946,26 @@ async function moveCardByTitle(page, title, targetTopLeft) {
 async function waitForRelationshipEdge(page) {
 	await page.waitForFunction(
 		() =>
-			Array.from(document.querySelectorAll(".baseboard-canvas-edge__path")).some(
+			Array.from(document.querySelectorAll(".canvas-bases-canvas-edge__path")).some(
 				(element) => element.getBoundingClientRect().width > 0 || element.getAttribute("d")
 			),
 		undefined,
+		{ timeout: 10000 }
+	);
+}
+
+async function waitForCardAnyText(page, title, fragments) {
+	await page.waitForFunction(
+		({ cardTitle, textFragments }) => {
+			const cards = Array.from(
+				document.querySelectorAll(".workspace-leaf.mod-active .canvas-bases-canvas-file")
+			);
+			const card = cards.find((element) => element.textContent?.includes(cardTitle));
+			if (!card) return false;
+			const text = card.textContent?.toLowerCase() ?? "";
+			return textFragments.some((fragment) => text.includes(fragment.toLowerCase()));
+		},
+		{ cardTitle: title, textFragments: fragments },
 		{ timeout: 10000 }
 	);
 }
@@ -730,9 +1037,9 @@ function delay(ms) {
 
 async function injectRecordingCursor(page) {
 	await page.evaluate(() => {
-		document.getElementById("baseboard-demo-cursor")?.remove();
+		document.getElementById("canvas-bases-demo-cursor")?.remove();
 		const cursorEl = document.createElement("div");
-		cursorEl.id = "baseboard-demo-cursor";
+		cursorEl.id = "canvas-bases-demo-cursor";
 		cursorEl.style.cssText = [
 			"position:fixed",
 			"left:0",
@@ -750,7 +1057,7 @@ async function injectRecordingCursor(page) {
 		].join(";");
 		document.body.appendChild(cursorEl);
 
-		window.__baseboardDemoSetCursor = (x, y) => {
+		window.__canvasBasesDemoSetCursor = (x, y) => {
 			cursorEl.style.opacity = "1";
 			cursorEl.style.left = `${x}px`;
 			cursorEl.style.top = `${y}px`;
@@ -759,7 +1066,7 @@ async function injectRecordingCursor(page) {
 		document.addEventListener(
 			"pointermove",
 			(event) => {
-				window.__baseboardDemoSetCursor?.(event.clientX, event.clientY);
+				window.__canvasBasesDemoSetCursor?.(event.clientX, event.clientY);
 			},
 			true
 		);
@@ -769,7 +1076,7 @@ async function injectRecordingCursor(page) {
 async function moveMouse(page, x, y, options = {}) {
 	await page.mouse.move(x, y, options);
 	await page.evaluate(
-		({ cursorX, cursorY }) => window.__baseboardDemoSetCursor?.(cursorX, cursorY),
+		({ cursorX, cursorY }) => window.__canvasBasesDemoSetCursor?.(cursorX, cursorY),
 		{ cursorX: x, cursorY: y }
 	);
 }
@@ -792,11 +1099,14 @@ async function updateAndOpenLinkedCanvas(page) {
 
 async function clickToolbarButton(page, label) {
 	const button = page
-		.locator(".workspace-leaf.mod-active .baseboard-view__button")
+		.locator(".workspace-leaf.mod-active .canvas-bases-view__button")
 		.filter({ hasText: label })
 		.first();
 	await button.waitFor({ state: "visible", timeout: 10000 });
-	await clickLocator(page, button);
+	const box = await button.boundingBox();
+	if (!box) throw new Error(`Could not click toolbar button: ${label}`);
+	await moveMouse(page, box.x + box.width / 2, box.y + box.height / 2, { steps: 8 });
+	await button.click();
 }
 
 async function waitForCanvasView(page) {
@@ -866,6 +1176,12 @@ function encodeOutputs() {
 		inputPattern,
 		"-vf",
 		"fps=30,scale=1280:-2:flags=lanczos,format=yuv420p",
+		"-r",
+		"30",
+		"-g",
+		"30",
+		"-keyint_min",
+		"30",
 		"-movflags",
 		"+faststart",
 		MP4_PATH,

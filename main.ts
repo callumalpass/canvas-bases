@@ -1,3 +1,3 @@
-import BaseboardPlugin from "./src/plugin";
+import CanvasBasesPlugin from "./src/plugin";
 
-export default BaseboardPlugin;
+export default CanvasBasesPlugin;

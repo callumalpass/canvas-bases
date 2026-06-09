@@ -1,15 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { TFile } from "obsidian";
 import type {
 	BasesEntry,
 	BasesPropertyId,
 	BasesQueryResult,
 	BasesViewConfig,
+	TFile,
 	Value,
 } from "obsidian";
-import { buildBaseboardSnapshot } from "../src/bases/snapshot";
+import { buildCanvasBasesSnapshot } from "../src/bases/snapshot";
+import { makeMockTFile } from "./obsidianMockUtils";
 
-describe("buildBaseboardSnapshot", () => {
+describe("buildCanvasBasesSnapshot", () => {
 	it("captures visible Bases properties for card rendering", () => {
 		const file = makeTFile("Tasks/Alpha.md", "Alpha", "md");
 		const entry = makeEntry(file, {
@@ -18,7 +19,7 @@ describe("buildBaseboardSnapshot", () => {
 			"note.depends_on": makeValue("[[Beta]]"),
 			"file.folder": makeValue("Tasks"),
 		});
-		const snapshot = buildBaseboardSnapshot(
+		const snapshot = buildCanvasBasesSnapshot(
 			makeQueryResult(entry),
 			makeViewConfig([
 				"file.name",
@@ -55,7 +56,7 @@ describe("buildBaseboardSnapshot", () => {
 		const entry = makeEntry(file, {
 			"note.status": null,
 		});
-		const snapshot = buildBaseboardSnapshot(
+		const snapshot = buildCanvasBasesSnapshot(
 			makeQueryResult(entry),
 			makeViewConfig(["note.status"])
 		);
@@ -73,14 +74,14 @@ describe("buildBaseboardSnapshot", () => {
 		const activeEntry = makeEntry(makeTFile("Tasks/Active.md", "Active", "md"), {});
 		const waitingEntry = makeEntry(makeTFile("Tasks/Waiting.md", "Waiting", "md"), {});
 		const config = makeViewConfig(["file.name"]);
-		const firstSnapshot = buildBaseboardSnapshot(
+		const firstSnapshot = buildCanvasBasesSnapshot(
 			makeGroupedQueryResult([
 				{ key: "Active", entries: [activeEntry] },
 				{ key: "Waiting", entries: [waitingEntry] },
 			]),
 			config
 		);
-		const reorderedSnapshot = buildBaseboardSnapshot(
+		const reorderedSnapshot = buildCanvasBasesSnapshot(
 			makeGroupedQueryResult([
 				{ key: "Waiting", entries: [waitingEntry] },
 				{ key: "Active", entries: [activeEntry] },
@@ -95,16 +96,55 @@ describe("buildBaseboardSnapshot", () => {
 			getGroupIdByLabel(reorderedSnapshot, "Waiting")
 		);
 	});
+
+	it("marks the single ungrouped fallback group as implicit", () => {
+		const entry = makeEntry(makeTFile("Tasks/Active.md", "Active", "md"), {});
+		const snapshot = buildCanvasBasesSnapshot(
+			makeGroupedQueryResult([{ key: "", hasKey: false, entries: [entry] }]),
+			makeViewConfig(["file.name"])
+		);
+
+		expect(snapshot.groups).toMatchObject([
+			{
+				label: "All notes",
+				isImplicit: true,
+			},
+		]);
+	});
+
+	it("captures grouped property and value for zone behavior", () => {
+		const activeEntry = makeEntry(makeTFile("Tasks/Active.md", "Active", "md"), {});
+		const emptyEntry = makeEntry(makeTFile("Tasks/Empty.md", "Empty", "md"), {});
+		const snapshot = buildCanvasBasesSnapshot(
+			makeGroupedQueryResult([
+				{ key: "Active", entries: [activeEntry] },
+				{ key: "", entries: [emptyEntry] },
+			]),
+			makeViewConfig(["file.name"]),
+			"note.status"
+		);
+
+		expect(snapshot.groups).toMatchObject([
+			{
+				label: "Active",
+				property: "note.status",
+				value: "Active",
+			},
+			{
+				label: "Empty",
+				property: "note.status",
+				value: "",
+			},
+		]);
+	});
 });
 
 function makeTFile(path: string, basename: string, extension: string): TFile {
-	const file = Object.create(TFile.prototype) as TFile;
-	Object.assign(file, {
-		path,
-		basename,
-		name: `${basename}.${extension}`,
-		extension,
-	});
+	const file = makeMockTFile(path);
+	if (file.basename !== basename || file.extension !== extension) {
+		throw new Error(`Mock file metadata does not match ${basename}.${extension}`);
+	}
+
 	return file;
 }
 
@@ -123,13 +163,13 @@ function makeQueryResult(entry: BasesEntry): BasesQueryResult {
 }
 
 function makeGroupedQueryResult(
-	groups: Array<{ key: string; entries: BasesEntry[] }>
+	groups: Array<{ key: string; entries: BasesEntry[]; hasKey?: boolean }>
 ): BasesQueryResult {
 	return {
 		data: groups.flatMap((group) => group.entries),
 		groupedData: groups.map((group) => ({
 			key: group.key,
-			hasKey: () => true,
+			hasKey: () => group.hasKey ?? true,
 			entries: group.entries,
 		})),
 	} as unknown as BasesQueryResult;
@@ -157,7 +197,7 @@ function makeValue(text: string): Value {
 }
 
 function getGroupIdByLabel(
-	snapshot: ReturnType<typeof buildBaseboardSnapshot>,
+	snapshot: ReturnType<typeof buildCanvasBasesSnapshot>,
 	label: string
 ): string {
 	const group = snapshot.groups.find((candidate) => candidate.label === label);

@@ -1,7 +1,7 @@
 {
-	"name": "baseboard",
+	"name": "canvas-bases",
 	"version": "0.1.0",
-	"description": "Materialize Obsidian Bases views as Canvas boards.",
+	"description": "TaskNotes canvas companion for Obsidian Bases and Canvas.",
 	"type": "module",
 	"main": "main.js",
 	"scripts": {
@@ -42,7 +42,9 @@
 		"eslint-plugin-obsidianmd": "^0.3.0",
 		"globals": "^16.5.0",
 		"i18n-state-manager": "^0.1.0",
+		"jsdom": "^29.1.1",
 		"obsidian": "^1.12.3",
+		"obsidian-test-mocks": "^3.1.0",
 		"obsidian-typings": "^4.49.0",
 		"postcss-selector-parser": "^7.1.1",
 		"stylelint": "^17.12.0",

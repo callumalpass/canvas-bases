@@ -1,22 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { TFile, type App } from "obsidian";
+import type { App, TFile } from "obsidian";
 import { TaskNotesRuntime } from "../src/tasknotes/runtime";
-import type { BaseboardViewSnapshot } from "../src/types";
+import type { CanvasBasesViewSnapshot } from "../src/types";
+import { makeMockTFile } from "./obsidianMockUtils";
 
 describe("TaskNotesRuntime", () => {
 	it("builds compact task cards using TaskNotes catalog labels", async () => {
 		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
 			tasks: {
-				"Tasks/Alpha.md": {
-					title: "Alpha task",
-					path: "Tasks/Alpha.md",
-					status: "in-progress",
-					priority: "high",
-					archived: false,
-					due: "2026-06-10",
-					isBlocked: true,
+					"Tasks/Alpha.md": {
+						title: "Alpha task",
+						path: "Tasks/Alpha.md",
+						status: "in-progress",
+						priority: "high",
+						archived: false,
+						due: "2026-06-10",
+						timeEntries: [{ startTime: "2026-06-09T09:00:00" }],
+						isBlocked: true,
+					},
 				},
-			},
 		}));
 		const cards = await runtime.getTaskCards(["Tasks/Alpha.md"]);
 		const card = cards.get("Tasks/Alpha.md");
@@ -30,12 +32,14 @@ describe("TaskNotesRuntime", () => {
 			priority: {
 				label: "High",
 				color: "#d94f4f",
-			},
-			isBlocked: true,
+				},
+				isBlocked: true,
+				isTracking: true,
+			});
+			expect(card?.badges.map((badge) => badge.label)).toContain("Due");
+			expect(card?.badges.map((badge) => badge.label)).toContain("Tracking");
+			expect(card?.badges.map((badge) => badge.label)).toContain("Blocked");
 		});
-		expect(card?.badges.map((badge) => badge.label)).toContain("Due");
-		expect(card?.badges.map((badge) => badge.label)).toContain("Blocked");
-	});
 
 	it("maps visible Bases properties through TaskNotes field definitions", () => {
 		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
@@ -85,6 +89,207 @@ describe("TaskNotesRuntime", () => {
 		expect(runtime.getPropertyKind("priority")).toBeNull();
 		expect(runtime.getPropertyKind("status")).toBeNull();
 		expect(runtime.getPropertyKind("due")).toBeNull();
+	});
+
+	it("lists writable TaskNotes properties for zone suggestions", () => {
+		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
+			fields: [
+				{
+					id: "status",
+					label: "Status",
+					frontmatterKey: "state",
+					aliases: ["task.status", "status"],
+					writable: true,
+				},
+				{
+					id: "created",
+					label: "Created",
+					frontmatterKey: "created",
+					writable: false,
+				},
+				{
+					id: "user:energy",
+					label: "Energy",
+					frontmatterKey: "energy",
+					source: "user",
+					writable: true,
+				},
+			],
+		}));
+
+		expect(runtime.getWritablePropertyIds()).toEqual([
+			"note.energy",
+			"note.state",
+			"task.status",
+			"task.user:energy",
+		]);
+	});
+
+	it("updates mapped TaskNotes properties through the TaskNotes task API", async () => {
+		const writes = createTaskWrites();
+		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
+			fields: [
+				{
+					id: "status",
+					label: "Status",
+					frontmatterKey: "state",
+					writable: true,
+				},
+			],
+			tasks: {
+				"Tasks/Alpha.md": task("Tasks/Alpha.md"),
+			},
+			writes,
+		}));
+
+		await expect(
+			runtime.updateMappedProperty("Tasks/Alpha.md", "note.state", "done")
+		).resolves.toBe("updated");
+
+		expect(writes.taskPatches).toEqual([
+			{
+				path: "Tasks/Alpha.md",
+				patch: { status: "done" },
+				context: { source: "canvas-bases", reason: "active-group" },
+			},
+		]);
+	});
+
+	it("does not use TaskNotes field aliases for raw note properties", async () => {
+		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
+			fields: [
+				{
+					id: "status",
+					label: "Status",
+					frontmatterKey: "state",
+					aliases: ["status", "note.status", "task.status"],
+					writable: true,
+				},
+			],
+			tasks: {
+				"Tasks/Alpha.md": task("Tasks/Alpha.md"),
+			},
+		}));
+
+		await expect(
+			runtime.updateMappedProperty("Tasks/Alpha.md", "note.status", "done")
+		).resolves.toBe("not-task-field");
+		await expect(
+			runtime.updateMappedProperty("Tasks/Alpha.md", "task.status", "done")
+		).resolves.toBe("updated");
+	});
+
+	it("updates TaskNotes user fields as custom frontmatter", async () => {
+		const writes = createTaskWrites();
+		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
+			fields: [
+				{
+					id: "user:energy",
+					label: "Energy",
+					frontmatterKey: "energy",
+					source: "user",
+					writable: true,
+				},
+			],
+			tasks: {
+				"Tasks/Alpha.md": task("Tasks/Alpha.md"),
+			},
+			writes,
+		}));
+
+		await expect(
+			runtime.updateMappedProperty("Tasks/Alpha.md", "note.energy", "ignored", {
+				updateMode: "clear",
+				valueType: "auto",
+			})
+		).resolves.toBe("updated");
+
+		expect(writes.taskPatches).toEqual([
+			{
+				path: "Tasks/Alpha.md",
+				patch: { customFrontmatter: { energy: null } },
+				context: { source: "canvas-bases", reason: "active-group" },
+			},
+		]);
+	});
+
+	it("runs TaskNotes actions for action zones", async () => {
+		const writes = createTaskWrites();
+		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
+			tasks: {
+				"Tasks/Alpha.md": task("Tasks/Alpha.md"),
+			},
+			writes,
+		}));
+
+		await expect(runtime.runZoneAction("Tasks/Alpha.md", "task.complete")).resolves.toBe("updated");
+		await expect(runtime.runZoneAction("Tasks/Alpha.md", "time.start")).resolves.toBe("updated");
+		await expect(runtime.runZoneAction("Tasks/Alpha.md", "pomodoro.assign")).resolves.toBe("updated");
+		await expect(runtime.runZoneAction("Tasks/Missing.md", "time.start")).resolves.toBe("not-task");
+
+		expect(writes.zoneActions).toEqual([
+			{
+				action: "task.complete",
+				path: "Tasks/Alpha.md",
+				context: { source: "canvas-bases", reason: "zone-action" },
+			},
+			{
+				action: "time.start",
+				path: "Tasks/Alpha.md",
+				context: { source: "canvas-bases", reason: "zone-action" },
+			},
+			{
+				action: "pomodoro.assign",
+				path: "Tasks/Alpha.md",
+				context: { source: "canvas-bases", reason: "zone-action" },
+			},
+		]);
+	});
+
+	it("applies active-group append rules to TaskNotes user list fields", async () => {
+		const writes = createTaskWrites();
+		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
+			fields: [
+				{
+					id: "user:contexts",
+					label: "Contexts",
+					frontmatterKey: "contexts",
+					source: "user",
+					writable: true,
+					valueType: "string[]",
+				},
+			],
+			tasks: {
+				"Tasks/Alpha.md": task("Tasks/Alpha.md", { contexts: ["home"] }),
+			},
+			writes,
+		}));
+
+		await expect(
+			runtime.updateMappedProperty("Tasks/Alpha.md", "note.contexts", "home", {
+				updateMode: "appendUnique",
+				valueType: "auto",
+			})
+		).resolves.toBe("updated");
+		await expect(
+			runtime.updateMappedProperty("Tasks/Alpha.md", "note.contexts", "work", {
+				updateMode: "appendUnique",
+				valueType: "auto",
+			})
+		).resolves.toBe("updated");
+
+		expect(writes.taskPatches).toEqual([
+			{
+				path: "Tasks/Alpha.md",
+				patch: { customFrontmatter: { contexts: ["home"] } },
+				context: { source: "canvas-bases", reason: "active-group" },
+			},
+			{
+				path: "Tasks/Alpha.md",
+				patch: { customFrontmatter: { contexts: ["home", "work"] } },
+				context: { source: "canvas-bases", reason: "active-group" },
+			},
+		]);
 	});
 
 	it("checks whether a visible note is a TaskNotes task before showing task actions", async () => {
@@ -177,7 +382,7 @@ describe("TaskNotesRuntime", () => {
 		expect(fileMenu.calls).toEqual([
 			{
 				path: "260608yp5.md",
-				source: "baseboard",
+				source: "canvas-bases",
 			},
 		]);
 	});
@@ -357,28 +562,28 @@ describe("TaskNotesRuntime", () => {
 			{
 				path: "Tasks/Alpha.md",
 				dependency: { uid: "[[Tasks/Beta]]", reltype: "FINISHTOSTART" },
-				context: { source: "baseboard", reason: "link-control" },
+				context: { source: "canvas-bases", reason: "link-control" },
 			},
 		]);
 		expect(writes.addProjects).toEqual([
 			{
 				path: "Tasks/Alpha.md",
 				project: "[[Tasks/Beta]]",
-				context: { source: "baseboard", reason: "link-control" },
+				context: { source: "canvas-bases", reason: "link-control" },
 			},
 		]);
 		expect(writes.removeDependencies).toEqual([
 			{
 				path: "Tasks/Alpha.md",
 				uid: "[[Tasks/Beta]]",
-				context: { source: "baseboard", reason: "link-control" },
+				context: { source: "canvas-bases", reason: "link-control" },
 			},
 		]);
 		expect(writes.removeProjects).toEqual([
 			{
 				path: "Tasks/Alpha.md",
 				project: "[[Tasks/Beta]]",
-				context: { source: "baseboard", reason: "link-control" },
+				context: { source: "canvas-bases", reason: "link-control" },
 			},
 		]);
 	});
@@ -400,7 +605,7 @@ describe("TaskNotesRuntime", () => {
 			{
 				path: "260608yp5.md",
 				uid: "[[260608yp8]]",
-				context: { source: "baseboard", reason: "link-control" },
+				context: { source: "canvas-bases", reason: "link-control" },
 			},
 		]);
 	});
@@ -424,7 +629,7 @@ describe("TaskNotesRuntime", () => {
 	});
 });
 
-function snapshot(): BaseboardViewSnapshot {
+function snapshot(): CanvasBasesViewSnapshot {
 	return {
 		viewName: "Planning",
 		totalEntries: 2,
@@ -442,7 +647,7 @@ function snapshot(): BaseboardViewSnapshot {
 	};
 }
 
-function rootTaskSnapshot(): BaseboardViewSnapshot {
+function rootTaskSnapshot(): CanvasBasesViewSnapshot {
 	return {
 		viewName: "Today",
 		totalEntries: 2,
@@ -477,6 +682,9 @@ function makeTaskNotesApp({
 		label: string;
 		aliases?: string[];
 		frontmatterKey?: string;
+		writable?: boolean;
+		source?: string;
+		valueType?: string;
 	}>;
 	fileMenu?: FileMenuLog;
 	frontmatter?: Record<string, Record<string, unknown>>;
@@ -484,7 +692,15 @@ function makeTaskNotesApp({
 	taskMenu?: TaskMenuLog;
 	writes?: TaskWriteLog;
 }): App {
-	const capabilities = new Set(["tasks.read", "tasks.write", "catalog.read", "relationships.read"]);
+		const capabilities = new Set([
+			"tasks.read",
+			"tasks.write",
+			"catalog.read",
+			"relationships.read",
+			"time.write",
+			"pomodoro.write",
+			"recurring.write",
+		]);
 	if (taskMenu) capabilities.add("ui.task-menu");
 
 	return {
@@ -516,11 +732,35 @@ function makeTaskNotesApp({
 							api: {
 								apiVersion: 1,
 								hasCapability: (capability: string) => capabilities.has(capability),
-								tasks: {
-									get: async (path: string) => tasks[path] ?? null,
-									addDependency: async (path: string, dependency: unknown, context: unknown) => {
-										writes.addDependencies.push({ path, dependency, context });
+									tasks: {
+										get: async (path: string) => tasks[path] ?? null,
+									update: async (path: string, patch: unknown, context: unknown) => {
+										writes.taskPatches.push({ path, patch, context });
 										return tasks[path] ?? task(path);
+									},
+										patch: async (path: string, patch: unknown, context: unknown) => {
+											writes.taskPatches.push({ path, patch, context });
+											return tasks[path] ?? task(path);
+										},
+										complete: async (path: string, _options: unknown, context: unknown) => {
+											writes.zoneActions.push({ action: "task.complete", path, context });
+											return tasks[path] ?? task(path);
+										},
+										uncomplete: async (path: string, _options: unknown, context: unknown) => {
+											writes.zoneActions.push({ action: "task.uncomplete", path, context });
+											return tasks[path] ?? task(path);
+										},
+										archive: async (path: string, archived: boolean, context: unknown) => {
+											writes.zoneActions.push({
+												action: archived ? "task.archive" : "task.unarchive",
+												path,
+												context,
+											});
+											return tasks[path] ?? task(path);
+										},
+										addDependency: async (path: string, dependency: unknown, context: unknown) => {
+											writes.addDependencies.push({ path, dependency, context });
+											return tasks[path] ?? task(path);
 									},
 									removeDependency: async (path: string, uid: string, context: unknown) => {
 										writes.removeDependencies.push({ path, uid, context });
@@ -551,9 +791,45 @@ function makeTaskNotesApp({
 											color: "#d94f4f",
 										},
 									],
-									fields: () => fields,
-								},
-								relationships: {
+										fields: () => fields,
+									},
+									time: {
+										start: async (path: string, _options: unknown, context: unknown) => {
+											writes.zoneActions.push({ action: "time.start", path, context });
+											return tasks[path] ?? task(path);
+										},
+										stop: async (path: string, context: unknown) => {
+											writes.zoneActions.push({ action: "time.stop", path, context });
+											return tasks[path] ?? task(path);
+										},
+									},
+									pomodoro: {
+										start: async (options: { taskPath?: string }, context: unknown) => {
+											writes.zoneActions.push({
+												action: "pomodoro.start",
+												path: options.taskPath ?? "",
+												context,
+											});
+										},
+										assignTask: async (path: string | null, context: unknown) => {
+											writes.zoneActions.push({
+												action: "pomodoro.assign",
+												path: path ?? "",
+												context,
+											});
+										},
+									},
+									recurring: {
+										toggleCompleteInstance: async (path: string, _date: unknown, context: unknown) => {
+											writes.zoneActions.push({ action: "recurring.complete", path, context });
+											return tasks[path] ?? task(path);
+										},
+										toggleSkippedInstance: async (path: string, _date: unknown, context: unknown) => {
+											writes.zoneActions.push({ action: "recurring.skip", path, context });
+											return tasks[path] ?? task(path);
+										},
+									},
+									relationships: {
 									dependencies: async (path: string) => {
 										relationshipCalls?.push(`dependencies:${path}`);
 										const result = relationships[path];
@@ -591,6 +867,8 @@ function makeTaskNotesApp({
 }
 
 interface TaskWriteLog {
+	taskPatches: Array<{ path: string; patch: unknown; context: unknown }>;
+	zoneActions: Array<{ action: string; path: string; context: unknown }>;
 	addDependencies: Array<{ path: string; dependency: unknown; context: unknown }>;
 	removeDependencies: Array<{ path: string; uid: string; context: unknown }>;
 	addProjects: Array<{ path: string; project: string; context: unknown }>;
@@ -609,8 +887,10 @@ interface FileMenuLog {
 }
 
 function createTaskWrites(): TaskWriteLog {
-	return {
-		addDependencies: [],
+		return {
+			taskPatches: [],
+			zoneActions: [],
+			addDependencies: [],
 		removeDependencies: [],
 		addProjects: [],
 		removeProjects: [],
@@ -650,6 +930,8 @@ interface MockTask {
 	priority: string;
 	archived: boolean;
 	blockedBy?: Array<{ uid: string; reltype: "FINISHTOSTART" }>;
+	timeEntries?: Array<{ startTime: string; endTime?: string | null }>;
+	contexts?: string[];
 	projects?: string[];
 }
 
@@ -665,9 +947,5 @@ function task(path: string, overrides: Partial<MockTask> = {}): MockTask {
 }
 
 function makeFile(path: string): TFile {
-	const file = new TFile();
-	file.path = path;
-	file.name = path.split("/").pop() ?? path;
-	file.basename = file.name.replace(/\.md$/u, "");
-	return file;
+	return makeMockTFile(path);
 }

@@ -2,9 +2,10 @@ import type { TranslationTree } from "../types";
 
 export const ru: TranslationTree = {
 	common: {
-		appName: "Baseboard",
+		appName: "Canvas Bases",
 		automatic: "Автоматически",
 		cancel: "Отмена",
+		close: "Закрыть",
 		card: {
 			one: "{count} карточка",
 			other: "{count} карточек"
@@ -34,17 +35,26 @@ export const ru: TranslationTree = {
 		addedDependency: "Добавлена зависимость: {label}.",
 		addedProjectRelationship: "Добавлена связь проекта: {label}.",
 		addedPropertyLink: "Добавлено {property}: {source} -> {target}.",
-		baseboardWaitingForBasesData: "Baseboard ожидает данные Bases.",
+		activeGroupDisabled: "Зона удалена: {label}.",
+		activeGroupEnabled: "Зона включена: {label}.",
+		activeGroupReadOnly: "Эта зона не может обновлять доступное для записи свойство заметки.",
+		activeGroupTaskUpdateUnavailable: "TaskNotes не может обновить это свойство задачи из Canvas Bases.",
+		activeGroupUpdated: "{property} обновлено до {value}.",
+		activeGroupActionRun: "Выполнено действие зоны: {action}.",
+		activeGroupActionNotTask: "Это действие зоны работает только с задачами TaskNotes.",
+		activeGroupActionUnavailable: "Это действие зоны TaskNotes недоступно.",
+		canvasBasesWaitingForBasesData: "Canvas Bases ожидает данные Bases.",
 		couldNotAddPropertyLink: "Не удалось добавить ссылку свойства: {message}",
 		couldNotFind: "Не удалось найти {path}.",
 		couldNotRemovePropertyLink: "Не удалось удалить ссылку свойства: {message}",
+		couldNotUpdateActiveGroup: "Не удалось обновить значение зоны: {message}",
 		couldNotUpdateLink: "Не удалось обновить ссылку: {message}",
 		languageChanged: "Язык изменён на {language}.",
 		linkActionUnavailable: "Это действие со ссылкой недоступно для этих заметок.",
 		noLinkedCanvas: "{source} ещё не имеет связанного канваса.",
 		noVisibleLinkProperties: "Нет видимых свойств заметки, доступных для ссылок.",
-		obsidianVersionRequired: "Для Baseboard требуется Obsidian 1.10.1 или новее.",
-		openBaseboardViewFirst: "Сначала откройте представление baseboard.",
+		obsidianVersionRequired: "Для Canvas Bases требуется Obsidian 1.10.1 или новее.",
+		openCanvasBasesViewFirst: "Сначала откройте представление Canvas Bases.",
 		openBasesViewFirst: "Сначала откройте представление bases.",
 		resolveInlineEditorConflict: "Разрешите конфликт встроенного редактора перед изменением ссылок.",
 		removedDependency: "Зависимость удалена.",
@@ -53,7 +63,7 @@ export const ru: TranslationTree = {
 		chooseCanvasPath: "Выберите путь к канвасу.",
 		chooseLinkProperty: "Выберите свойство заметки для этой ссылки.",
 		starterFilesBlocked: "Не удалось создать начальные файлы, потому что один из начальных путей уже используется другим файлом или папкой.",
-		starterFilesReady: "Начальные файлы готовы в Baseboard/.",
+		starterFilesReady: "Начальные файлы готовы в Canvas Bases/.",
 		updatedCanvas: "Обновлено {path}: узлов — {nodes}, связей — {edges}."
 	},
 	settings: {
@@ -61,7 +71,7 @@ export const ru: TranslationTree = {
 			heading: "По умолчанию",
 			canvasFolder: {
 				name: "Папка канваса по умолчанию",
-				description: "Папка, используемая когда у представления baseboard ещё нет пути к канвасу."
+				description: "Папка, используемая когда у представления Canvas Bases ещё нет пути к канвасу."
 			},
 			layout: {
 				name: "Макет по умолчанию",
@@ -77,14 +87,14 @@ export const ru: TranslationTree = {
 			},
 			bodyEditor: {
 				name: "Показать редактор текста",
-				description: "По умолчанию показывать редактируемый текст заметки на живых карточках baseboard."
+				description: "По умолчанию показывать редактируемый текст заметки на живых карточках Canvas Bases."
 			}
 		},
 		tasknotes: {
 			heading: "TaskNotes",
 			integration: {
 				name: "Интеграция с TaskNotes",
-				description: "Поведение TaskNotes по умолчанию для новых представлений baseboard."
+				description: "Поведение TaskNotes по умолчанию для новых представлений Canvas Bases."
 			},
 			badges: {
 				name: "Показать значки задачи",
@@ -103,11 +113,11 @@ export const ru: TranslationTree = {
 			heading: "Правила обновления",
 			preservePositions: {
 				name: "Сохранять позиции",
-				description: "Сохранять существующие позиции узлов baseboard при обновлении канваса."
+				description: "Сохранять существующие позиции узлов Canvas Bases при обновлении канваса."
 			},
 			removeMissingNotes: {
 				name: "Удалять отсутствующие заметки",
-				description: "Удалять узлы baseboard, которых больше нет в текущем результате base."
+				description: "Удалять узлы Canvas Bases, которых больше нет в текущем результате base."
 			},
 			nodeWidth: {
 				name: "Ширина узла",
@@ -120,9 +130,9 @@ export const ru: TranslationTree = {
 		},
 		language: {
 			heading: "Язык интерфейса",
-			description: "Изменить язык команд, настроек, уведомлений и представлений Baseboard.",
+			description: "Изменить язык команд, настроек, уведомлений и представлений Canvas Bases.",
 			name: "Язык интерфейса",
-			dropdownDescription: "Выберите язык, используемый для текста интерфейса Baseboard."
+			dropdownDescription: "Выберите язык, используемый для текста интерфейса Canvas Bases."
 		}
 	},
 	options: {
@@ -151,7 +161,9 @@ export const ru: TranslationTree = {
 			blocking: "Блокирует",
 			subtasks: "Подзадачи",
 			estimate: "Оценка",
-			tracked: "Отслеживается"
+			tracked: "Отслеживается",
+			tracking: "Учет времени",
+			active: "Активно"
 		},
 		relationships: {
 			blocks: "блокирует",
@@ -188,7 +200,7 @@ export const ru: TranslationTree = {
 			description: "Добавлять связи задач на создаваемый канвас."
 		},
 		preservePositions: {
-			description: "Сохранять позиции для узлов baseboard, уже присутствующих на канвасе."
+			description: "Сохранять позиции для узлов Canvas Bases, уже присутствующих на канвасе."
 		},
 		createCanvas: "Создать канвас"
 	},
@@ -198,6 +210,7 @@ export const ru: TranslationTree = {
 			pinNote: "Закрепить заметку",
 			addCard: "Добавить карточку",
 			addGroup: "Добавить группу",
+			addZone: "Добавить зону",
 			createCanvas: "Создать канвас",
 			updateCanvas: "Обновить канвас",
 			openCanvas: "Открыть канвас",
@@ -213,16 +226,67 @@ export const ru: TranslationTree = {
 			textCardTitle: "Карточка",
 			cardActions: "Действия с карточкой",
 			groupActions: "Действия группы",
+			color: "Цвет",
+			noteColor: "Цвет заметки",
+			cardColor: "Цвет карточки",
 			editCard: "Редактировать карточку",
 			writeNote: "Написать заметку",
 			linkFromNote: "Связать из этой заметки"
 		},
+		linkDrag: {
+			releaseToLink: "Отпустите, чтобы связать с {target}",
+			dragToCard: "Отпустите на другой карточке заметки",
+			cannotLinkHere: "Здесь нельзя создать связь"
+		},
 		group: {
+			active: "Зона",
+			activeTitle: "Зона назначения",
+			zoneTitle: "Зона назначения",
+			label: "Метка",
+			action: "Действие при перетаскивании",
+			actionSetProperty: "Обновить свойство",
+			actionCompleteTask: "Завершить задачу",
+			actionUncompleteTask: "Пометить задачу как незавершенную",
+			actionArchiveTask: "Архивировать задачу",
+			actionUnarchiveTask: "Разархивировать задачу",
+			actionStartTimeTracking: "Начать учёт времени",
+			actionStopTimeTracking: "Остановить учёт времени",
+			actionStartPomodoro: "Начать Pomodoro",
+			actionAssignPomodoro: "Назначить текущему Pomodoro",
+			actionCompleteRecurring: "Завершить повторяющийся экземпляр",
+			actionSkipRecurring: "Пропустить повторяющийся экземпляр",
+			property: "Свойство",
+			value: "Значение",
+			updateMode: "Режим обновления",
+			valueType: "Тип значения",
+			updateModeReplace: "Заменить",
+			updateModeAppend: "Добавить",
+			updateModeAppendUnique: "Добавить без дублей",
+			updateModeRemove: "Удалить",
+			updateModeClear: "Очистить",
+			valueTypeAuto: "Авто",
+			valueTypeString: "Текст",
+			valueTypeNumber: "Число",
+			valueTypeBoolean: "Логическое",
+			valueTypeDate: "Дата",
+			valueTypeList: "Список",
+			color: "Цвет",
+			writeRule: "Правило записи",
+			groupRuleLocked: "Эта зона следует текущей группе Base. Используйте пользовательскую зону, чтобы записывать другое свойство.",
+			dropResult: "Результат перетаскивания",
+			previewWrite: "{mode}: {property} -> {value}.",
+			previewClear: "{mode}: {property}.",
+			previewAction: "{action}.",
+			emptyValue: "пустое значение",
+			propertyRequired: "Выберите свойство перед сохранением.",
 			createTitle: "Создать группу",
 			defaultName: "Группа",
+			defaultZoneName: "Зона",
 			create: "Создать",
+			createZone: "Создать зону",
 			renameTitle: "Переименовать группу",
-			rename: "Переименовать"
+			rename: "Переименовать",
+			saveActiveGroup: "Сохранить зону"
 		},
 		tooltips: {
 			dragGroup: "Перетащить группу",
@@ -240,15 +304,25 @@ export const ru: TranslationTree = {
 			openNote: "Открыть заметку",
 			unpinFromBoard: "Открепить от доски",
 			removeCard: "Удалить карточку",
+			setCardColor: "Задать цвет",
+			clearCardColor: "Сбросить цвет",
 			addPinnedNote: "Добавить закреплённую заметку",
 			addCard: "Добавить карточку",
+			activateGroup: "Использовать как зону назначения",
+			configureActiveGroup: "Настроить зону",
+			deactivateActiveGroup: "Удалить зону",
 			renameGroup: "Переименовать группу",
 			removeGroup: "Удалить группу",
+			fitGroupToCards: "Подогнать группу под карточки",
 			createGroupFromSelection: "Создать группу из выделенного",
+			createZoneFromSelection: "Создать зону из выделенного",
 			sourceBlocksTarget: "{source} блокирует {target}",
 			targetBlocksSource: "{target} блокирует {source}",
 			targetSubtaskOfSource: "{target} — подзадача {source}",
 			sourceSubtaskOfTarget: "{source} — подзадача {target}",
+			dependencyLinks: "Зависимости",
+			subtaskLinks: "Подзадачи",
+			propertyLinks: "Ссылки свойств",
 			addPropertyLink: "Добавить {property}: {source} -> {target}",
 			chooseProperty: "Выбрать свойство...",
 			openPath: "Открыть {name}",

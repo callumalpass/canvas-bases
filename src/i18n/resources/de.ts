@@ -2,9 +2,10 @@ import type { TranslationTree } from "../types";
 
 export const de: TranslationTree = {
 	common: {
-		appName: "Baseboard",
+		appName: "Canvas Bases",
 		automatic: "Automatisch",
 		cancel: "Abbrechen",
+		close: "Schließen",
 		card: {
 			one: "{count} Karte",
 			other: "{count} Karten"
@@ -34,17 +35,26 @@ export const de: TranslationTree = {
 		addedDependency: "Abhängigkeit hinzugefügt: {label}.",
 		addedProjectRelationship: "Projektbeziehung hinzugefügt: {label}.",
 		addedPropertyLink: "{property} hinzugefügt: {source} -> {target}.",
-		baseboardWaitingForBasesData: "Baseboard wartet auf Bases-Daten.",
+		activeGroupDisabled: "Zone entfernt: {label}.",
+		activeGroupEnabled: "Zone aktiviert: {label}.",
+		activeGroupReadOnly: "Diese Zone kann keine beschreibbare Notiz-Eigenschaft aktualisieren.",
+		activeGroupTaskUpdateUnavailable: "TaskNotes kann diese Aufgaben-Eigenschaft nicht aus Canvas Bases aktualisieren.",
+		activeGroupUpdated: "{property} auf {value} aktualisiert.",
+		activeGroupActionRun: "Zonenaktion ausgeführt: {action}.",
+		activeGroupActionNotTask: "Diese Zonenaktion funktioniert nur mit TaskNotes-Aufgaben.",
+		activeGroupActionUnavailable: "Diese TaskNotes-Zonenaktion ist nicht verfügbar.",
+		canvasBasesWaitingForBasesData: "Canvas Bases wartet auf Bases-Daten.",
 		couldNotAddPropertyLink: "Eigenschafts-Link konnte nicht hinzugefügt werden: {message}",
 		couldNotFind: "{path} konnte nicht gefunden werden.",
 		couldNotRemovePropertyLink: "Eigenschafts-Link konnte nicht entfernt werden: {message}",
+		couldNotUpdateActiveGroup: "Zonenwert konnte nicht aktualisiert werden: {message}",
 		couldNotUpdateLink: "Link konnte nicht aktualisiert werden: {message}",
 		languageChanged: "Sprache geändert zu {language}.",
 		linkActionUnavailable: "Diese Link-Aktion ist für diese Notizen nicht verfügbar.",
 		noLinkedCanvas: "{source} hat noch keine verknüpfte Canvas.",
 		noVisibleLinkProperties: "Keine sichtbaren Notiz-Eigenschaften für Links verfügbar.",
-		obsidianVersionRequired: "Baseboard erfordert Obsidian 1.10.1 oder neuer.",
-		openBaseboardViewFirst: "Öffne zuerst eine Baseboard-Ansicht.",
+		obsidianVersionRequired: "Canvas Bases erfordert Obsidian 1.10.1 oder neuer.",
+		openCanvasBasesViewFirst: "Öffne zuerst eine Canvas Bases-Ansicht.",
 		openBasesViewFirst: "Öffne zuerst eine Bases-Ansicht.",
 		resolveInlineEditorConflict: "Löse den Konflikt im Inline-Editor, bevor du Links änderst.",
 		removedDependency: "Abhängigkeit entfernt.",
@@ -53,7 +63,7 @@ export const de: TranslationTree = {
 		chooseCanvasPath: "Wähle einen Canvas-Pfad.",
 		chooseLinkProperty: "Wähle eine Notiz-Eigenschaft für diesen Link.",
 		starterFilesBlocked: "Startdateien konnten nicht erstellt werden, weil ein Startpfad bereits von einer anderen Datei oder einem Ordner verwendet wird.",
-		starterFilesReady: "Die Startdateien liegen in Baseboard/ bereit.",
+		starterFilesReady: "Die Startdateien liegen in Canvas Bases/ bereit.",
 		updatedCanvas: "{path} aktualisiert: {nodes} Knoten, {edges} Kanten."
 	},
 	settings: {
@@ -61,7 +71,7 @@ export const de: TranslationTree = {
 			heading: "Standardwerte",
 			canvasFolder: {
 				name: "Standard-Canvas-Ordner",
-				description: "Ordner, der verwendet wird, wenn eine Baseboard-Ansicht noch keinen Canvas-Pfad hat."
+				description: "Ordner, der verwendet wird, wenn eine Canvas Bases-Ansicht noch keinen Canvas-Pfad hat."
 			},
 			layout: {
 				name: "Standardlayout",
@@ -77,14 +87,14 @@ export const de: TranslationTree = {
 			},
 			bodyEditor: {
 				name: "Textkörper-Editor anzeigen",
-				description: "Bearbeitbaren Notiz-Textkörper auf Live-Baseboard-Karten standardmäßig anzeigen."
+				description: "Bearbeitbaren Notiz-Textkörper auf Live-Canvas Bases-Karten standardmäßig anzeigen."
 			}
 		},
 		tasknotes: {
 			heading: "TaskNotes",
 			integration: {
 				name: "TaskNotes-Integration",
-				description: "Standard-TaskNotes-Verhalten für neue Baseboard-Ansichten."
+				description: "Standard-TaskNotes-Verhalten für neue Canvas Bases-Ansichten."
 			},
 			badges: {
 				name: "Aufgaben-Badges anzeigen",
@@ -103,11 +113,11 @@ export const de: TranslationTree = {
 			heading: "Aktualisierungsregeln",
 			preservePositions: {
 				name: "Positionen beibehalten",
-				description: "Vorhandene Baseboard-Knotenpositionen beim Aktualisieren einer Canvas beibehalten."
+				description: "Vorhandene Canvas Bases-Knotenpositionen beim Aktualisieren einer Canvas beibehalten."
 			},
 			removeMissingNotes: {
 				name: "Fehlende Notizen entfernen",
-				description: "Baseboard-Knoten entfernen, die nicht mehr im aktuellen Base-Ergebnis erscheinen."
+				description: "Canvas Bases-Knoten entfernen, die nicht mehr im aktuellen Base-Ergebnis erscheinen."
 			},
 			nodeWidth: {
 				name: "Knotenbreite",
@@ -120,9 +130,9 @@ export const de: TranslationTree = {
 		},
 		language: {
 			heading: "Oberflächensprache",
-			description: "Ändere die Sprache der Baseboard-Befehle, Einstellungen, Hinweise und Ansichten.",
+			description: "Ändere die Sprache der Canvas Bases-Befehle, Einstellungen, Hinweise und Ansichten.",
 			name: "UI-Sprache",
-			dropdownDescription: "Wähle die Sprache für den Baseboard-Oberflächentext."
+			dropdownDescription: "Wähle die Sprache für den Canvas Bases-Oberflächentext."
 		}
 	},
 	options: {
@@ -151,7 +161,9 @@ export const de: TranslationTree = {
 			blocking: "Blockierend",
 			subtasks: "Unteraufgaben",
 			estimate: "Schätzung",
-			tracked: "Verfolgt"
+			tracked: "Verfolgt",
+			tracking: "Zeiterfassung",
+			active: "Aktiv"
 		},
 		relationships: {
 			blocks: "blockiert",
@@ -188,7 +200,7 @@ export const de: TranslationTree = {
 			description: "Aufgabenbeziehungs-Kanten zur generierten Canvas hinzufügen."
 		},
 		preservePositions: {
-			description: "Positionen für Baseboard-Knoten beibehalten, die bereits in der Canvas vorhanden sind."
+			description: "Positionen für Canvas Bases-Knoten beibehalten, die bereits in der Canvas vorhanden sind."
 		},
 		createCanvas: "Canvas erstellen"
 	},
@@ -198,6 +210,7 @@ export const de: TranslationTree = {
 			pinNote: "Notiz anheften",
 			addCard: "Karte hinzufügen",
 			addGroup: "Gruppe hinzufügen",
+			addZone: "Zone hinzufügen",
 			createCanvas: "Canvas erstellen",
 			updateCanvas: "Canvas aktualisieren",
 			openCanvas: "Canvas öffnen",
@@ -213,16 +226,67 @@ export const de: TranslationTree = {
 			textCardTitle: "Karte",
 			cardActions: "Kartenaktionen",
 			groupActions: "Gruppenaktionen",
+			color: "Farbe",
+			noteColor: "Notizfarbe",
+			cardColor: "Kartenfarbe",
 			editCard: "Karte bearbeiten",
 			writeNote: "Notiz schreiben",
 			linkFromNote: "Von dieser Notiz verknüpfen"
 		},
+		linkDrag: {
+			releaseToLink: "Loslassen, um mit {target} zu verknüpfen",
+			dragToCard: "Auf eine andere Notizkarte ziehen",
+			cannotLinkHere: "Hier kann nicht verknüpft werden"
+		},
 		group: {
+			active: "Zone",
+			activeTitle: "Zuweisungszone",
+			zoneTitle: "Zuweisungszone",
+			label: "Bezeichnung",
+			action: "Aktion beim Ablegen",
+			actionSetProperty: "Eigenschaft aktualisieren",
+			actionCompleteTask: "Aufgabe abschließen",
+			actionUncompleteTask: "Aufgabe als unerledigt markieren",
+			actionArchiveTask: "Aufgabe archivieren",
+			actionUnarchiveTask: "Aufgabe aus Archiv holen",
+			actionStartTimeTracking: "Zeiterfassung starten",
+			actionStopTimeTracking: "Zeiterfassung stoppen",
+			actionStartPomodoro: "Pomodoro starten",
+			actionAssignPomodoro: "Aktuellem Pomodoro zuweisen",
+			actionCompleteRecurring: "Wiederkehrendes Vorkommen abschließen",
+			actionSkipRecurring: "Wiederkehrendes Vorkommen überspringen",
+			property: "Eigenschaft",
+			value: "Wert",
+			updateMode: "Aktualisierungsmodus",
+			valueType: "Werttyp",
+			updateModeReplace: "Ersetzen",
+			updateModeAppend: "Anhängen",
+			updateModeAppendUnique: "Eindeutig anhängen",
+			updateModeRemove: "Entfernen",
+			updateModeClear: "Leeren",
+			valueTypeAuto: "Automatisch",
+			valueTypeString: "Text",
+			valueTypeNumber: "Zahl",
+			valueTypeBoolean: "Boolesch",
+			valueTypeDate: "Datum",
+			valueTypeList: "Liste",
+			color: "Farbe",
+			writeRule: "Schreibregel",
+			groupRuleLocked: "Diese Zone folgt der aktuellen Base-Gruppe. Verwende eine benutzerdefinierte Zone, um eine andere Eigenschaft zu schreiben.",
+			dropResult: "Ablageergebnis",
+			previewWrite: "{mode}: {property} -> {value}.",
+			previewClear: "{mode}: {property}.",
+			previewAction: "{action}.",
+			emptyValue: "leerer Wert",
+			propertyRequired: "Vor dem Speichern eine Eigenschaft auswählen.",
 			createTitle: "Gruppe erstellen",
 			defaultName: "Gruppe",
+			defaultZoneName: "Zone",
 			create: "Erstellen",
+			createZone: "Zone erstellen",
 			renameTitle: "Gruppe umbenennen",
-			rename: "Umbenennen"
+			rename: "Umbenennen",
+			saveActiveGroup: "Zone speichern"
 		},
 		tooltips: {
 			dragGroup: "Gruppe ziehen",
@@ -240,15 +304,25 @@ export const de: TranslationTree = {
 			openNote: "Notiz öffnen",
 			unpinFromBoard: "Vom Board lösen",
 			removeCard: "Karte entfernen",
+			setCardColor: "Farbe festlegen",
+			clearCardColor: "Farbe entfernen",
 			addPinnedNote: "Angeheftete Notiz hinzufügen",
 			addCard: "Karte hinzufügen",
+			activateGroup: "Als Zuweisungszone verwenden",
+			configureActiveGroup: "Zone konfigurieren",
+			deactivateActiveGroup: "Zone entfernen",
 			renameGroup: "Gruppe umbenennen",
 			removeGroup: "Gruppe entfernen",
+			fitGroupToCards: "Gruppe an Karten anpassen",
 			createGroupFromSelection: "Gruppe aus Auswahl erstellen",
+			createZoneFromSelection: "Zone aus Auswahl erstellen",
 			sourceBlocksTarget: "{source} blockiert {target}",
 			targetBlocksSource: "{target} blockiert {source}",
 			targetSubtaskOfSource: "{target} ist Unteraufgabe von {source}",
 			sourceSubtaskOfTarget: "{source} ist Unteraufgabe von {target}",
+			dependencyLinks: "Abhängigkeiten",
+			subtaskLinks: "Unteraufgaben",
+			propertyLinks: "Eigenschaftslinks",
 			addPropertyLink: "{property} hinzufügen: {source} -> {target}",
 			chooseProperty: "Eigenschaft wählen...",
 			openPath: "{name} öffnen",

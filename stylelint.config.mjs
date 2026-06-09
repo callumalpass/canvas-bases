@@ -3,10 +3,10 @@ import selectorParser from "postcss-selector-parser";
 
 const { createPlugin, utils } = stylelint;
 
-const noHasRuleName = "baseboard/no-has";
-const obsidianBrowserSupportRuleName = "baseboard/obsidian-browser-support";
-const scopedSelectorsRuleName = "baseboard/scoped-selectors";
-const noFixedPositionRuleName = "baseboard/no-fixed-position";
+const noHasRuleName = "canvas-bases/no-has";
+const obsidianBrowserSupportRuleName = "canvas-bases/obsidian-browser-support";
+const scopedSelectorsRuleName = "canvas-bases/scoped-selectors";
+const noFixedPositionRuleName = "canvas-bases/no-fixed-position";
 
 const noHasRule = createPlugin(noHasRuleName, (enabled) => {
 	return (root, result) => {
@@ -88,7 +88,7 @@ const obsidianBrowserSupportRule = createPlugin(
 	}
 );
 
-const ownedSelectorPatterns = [/^baseboard(?:-|$)/u];
+const ownedSelectorPatterns = [/^canvas-bases(?:-|$)/u];
 const allowedGlobalContextClasses = new Set([
 	"theme-dark",
 	"theme-light",
@@ -145,7 +145,7 @@ const scopedSelectorsRule = createPlugin(scopedSelectorsRuleName, (enabled) => {
 
 				utils.report({
 					message:
-						"Scope plugin CSS with a Baseboard-owned selector or an explicit allowed global context.",
+						"Scope plugin CSS with a Canvas Bases-owned selector or an explicit allowed global context.",
 					node: ruleNode,
 					result,
 					ruleName: scopedSelectorsRuleName,

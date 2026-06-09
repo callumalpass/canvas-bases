@@ -1,21 +1,26 @@
 import { TFile, type App, type EventRef, type Menu } from "obsidian";
 import type {
-	BaseboardRelationship,
-	BaseboardTaskNotesRelationshipMode,
-	BaseboardViewSnapshot,
+	CanvasBasesRelationship,
+	CanvasBasesTaskNotesRelationshipMode,
+	CanvasBasesViewSnapshot,
+	CanvasBasesZoneAction,
+	CanvasBasesZoneUpdateMode,
+	CanvasBasesZoneValueType,
 } from "../types";
 import type { TranslateFn } from "../i18n";
 import { getSnapshotPaths } from "../bases/snapshotEntries";
+import { applyActiveGroupUpdate } from "../bases/activeGroupUpdates";
 
-export interface BaseboardTaskBadge {
-	kind: BaseboardTaskPropertyKind;
+export interface CanvasBasesTaskBadge {
+	kind: CanvasBasesTaskPropertyKind;
 	label: string;
 	value: string;
 	color?: string;
 	tone?: "default" | "danger" | "muted" | "success" | "warning";
 }
 
-export type BaseboardTaskPropertyKind =
+export type CanvasBasesTaskPropertyKind =
+	| "activeTimeTracking"
 	| "due"
 	| "hasSubtasks"
 	| "isBlocked"
@@ -27,16 +32,17 @@ export type BaseboardTaskPropertyKind =
 	| "timeEstimate"
 	| "totalTrackedTime";
 
-export interface BaseboardTaskCard {
+export interface CanvasBasesTaskCard {
 	path: string;
 	title: string;
-	status: BaseboardTaskBadge;
-	priority: BaseboardTaskBadge;
-	badges: BaseboardTaskBadge[];
+	status: CanvasBasesTaskBadge;
+	priority: CanvasBasesTaskBadge;
+	badges: CanvasBasesTaskBadge[];
 	isArchived: boolean;
 	isBlocked: boolean;
 	isBlocking: boolean;
 	isCompleted: boolean;
+	isTracking: boolean;
 	hasSubtasks: boolean;
 }
 
@@ -52,8 +58,31 @@ interface TaskNotesRuntimeApiV1 {
 	hasCapability(capability: string): boolean;
 	tasks?: {
 		get(path: string): Promise<TaskNotesTaskInfo | null>;
-		complete?(path: string, options?: unknown, context?: TaskNotesMutationContext): Promise<TaskNotesTaskInfo>;
-		uncomplete?(path: string, options?: unknown, context?: TaskNotesMutationContext): Promise<TaskNotesTaskInfo>;
+		update?(
+			path: string,
+			patch: TaskNotesTaskPatch,
+			context?: TaskNotesMutationContext
+		): Promise<TaskNotesTaskInfo>;
+		patch?(
+			path: string,
+			patch: TaskNotesTaskPatch,
+			context?: TaskNotesMutationContext
+		): Promise<TaskNotesTaskInfo>;
+		complete?(
+			path: string,
+			options?: unknown,
+			context?: TaskNotesMutationContext
+		): Promise<TaskNotesTaskInfo>;
+		uncomplete?(
+			path: string,
+			options?: unknown,
+			context?: TaskNotesMutationContext
+		): Promise<TaskNotesTaskInfo>;
+		archive?(
+			path: string,
+			archived: boolean,
+			context?: TaskNotesMutationContext
+		): Promise<TaskNotesTaskInfo>;
 		addDependency?(
 			path: string,
 			dependency: TaskNotesDependency,
@@ -79,10 +108,38 @@ interface TaskNotesRuntimeApiV1 {
 		statuses(): TaskNotesStatusConfig[];
 		priorities(): TaskNotesPriorityConfig[];
 		fields?(): TaskNotesFieldDefinition[];
+		writableFields?(): TaskNotesFieldDefinition[];
 	};
 	relationships?: {
 		parents(path: string): Promise<TaskNotesTaskInfo[]>;
 		dependencies(path: string): Promise<ResolvedTaskDependency[]>;
+	};
+	time?: {
+		start?(
+			path: string,
+			options?: { description?: string },
+			context?: TaskNotesMutationContext
+		): Promise<TaskNotesTaskInfo>;
+		stop?(path: string, context?: TaskNotesMutationContext): Promise<TaskNotesTaskInfo>;
+	};
+	pomodoro?: {
+		start?(
+			options?: { taskPath?: string; duration?: number },
+			context?: TaskNotesMutationContext
+		): Promise<unknown>;
+		assignTask?(path: string | null, context?: TaskNotesMutationContext): Promise<unknown>;
+	};
+	recurring?: {
+		toggleCompleteInstance?(
+			path: string,
+			date?: string,
+			context?: TaskNotesMutationContext
+		): Promise<TaskNotesTaskInfo>;
+		toggleSkippedInstance?(
+			path: string,
+			date?: string,
+			context?: TaskNotesMutationContext
+		): Promise<TaskNotesTaskInfo>;
 	};
 	ui?: {
 		taskMenu?: {
@@ -130,6 +187,9 @@ interface TaskNotesFieldDefinition {
 	label: string;
 	aliases?: readonly string[];
 	frontmatterKey?: string;
+	writable?: boolean;
+	source?: string;
+	valueType?: string;
 }
 
 interface TaskNotesTaskInfo {
@@ -145,12 +205,30 @@ interface TaskNotesTaskInfo {
 	completedDate?: string;
 	timeEstimate?: number;
 	totalTrackedTime?: number;
+	timeEntries?: TaskNotesTimeEntry[];
 	tags?: string[];
 	contexts?: string[];
 	projects?: string[];
 	isBlocked?: boolean;
 	isBlocking?: boolean;
 	hasSubtasks?: boolean;
+}
+
+type TaskNotesTaskPatch = Record<string, unknown>;
+
+export type CanvasBasesTaskNotesPropertyUpdateResult =
+	| "not-task-field"
+	| "unavailable"
+	| "updated";
+
+export type CanvasBasesTaskNotesZoneActionResult =
+	| "not-task"
+	| "unavailable"
+	| "updated";
+
+interface TaskNotesPropertyUpdateOptions {
+	updateMode?: CanvasBasesZoneUpdateMode;
+	valueType?: CanvasBasesZoneValueType;
 }
 
 interface ResolvedTaskDependency {
@@ -169,6 +247,12 @@ type TaskNotesDependencyRelType =
 	| "FINISHTOFINISH"
 	| "STARTTOSTART"
 	| "STARTTOFINISH";
+
+interface TaskNotesTimeEntry {
+	startTime: string;
+	endTime?: string | null;
+	description?: string | null;
+}
 
 export class TaskNotesRuntime {
 	private readonly app: App;
@@ -213,7 +297,7 @@ export class TaskNotesRuntime {
 		);
 	}
 
-	getPropertyKind(propertyId: string): BaseboardTaskPropertyKind | null {
+	getPropertyKind(propertyId: string): CanvasBasesTaskPropertyKind | null {
 		const normalized = normalizePropertyId(propertyId);
 		const api = this.getApi();
 		if (api?.catalog && api.hasCapability("catalog.read")) {
@@ -229,14 +313,145 @@ export class TaskNotesRuntime {
 		return null;
 	}
 
-	async getTaskCards(paths: string[]): Promise<Map<string, BaseboardTaskCard>> {
+	getWritablePropertyIds(): string[] {
+		const api = this.getApi();
+		if (!api?.catalog || !api.hasCapability("catalog.read")) return [];
+
+		const properties = new Set<string>();
+		for (const field of getWritableFields(api)) {
+			if (field.id) properties.add(`task.${field.id}`);
+			if (field.frontmatterKey) properties.add(`note.${field.frontmatterKey}`);
+			for (const alias of field.aliases ?? []) {
+				if (/^task\./iu.test(alias.trim())) properties.add(alias.trim());
+			}
+		}
+
+		return [...properties].sort((left, right) => left.localeCompare(right));
+	}
+
+	async updateMappedProperty(
+		path: string,
+		propertyId: string,
+		value: string,
+		options: TaskNotesPropertyUpdateOptions = {}
+	): Promise<CanvasBasesTaskNotesPropertyUpdateResult> {
+		const api = this.getApi();
+		const field = this.getWritableFieldForProperty(propertyId);
+		if (!field) return "not-task-field";
+
+		if (
+			!api?.tasks?.get ||
+			!api.hasCapability("tasks.read") ||
+			!api.hasCapability("tasks.write") ||
+			!(api.tasks.patch || api.tasks.update)
+		) {
+			return "unavailable";
+		}
+
+		const task = await api.tasks.get(path);
+		if (!task) return "not-task-field";
+
+		const nextValue = applyActiveGroupUpdate(
+			getTaskFieldCurrentValue(task, field),
+			value,
+			{
+				updateMode: options.updateMode ?? "replace",
+				valueType: options.valueType ?? "auto",
+				metadataType: field.valueType ?? null,
+			}
+		);
+		const patch = buildTaskPatch(field, nextValue);
+		const context = {
+			source: "canvas-bases",
+			reason: "active-group",
+		};
+
+		if (api.tasks.patch) {
+			await api.tasks.patch(path, patch, context);
+		} else if (api.tasks.update) {
+			await api.tasks.update(path, patch, context);
+		} else {
+			return "unavailable";
+		}
+		return "updated";
+	}
+
+	async runZoneAction(
+		path: string,
+		action: CanvasBasesZoneAction
+	): Promise<CanvasBasesTaskNotesZoneActionResult> {
+		const api = this.getApi();
+		if (!api?.tasks?.get || !api.hasCapability("tasks.read")) return "unavailable";
+
+		const task = await api.tasks.get(path);
+		if (!task) return "not-task";
+
+		const context = {
+			source: "canvas-bases",
+			reason: "zone-action",
+		};
+
+		switch (action) {
+			case "set-property":
+				return "unavailable";
+			case "task.complete":
+				if (!api.tasks.complete || !api.hasCapability("tasks.write")) return "unavailable";
+				await api.tasks.complete(path, undefined, context);
+				return "updated";
+			case "task.uncomplete":
+				if (!api.tasks.uncomplete || !api.hasCapability("tasks.write")) return "unavailable";
+				await api.tasks.uncomplete(path, undefined, context);
+				return "updated";
+			case "task.archive":
+				if (!api.tasks.archive || !api.hasCapability("tasks.write")) return "unavailable";
+				await api.tasks.archive(path, true, context);
+				return "updated";
+			case "task.unarchive":
+				if (!api.tasks.archive || !api.hasCapability("tasks.write")) return "unavailable";
+				await api.tasks.archive(path, false, context);
+				return "updated";
+			case "time.start":
+				if (!api.time?.start || !api.hasCapability("time.write")) return "unavailable";
+				await api.time.start(path, undefined, context);
+				return "updated";
+			case "time.stop":
+				if (!api.time?.stop || !api.hasCapability("time.write")) return "unavailable";
+				await api.time.stop(path, context);
+				return "updated";
+			case "pomodoro.start":
+				if (!api.pomodoro?.start || !api.hasCapability("pomodoro.write")) return "unavailable";
+				await api.pomodoro.start({ taskPath: path }, context);
+				return "updated";
+			case "pomodoro.assign":
+				if (!api.pomodoro?.assignTask || !api.hasCapability("pomodoro.write")) return "unavailable";
+				await api.pomodoro.assignTask(path, context);
+				return "updated";
+			case "recurring.complete":
+				if (
+					!api.recurring?.toggleCompleteInstance ||
+					!api.hasCapability("recurring.write")
+				) {
+					return "unavailable";
+				}
+				await api.recurring.toggleCompleteInstance(path, undefined, context);
+				return "updated";
+			case "recurring.skip":
+				if (!api.recurring?.toggleSkippedInstance || !api.hasCapability("recurring.write")) {
+					return "unavailable";
+				}
+				await api.recurring.toggleSkippedInstance(path, undefined, context);
+				return "updated";
+		}
+	}
+
+	async getTaskCards(paths: string[]): Promise<Map<string, CanvasBasesTaskCard>> {
 		const api = this.getApi();
 		if (!api?.tasks || !api.hasCapability("tasks.read")) {
 			return new Map();
 		}
 
 		const catalog = this.getCatalog(api);
-		const cards = new Map<string, BaseboardTaskCard>();
+		const cards = new Map<string, CanvasBasesTaskCard>();
 
 		await Promise.all(
 			paths.map(async (path) => {
@@ -250,16 +465,16 @@ export class TaskNotesRuntime {
 	}
 
 	async collectRelationships(
-		snapshot: BaseboardViewSnapshot,
-		mode: BaseboardTaskNotesRelationshipMode
-	): Promise<BaseboardRelationship[]> {
+		snapshot: CanvasBasesViewSnapshot,
+		mode: CanvasBasesTaskNotesRelationshipMode
+	): Promise<CanvasBasesRelationship[]> {
 		const api = this.getApi();
 		if (mode === "none" || !api?.relationships || !api.hasCapability("relationships.read")) {
 			return [];
 		}
 
 		const visiblePaths = new Set(getSnapshotPaths(snapshot));
-		const relationships: BaseboardRelationship[] = [];
+		const relationships: CanvasBasesRelationship[] = [];
 
 		await Promise.all(
 			[...visiblePaths].map(async (path) => {
@@ -290,7 +505,7 @@ export class TaskNotesRuntime {
 				reltype,
 			},
 			{
-				source: "baseboard",
+				source: "canvas-bases",
 				reason: "link-control",
 			}
 		);
@@ -303,7 +518,7 @@ export class TaskNotesRuntime {
 
 		const storedUid = await this.findDependencyReference(blockedPath, dependencyUid);
 		await api.tasks.removeDependency(blockedPath, storedUid ?? dependencyUid, {
-			source: "baseboard",
+			source: "canvas-bases",
 			reason: "link-control",
 		});
 		return true;
@@ -314,7 +529,7 @@ export class TaskNotesRuntime {
 		if (!api?.tasks?.addProject || !api.hasCapability("tasks.write")) return false;
 
 		await api.tasks.addProject(childPath, createWikiLink(parentPath), {
-			source: "baseboard",
+			source: "canvas-bases",
 			reason: "link-control",
 		});
 		return true;
@@ -328,7 +543,7 @@ export class TaskNotesRuntime {
 		if (!projectReference) return false;
 
 		await api.tasks.removeProject(childPath, projectReference, {
-			source: "baseboard",
+			source: "canvas-bases",
 			reason: "link-control",
 		});
 		return true;
@@ -398,7 +613,7 @@ export class TaskNotesRuntime {
 		if (!this.isLegacyTaskFile(file)) return false;
 
 		const before = getMenuItemCount(menu);
-		this.app.workspace.trigger("file-menu", menu, file, "baseboard");
+		this.app.workspace.trigger("file-menu", menu, file, "canvas-bases");
 		const after = getMenuItemCount(menu);
 
 		return typeof before === "number" && typeof after === "number" ? after > before : true;
@@ -424,6 +639,18 @@ export class TaskNotesRuntime {
 			statuses: new Map(api.catalog.statuses().map((status) => [status.value, status])),
 			priorities: new Map(api.catalog.priorities().map((priority) => [priority.value, priority])),
 		};
+	}
+
+	private getWritableFieldForProperty(propertyId: string): TaskNotesFieldDefinition | null {
+		const api = this.getApi();
+		if (!api?.catalog || !api.hasCapability("catalog.read")) return null;
+
+		const normalized = normalizePropertyId(propertyId);
+		if (!normalized) return null;
+
+		return getWritableFields(api).find((field) =>
+			fieldMatchesProperty(field, propertyId, normalized)
+		) ?? null;
 	}
 
 	private async findProjectReference(childPath: string, parentPath: string): Promise<string | null> {
@@ -494,10 +721,11 @@ function buildTaskCard(
 	task: TaskNotesTaskInfo,
 	catalog: TaskNotesCatalog,
 	t: TranslateFn
-): BaseboardTaskCard {
+): CanvasBasesTaskCard {
 	const status = catalog.statuses.get(task.status);
 	const priority = catalog.priorities.get(task.priority);
 	const badges = buildTaskBadges(task, t);
+	const isTracking = hasActiveTimeEntry(task);
 
 	return {
 		path: task.path,
@@ -520,13 +748,22 @@ function buildTaskCard(
 		isBlocked: Boolean(task.isBlocked),
 		isBlocking: Boolean(task.isBlocking),
 		isCompleted: Boolean(status?.isCompleted || task.completedDate),
+		isTracking,
 		hasSubtasks: Boolean(task.hasSubtasks),
 	};
 }
 
-function buildTaskBadges(task: TaskNotesTaskInfo, t: TranslateFn): BaseboardTaskBadge[] {
-	const badges: BaseboardTaskBadge[] = [];
+function buildTaskBadges(task: TaskNotesTaskInfo, t: TranslateFn): CanvasBasesTaskBadge[] {
+	const badges: CanvasBasesTaskBadge[] = [];
 
+	if (hasActiveTimeEntry(task)) {
+		badges.push({
+			kind: "activeTimeTracking",
+			label: t("tasknotes.badges.tracking"),
+			value: t("tasknotes.badges.active"),
+			tone: "success",
+		});
+	}
 	if (task.due) {
 		badges.push({
 			kind: "due",
@@ -597,8 +834,8 @@ function buildDependencyRelationships(
 	dependencies: ResolvedTaskDependency[],
 	visiblePaths: Set<string>,
 	t: TranslateFn
-): BaseboardRelationship[] {
-	const relationships: BaseboardRelationship[] = [];
+): CanvasBasesRelationship[] {
+	const relationships: CanvasBasesRelationship[] = [];
 
 	for (const dependency of dependencies) {
 		const dependencyPath = dependency.path ?? dependency.task?.path;
@@ -627,8 +864,8 @@ function buildStructuralRelationships(
 	parents: TaskNotesTaskInfo[],
 	visiblePaths: Set<string>,
 	t: TranslateFn
-): BaseboardRelationship[] {
-	const relationships: BaseboardRelationship[] = [];
+): CanvasBasesRelationship[] {
+	const relationships: CanvasBasesRelationship[] = [];
 
 	for (const parent of parents) {
 		if (visiblePaths.has(parent.path)) {
@@ -650,10 +887,10 @@ function buildStructuralRelationships(
 }
 
 function dedupeRelationships(
-	relationships: BaseboardRelationship[]
-): BaseboardRelationship[] {
+	relationships: CanvasBasesRelationship[]
+): CanvasBasesRelationship[] {
 	const seen = new Set<string>();
-	const result: BaseboardRelationship[] = [];
+	const result: CanvasBasesRelationship[] = [];
 
 	for (const relationship of relationships) {
 		const key = `${relationship.sourcePath}\u0000${relationship.targetPath}\u0000${
@@ -704,13 +941,19 @@ function defaultTranslate(key: string): string {
 		"tasknotes.badges.subtasks": "Subtasks",
 		"tasknotes.badges.estimate": "Estimate",
 		"tasknotes.badges.tracked": "Tracked",
+		"tasknotes.badges.tracking": "Tracking",
+		"tasknotes.badges.active": "Active",
 		"tasknotes.relationships.blocks": "blocks",
 		"tasknotes.relationships.subtask": "subtask",
 	};
 	return values[key] ?? key;
 }
 
-function getTaskPropertyKindFromFieldId(id: string): BaseboardTaskPropertyKind | null {
+function hasActiveTimeEntry(task: TaskNotesTaskInfo): boolean {
+	return (task.timeEntries ?? []).some((entry) => !entry.endTime);
+}
+
+function getTaskPropertyKindFromFieldId(id: string): CanvasBasesTaskPropertyKind | null {
 	switch (id) {
 		case "blockedBy":
 		case "isBlocked":
@@ -732,6 +975,69 @@ function getTaskPropertyKindFromFieldId(id: string): BaseboardTaskPropertyKind |
 		default:
 			return null;
 	}
+}
+
+function getTaskFieldCurrentValue(
+	task: TaskNotesTaskInfo,
+	field: TaskNotesFieldDefinition
+): unknown {
+	const taskRecord = task as unknown as Record<string, unknown>;
+
+	if (!isUserField(field)) {
+		return taskRecord[field.id];
+	}
+
+	const key = field.frontmatterKey ?? field.id.replace(/^user[:.]/iu, "");
+	const customFrontmatter = taskRecord.customFrontmatter;
+	if (isRecord(customFrontmatter) && key in customFrontmatter) {
+		return customFrontmatter[key];
+	}
+
+	return taskRecord[key] ?? taskRecord[field.id];
+}
+
+function buildTaskPatch(field: TaskNotesFieldDefinition, value: unknown): TaskNotesTaskPatch {
+	if (isUserField(field)) {
+		const key = field.frontmatterKey ?? field.id.replace(/^user[:.]/iu, "");
+		return {
+			customFrontmatter: {
+				[key]: typeof value === "undefined" ? null : value,
+			},
+		};
+	}
+
+	return {
+		[field.id]: value,
+	};
+}
+
+function getWritableFields(api: TaskNotesRuntimeApiV1): TaskNotesFieldDefinition[] {
+	return api.catalog?.writableFields?.() ??
+		api.catalog?.fields?.().filter((field) => field.writable !== false) ??
+		[];
+}
+
+function fieldMatchesProperty(
+	field: TaskNotesFieldDefinition,
+	propertyId: string,
+	normalizedPropertyId: string
+): boolean {
+	const propertyIds = isTaskPropertyId(propertyId)
+		? [field.id, field.frontmatterKey, ...(field.aliases ?? [])]
+		: [field.frontmatterKey];
+	return propertyIds.some(
+		(propertyId) =>
+			typeof propertyId === "string" &&
+			normalizePropertyId(propertyId) === normalizedPropertyId
+	);
+}
+
+function isUserField(field: TaskNotesFieldDefinition): boolean {
+	return field.source === "user" || /^user[:.]/iu.test(field.id);
+}
+
+function isTaskPropertyId(propertyId: string): boolean {
+	return /^task\./iu.test(propertyId.trim());
 }
 
 function normalizePropertyId(propertyId: string): string {

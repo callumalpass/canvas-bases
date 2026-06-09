@@ -1,11 +1,11 @@
 import { App, TFile, normalizePath } from "obsidian";
 import type {
-	BaseboardGenerationSummary,
-	BaseboardRelationship,
-	BaseboardViewSnapshot,
+	CanvasBasesGenerationSummary,
+	CanvasBasesRelationship,
+	CanvasBasesViewSnapshot,
 	MaterializeOptions,
 } from "../types";
-import { buildBaseboardCanvas } from "./canvasBuilder";
+import { buildCanvasBasesCanvas } from "./canvasBuilder";
 import { collectRelationships } from "./relationships";
 import { parseJsonCanvas, stringifyJsonCanvas, type JsonCanvas } from "./jsonCanvas";
 
@@ -16,14 +16,14 @@ export async function materializeCanvas({
 	relationships,
 }: {
 	app: App;
-	snapshot: BaseboardViewSnapshot;
+	snapshot: CanvasBasesViewSnapshot;
 	options: MaterializeOptions;
-	relationships?: BaseboardRelationship[];
-}): Promise<BaseboardGenerationSummary> {
+	relationships?: CanvasBasesRelationship[];
+}): Promise<CanvasBasesGenerationSummary> {
 	const canvasPath = normalizePath(options.canvasPath);
 	const existingCanvas = await readExistingCanvas(app, canvasPath);
 	const canvasRelationships = relationships ?? collectRelationships(app, snapshot, options);
-	const canvas = buildBaseboardCanvas(snapshot, options, canvasRelationships, existingCanvas);
+	const canvas = buildCanvasBasesCanvas(snapshot, options, canvasRelationships, existingCanvas);
 
 	await ensureFolder(app, canvasPath);
 	await writeCanvas(app, canvasPath, stringifyJsonCanvas(canvas));
@@ -31,7 +31,7 @@ export async function materializeCanvas({
 	return {
 		canvasPath,
 		nodeCount: canvas.nodes?.length ?? 0,
-		groupCount: snapshot.groups.length + snapshot.manualGroups.length,
+		groupCount: getVisibleGroupCount(snapshot),
 		edgeCount: canvas.edges?.length ?? 0,
 	};
 }
@@ -75,4 +75,8 @@ async function ensureFolder(app: App, canvasPath: string): Promise<void> {
 function getParentPath(path: string): string {
 	const index = path.lastIndexOf("/");
 	return index > 0 ? path.slice(0, index) : "";
+}
+
+function getVisibleGroupCount(snapshot: CanvasBasesViewSnapshot): number {
+	return snapshot.groups.filter((group) => !group.isImplicit).length + snapshot.manualGroups.length;
 }

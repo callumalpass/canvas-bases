@@ -1,7 +1,7 @@
 import { App, TFile } from "obsidian";
 import type { BasesQueryResult, BasesViewConfig } from "obsidian";
-import type { BaseboardViewSnapshot } from "../types";
-import { buildBaseboardSnapshot } from "./snapshot";
+import type { CanvasBasesViewSnapshot } from "../types";
+import { buildCanvasBasesSnapshot } from "./snapshot";
 
 const BASES_VIEW_TYPE = "bases";
 const KEY_SEPARATOR = "\u001f";
@@ -11,7 +11,7 @@ export interface ActiveBasesViewSource {
 	defaultCanvasName: string;
 	sourceKey: string;
 	sourceLabel: string;
-	snapshot: BaseboardViewSnapshot;
+	snapshot: CanvasBasesViewSnapshot;
 	viewType: string;
 }
 
@@ -33,7 +33,7 @@ export function getActiveBasesViewSource(app: App): ActiveBasesViewSource | null
 
 	const viewName = config.name?.trim() || readString(controller, "viewName") || "Base";
 	const viewType = readString(config, "type") || readString(activeView, "type") || "unknown";
-	const snapshot = buildBaseboardSnapshot(data, config);
+	const snapshot = buildCanvasBasesSnapshot(data, config);
 	const sourceKey = buildActiveBasesViewKey(baseFile.path, viewName, viewType);
 
 	return {

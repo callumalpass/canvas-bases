@@ -1,8 +1,8 @@
 {
   "de": {
     "common.appName": {
-      "source": "fd824b3ba1713694a75da21b3f4cf97a42bab657",
-      "translation": "fd824b3ba1713694a75da21b3f4cf97a42bab657"
+      "source": "2f9c39a527e33f312b2d0914fb008da581913dcc",
+      "translation": "2f9c39a527e33f312b2d0914fb008da581913dcc"
     },
     "common.automatic": {
       "source": "ac9041e76816a34aba228a736ec30da6984c5777",
@@ -11,6 +11,10 @@
     "common.cancel": {
       "source": "77dfd2135f4db726c47299bb55be26f7f4525a46",
       "translation": "07af7cb30fca13091b0c2f0831dc8283e9f24965"
+    },
+    "common.close": {
+      "source": "bbfa773e5a63a5ea58c9b6207e608ca0120e592a",
+      "translation": "44424b18700e2a4f5850c646e0a08bfe0895cebf"
     },
     "common.card.one": {
       "source": "10b93da7c74f93af707c33f1ef412a2a92d9615b",
@@ -80,9 +84,41 @@
       "source": "3622410a4a8fab47e39a4f05735ec87c93dcc8ab",
       "translation": "ff66f40e78de2fe1607c50f1acd25b9246e4b63c"
     },
-    "notices.baseboardWaitingForBasesData": {
-      "source": "3c0f6a0e8db0a78ea91f32e0e4c56d5f98975b77",
-      "translation": "2c0b9408c58e5761574a6b9fb3cc4adbfb7083d4"
+    "notices.activeGroupDisabled": {
+      "source": "3ee2ddfc118717219b9bdff68b9a63881ba503d6",
+      "translation": "db641ae3e854047899cac035e62df7cdbd9bd73d"
+    },
+    "notices.activeGroupEnabled": {
+      "source": "543ef7d617d47b7ba03da5b0d6a6ddb943da4e3a",
+      "translation": "747e2de7f3751a7c9b2ef4144db71e7d9c928ee4"
+    },
+    "notices.activeGroupReadOnly": {
+      "source": "722dca50e751da27f4cc180c968d27bc6b7b979e",
+      "translation": "4be8d59ed5a14264a4588a0d094dd69a8461b6a4"
+    },
+    "notices.activeGroupTaskUpdateUnavailable": {
+      "source": "10a28d58ca6af418d08842620939e4b640eac556",
+      "translation": "239588c1639c54882fbf2d725185968c5b85e234"
+    },
+    "notices.activeGroupUpdated": {
+      "source": "c78ad3455f76a36acf79433077e4c7363eb7a4dd",
+      "translation": "f7efaf11ca74bff80b17581030ab8ca33efa11da"
+    },
+    "notices.activeGroupActionRun": {
+      "source": "110af2d8e5e5717d2228f4a7223089953331156f",
+      "translation": "dfe0fdf4e26a329b7f7fbbab02a518081a465010"
+    },
+    "notices.activeGroupActionNotTask": {
+      "source": "e9800a314aadaf3027a58a9310b41bd14e506b9e",
+      "translation": "cb96139ac1059ce242f8278959b26ec5ba510b15"
+    },
+    "notices.activeGroupActionUnavailable": {
+      "source": "05b9d79c120ed0021290e290c62df0026f9377da",
+      "translation": "c2843818ce46c65ae6254d69a34c4c188a76aca3"
+    },
+    "notices.canvasBasesWaitingForBasesData": {
+      "source": "a0bb20a5f9df7dc64407bc0329f524337231951c",
+      "translation": "8158357f3da7d3724ecb629c47aba03c82d3b0b8"
     },
     "notices.couldNotAddPropertyLink": {
       "source": "1432c25d668ca971f8de44c270644b9171220c5f",
@@ -95,6 +131,10 @@
     "notices.couldNotRemovePropertyLink": {
       "source": "b2ad9dc15ce642c0ef1c526df2a34ff9afbf61ab",
       "translation": "89a59340967055ccc7a06a011437f13b103844f9"
+    },
+    "notices.couldNotUpdateActiveGroup": {
+      "source": "b18b656c33b1d709f665d2396ab76cc2731cd357",
+      "translation": "6781c545d9174e81bab7894f064c1b800fc78b05"
     },
     "notices.couldNotUpdateLink": {
       "source": "70ceafd6c4531892fd867c3590de60b6f00c5cca",
@@ -117,12 +157,12 @@
       "translation": "62995ce0ddce4972e03014f7f5a4618da2d7108f"
     },
     "notices.obsidianVersionRequired": {
-      "source": "626c430316d0f7bf4ce74ea6089bb45a34f9d28d",
-      "translation": "b42183dfd335998e76289df80a31ed29359cea32"
+      "source": "62e440f2994ac4d9287d34ca774d3c0ac02667d0",
+      "translation": "f56e767db882495b54a451c3b30ac22d52a44ebc"
     },
-    "notices.openBaseboardViewFirst": {
-      "source": "71e797527713fc1278a569c7263ddda3a7cf5aa3",
-      "translation": "77962b643c8d529b19dcc45eb393acde245c70ab"
+    "notices.openCanvasBasesViewFirst": {
+      "source": "ec0fd2571fc9d44a9938a201360905c6f2f241b7",
+      "translation": "cd282bfddfd20bbc6497b30f257a8a060c8873f7"
     },
     "notices.openBasesViewFirst": {
       "source": "da610fcbcddaf8f9408853df43a17500fe7d6491",
@@ -157,8 +197,8 @@
       "translation": "3c589393f2ef48276ac640fa53ec5c8c7f4447c3"
     },
     "notices.starterFilesReady": {
-      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
-      "translation": "3cecb1a7a3d1b77d2c486b939c0baa7902c24601"
+      "source": "96d0354a4f9aff5832c826fe766f079b9795f60f",
+      "translation": "c58df540797479df19eb69488b4492f64ce0089d"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -173,8 +213,8 @@
       "translation": "7e14b675964238dfe337a7f1cf0f5192a32fee0f"
     },
     "settings.defaults.canvasFolder.description": {
-      "source": "f5451548720b3d7c048f929105140ad491b1a8d9",
-      "translation": "4845ded708a654a0bf0429b4b281bd293ebcbde9"
+      "source": "71b9f60c887e59721ed65a9ab0420ebab642d172",
+      "translation": "a8bd7f5b5f116e7653df1f08b44616d2a31c2333"
     },
     "settings.defaults.layout.name": {
       "source": "2ae3a9285af610786a6931294c6c13b82d1d24ba",
@@ -205,8 +245,8 @@
       "translation": "d1ea0d2054432a060431389ecffbbb86544d2167"
     },
     "settings.defaults.bodyEditor.description": {
-      "source": "028774d660a4263a07cafb0d93477930fe30b5f5",
-      "translation": "fabb11b5cfd43ec5cbe27050400fe1f84437c980"
+      "source": "83a3799e10b83484407723be11a9e6a3afafa06e",
+      "translation": "f83894d1096d7599b1ef6e229cff2fcafcca281d"
     },
     "settings.tasknotes.heading": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
@@ -217,8 +257,8 @@
       "translation": "e31b731958ed689bb576e9e2e4711483ec202efe"
     },
     "settings.tasknotes.integration.description": {
-      "source": "5312d39ae6ad1b8e203c70afff6a9adefa92152e",
-      "translation": "ef5e96d2eee949f3fb549b6b8761dd8807c1c507"
+      "source": "d7ec0c5cad9da592c0a24d542f697ba3404cf6ce",
+      "translation": "d554a7ccb299a9a47bedaf20bd9940297b9b739f"
     },
     "settings.tasknotes.badges.name": {
       "source": "4a47f1e139d831149e20d0ad3fc59b8ed7c5561c",
@@ -253,16 +293,16 @@
       "translation": "81e0b6c8d6d5bb14e3ea5233bfa95f13beb1e988"
     },
     "settings.updateRules.preservePositions.description": {
-      "source": "1b9508fd361ceb9e78fa27281844f94f178a7f25",
-      "translation": "d3a89594017240eb5a3935c8b97300709b41fec8"
+      "source": "b3b4dadbea9eab0fa344d7530d9f97919713252d",
+      "translation": "5d689bf4ada15bc380f63a3435e1a0fc99d9874c"
     },
     "settings.updateRules.removeMissingNotes.name": {
       "source": "69a07189d1ee6ce5c99533af82a2ae60086e729f",
       "translation": "170c587be9d59b018ffc325281dabf2d544d495c"
     },
     "settings.updateRules.removeMissingNotes.description": {
-      "source": "26b3763b21644b0ebb40fb59e01de831c1074983",
-      "translation": "17d1afd5f5d0bbd26855bab4660d61ce61821013"
+      "source": "240f89454d4d6acdbb25caa4aaa6e8f928bd2a93",
+      "translation": "ba2ae736e6de9fba83adefdef895077fd93e3248"
     },
     "settings.updateRules.nodeWidth.name": {
       "source": "08cf7bca56d478d335b2b9c3d0e184058dbb307f",
@@ -285,16 +325,16 @@
       "translation": "d895170a7309ec578eb4d03b2bb3f14dd94f6333"
     },
     "settings.language.description": {
-      "source": "b74f44cb84d7bfdef24613db569d51c614767eb4",
-      "translation": "22dd15a0dea3fd6fd8688eb7a166b6003d9eeefa"
+      "source": "633464233e79b995420f421284352c663c15891f",
+      "translation": "b32a7906c3d88d05a7ec89fec62df2ca72cf9df0"
     },
     "settings.language.name": {
       "source": "5a28c99d6d38a7489e8b1ab06a11507f8c6fd47f",
       "translation": "654f725871b1563974eb5393fcd9b92ce4a56683"
     },
     "settings.language.dropdownDescription": {
-      "source": "601ea9a888accf03523827b9afb9b89b90c4b8f2",
-      "translation": "0b67f62254412db1eefbc21f20f497de2ad00873"
+      "source": "a95dba96cbb2d657f0e30a30f916dfe3c564006f",
+      "translation": "9a88c45102b162bbc15301be3f37d2dac342680c"
     },
     "options.layout.columns": {
       "source": "b337287f17401eb2db30ece3f3a3094217b413e0",
@@ -363,6 +403,14 @@
     "tasknotes.badges.tracked": {
       "source": "f453f5a887e880559f39d177175012d7adad9ac4",
       "translation": "c2293c014e1ca2915f81ec69124b9c741a850e64"
+    },
+    "tasknotes.badges.tracking": {
+      "source": "e81a151bd05091f9935dc3aba219eed346e7bb4f",
+      "translation": "6ae7f50884039f01a63885353597592a20983f8a"
+    },
+    "tasknotes.badges.active": {
+      "source": "a733b809d2f1233496ab516eed0f3ef75cf3791a",
+      "translation": "16a766caf92d4e41680ef8776c1b382a8bf7d4f5"
     },
     "tasknotes.relationships.blocks": {
       "source": "f7d5b2b95861daea9933ef0a243f733bbc79235e",
@@ -437,8 +485,8 @@
       "translation": "3cd26d8a35e184600482dd7f107cb09dbd3f0d9c"
     },
     "modal.preservePositions.description": {
-      "source": "4a70addb3cb30a12a488bed407561b96691cc9d9",
-      "translation": "07e31b5dd7413b9ca9f2f02cc24629ee3f6eac3f"
+      "source": "8d4dc77a9baaffd0251d451574986fa97e201bc4",
+      "translation": "e1175cebc6a7420854f8f12c3110c638607d0924"
     },
     "modal.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -459,6 +507,10 @@
     "view.toolbar.addGroup": {
       "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
       "translation": "ca184600f1133b3352919a043ef58768cc695f57"
+    },
+    "view.toolbar.addZone": {
+      "source": "0279d7313189283e312b36e83d146afe76680db9",
+      "translation": "da7dae8ba5aaea31411b471c0801aa2d69306de6"
     },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -504,6 +556,18 @@
       "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
       "translation": "475ebffcab279b17699ee4b109c686d68f00ecf2"
     },
+    "view.card.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "89b7957dae43b5c264cf9a6889b67259dadcda25"
+    },
+    "view.card.noteColor": {
+      "source": "a5dad58668b83243fa855c04a906abfe710e0e45",
+      "translation": "b78e93557a93ae3a936650fd9c2d61d67361ea45"
+    },
+    "view.card.cardColor": {
+      "source": "2e1a93636a6096741d5aa40a98132acfbd75228a",
+      "translation": "b73a3e664d5774ee4a0dc70fe3b68d77502d18eb"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "9f89cf09d8737f97debc2bea0234ba6452b28cb9"
@@ -516,6 +580,178 @@
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "f844187d73d5157d0c704017b7392082aeb93131"
     },
+    "view.linkDrag.releaseToLink": {
+      "source": "30af734941bdbde5e74a5d1adf918177098219d7",
+      "translation": "67157a326a66d2150438930ab368eae7de2259c6"
+    },
+    "view.linkDrag.dragToCard": {
+      "source": "088156c3eaba8c07599a1843e385a4f41fa2ef47",
+      "translation": "67cf93536280e8fe1365bf4ecd9c746ebae0fc31"
+    },
+    "view.linkDrag.cannotLinkHere": {
+      "source": "e0ce0f06b21166f101163697a47707264e78c650",
+      "translation": "e29b9641c56e0f04317d675a028d611864c33d86"
+    },
+    "view.group.active": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "03efccb49f3ff5f0055a644eae98835dda00b789"
+    },
+    "view.group.activeTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "261302882a8ce4391db1d68f238236ce76aa77da"
+    },
+    "view.group.zoneTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "261302882a8ce4391db1d68f238236ce76aa77da"
+    },
+    "view.group.label": {
+      "source": "74341e3c271df3c784e595b804b1f90be0f80429",
+      "translation": "a0b60ec855e9e05c15c82b99edea87b3b9ef9ef8"
+    },
+    "view.group.action": {
+      "source": "f4e4cb8146eebbf05fc00860419e8d9b9f1b67c2",
+      "translation": "f06f68fde942bf8a8ee46b7029a4c66e80b5858a"
+    },
+    "view.group.actionSetProperty": {
+      "source": "0072a167d4fee18c3b8d259bada3014dff641371",
+      "translation": "571a053000c87e015da590d9e40de508704caf46"
+    },
+    "view.group.actionCompleteTask": {
+      "source": "af20ec58720a70b4d05fb78d3500c7af26fd37b8",
+      "translation": "5e495d5773a552510c75d1a0721fe9a78286b31f"
+    },
+    "view.group.actionUncompleteTask": {
+      "source": "79d6acda2f4e9574ebfeaee4447459b59683d2b3",
+      "translation": "2c419b0add1bfdf00dbb43d6bf7406b693c85568"
+    },
+    "view.group.actionArchiveTask": {
+      "source": "03d82ba7907ae1c9c34b442b8de36b436a13fc99",
+      "translation": "8113852b948360331e7c3b35a931ce4ce3d8dec4"
+    },
+    "view.group.actionUnarchiveTask": {
+      "source": "bcd2c2d3ea900f171fe4e4babedbcd5826838fb2",
+      "translation": "06a47d10c37e44c55cba1f004b48cb19bd56ea3e"
+    },
+    "view.group.actionStartTimeTracking": {
+      "source": "7151516a05b9f16fd6d876ce009551328cdfeff2",
+      "translation": "32fe7d435d8a6c5a730428866df41ea9426b3c47"
+    },
+    "view.group.actionStopTimeTracking": {
+      "source": "d830f5133dafe2f2c8325d37811c4901efa364a8",
+      "translation": "7dd15cf100c113d3591dd0780e0351e7e971ffca"
+    },
+    "view.group.actionStartPomodoro": {
+      "source": "b5924c20fa7da66235c95fdded5c9529a11a4a73",
+      "translation": "fcd0b72662daec96e9a5a24e43ce54fb02610003"
+    },
+    "view.group.actionAssignPomodoro": {
+      "source": "5ed2c0b7fa74e11f2bb31db18d7c967fe7afa527",
+      "translation": "747aa65f8580bc3ff77ae008d5bb1c2b81689e3d"
+    },
+    "view.group.actionCompleteRecurring": {
+      "source": "eb2125c7238d7f8f35434a16a3be08a912794eb4",
+      "translation": "59e1df1d797fac60548328943eb57f17a10b9444"
+    },
+    "view.group.actionSkipRecurring": {
+      "source": "9648841dc8789017f672c117b1bc754d5cc08b29",
+      "translation": "d749580d6154bac84d8dab036c4c3ba05566cb37"
+    },
+    "view.group.property": {
+      "source": "9ae33a7d0ecb82cae8f04aafab20bf90425b7b8c",
+      "translation": "b9c80286382eeb3f36cbae8dbdbcd41ea97909b6"
+    },
+    "view.group.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "9d3fb5bb570756f0862c381883078ac371b41763"
+    },
+    "view.group.updateMode": {
+      "source": "9fac6527645ba5d4025a166d382ef4f52305083e",
+      "translation": "56b6f4bab0e2bc49d2de86af33dc04ff3cb625bf"
+    },
+    "view.group.valueType": {
+      "source": "a956485e60c24642bdc24465480775891fba80d6",
+      "translation": "f991a955d744baa819a7f509653d6843aa2379fc"
+    },
+    "view.group.updateModeReplace": {
+      "source": "a7cf7b25a703b308887c7f1d100c4326ef20ac46",
+      "translation": "0556e76a16ceb6c7c5314703565ccf0a618247ab"
+    },
+    "view.group.updateModeAppend": {
+      "source": "6b3a602280be24f5c0e41945a5a73a105b0c54c4",
+      "translation": "b224a4fd838bdcfc305eb095e8f1134b58cd69d9"
+    },
+    "view.group.updateModeAppendUnique": {
+      "source": "2cc8d9f9c0ab46208ea57f674730cb6e4bd8a49f",
+      "translation": "92ef8e5eb1d74eda7666a544fcc514c01f7c6ed3"
+    },
+    "view.group.updateModeRemove": {
+      "source": "e963907dac5cd5c017869b4c96c18021c9bd058b",
+      "translation": "f78b6376e028b9f7c577e7f63c6557cb34bafce7"
+    },
+    "view.group.updateModeClear": {
+      "source": "719ea396ad92e01b4757ec2b93bb1e5f270f771d",
+      "translation": "7bb209425a7c36ae86a78eaad10fc252c0b06976"
+    },
+    "view.group.valueTypeAuto": {
+      "source": "c614ba7c453cdcd4d21b20e8286c6266c891e0c6",
+      "translation": "95b51063ad9ebf85b4e06db9f11cfdfeefb88f63"
+    },
+    "view.group.valueTypeString": {
+      "source": "c3328c39b0e29f78e9ff45db674248b1d245887d",
+      "translation": "c3328c39b0e29f78e9ff45db674248b1d245887d"
+    },
+    "view.group.valueTypeNumber": {
+      "source": "b7baa1d40c4ea29afc9098732bffee2a861a6c44",
+      "translation": "081285c835a2ba4f784dd88b55d43e9447a40a24"
+    },
+    "view.group.valueTypeBoolean": {
+      "source": "b76ff4906f33c2dd97ddd929b9662ba8cac6174c",
+      "translation": "293c505457b1a4f54e7877e87a83641a988796b5"
+    },
+    "view.group.valueTypeDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "df5c3008c765b0f5cdf0189d6a71536187af3365"
+    },
+    "view.group.valueTypeList": {
+      "source": "a1fffaaafb7cc996685bceb829c053cc4f7de43d",
+      "translation": "4231be1747285e4a3497f48d5fdd22b59dd75e83"
+    },
+    "view.group.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "89b7957dae43b5c264cf9a6889b67259dadcda25"
+    },
+    "view.group.writeRule": {
+      "source": "e42f054b2974ad83a5bca96ea87112514fc83db3",
+      "translation": "e4596d60727f911996189b4d9f8aa6b3ccae2ca5"
+    },
+    "view.group.groupRuleLocked": {
+      "source": "7c7a4212647e7154812f9a90ce62b149d303f8f0",
+      "translation": "cc5beb01439cabfcb709f07eb04f25d079880a8c"
+    },
+    "view.group.dropResult": {
+      "source": "d8a8bf37c90d50fa26abe4b297b441f27d0daf28",
+      "translation": "6f318f01684fe2610e1942d3d1fb5a2f5d5d6109"
+    },
+    "view.group.previewWrite": {
+      "source": "c077f564847fdb1c70258590955e163d391893ba",
+      "translation": "c077f564847fdb1c70258590955e163d391893ba"
+    },
+    "view.group.previewClear": {
+      "source": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868",
+      "translation": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868"
+    },
+    "view.group.previewAction": {
+      "source": "34c09447a51c35c7878c0c125d9d874bf088c266",
+      "translation": "34c09447a51c35c7878c0c125d9d874bf088c266"
+    },
+    "view.group.emptyValue": {
+      "source": "2464254a17a92aba20f96b8a0216d88b9ef8c15e",
+      "translation": "3fe8cc2763c3a4c749d204deb349c98007984e1b"
+    },
+    "view.group.propertyRequired": {
+      "source": "6dbff942a005991d025fe9fe4223de5ef4c1d778",
+      "translation": "0ec9d3db9558e1edbd062e3151c333d560a2eabf"
+    },
     "view.group.createTitle": {
       "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
       "translation": "0b899239e08d26cc77cb47fad2c4283207edef04"
@@ -524,9 +760,17 @@
       "source": "171a0606f7c74580fd3982cf57c49d604104120a",
       "translation": "f4e8075cef9dd01c29f3d3523cd1b788e525a78b"
     },
+    "view.group.defaultZoneName": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "03efccb49f3ff5f0055a644eae98835dda00b789"
+    },
     "view.group.create": {
       "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
       "translation": "dbc9fb8c7424c1726b51bf46c1aff7160eb2a310"
+    },
+    "view.group.createZone": {
+      "source": "5ae01175f207c3086ef197de15b6774a80b7d9d2",
+      "translation": "3e0cdee1c92688ac2b7358e823aa9444adc05f77"
     },
     "view.group.renameTitle": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -535,6 +779,10 @@
     "view.group.rename": {
       "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
       "translation": "a0aa20d8c296b00f9e2773c8c523d12a80a5395e"
+    },
+    "view.group.saveActiveGroup": {
+      "source": "59d37aff09d7712a8992f239782c3701a39202da",
+      "translation": "7cea1fc8b9f4a62ac0ebd08c364d246cb735efc1"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -588,6 +836,14 @@
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "6f6a96c40785f4db25538ccafc37f80f8764e040"
     },
+    "view.menu.setCardColor": {
+      "source": "f5b3969bb8b4d7f0704d9023076541ca1942fefe",
+      "translation": "a67d75c34d76c9af00bbf0dea8a7076f5a5587a1"
+    },
+    "view.menu.clearCardColor": {
+      "source": "5519c8e0cba7397fb5b70018b49243e44d81e08b",
+      "translation": "3b6987fb476eaf1157c0955b8d1b989ab84de2da"
+    },
     "view.menu.addPinnedNote": {
       "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
       "translation": "14d195443b7f3c2f08bfbbfd361be3d4db6887e5"
@@ -595,6 +851,18 @@
     "view.menu.addCard": {
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "8596ffc9a0501d55dba9e4eb6138d9a6f74518bf"
+    },
+    "view.menu.activateGroup": {
+      "source": "a0a89785e4181d8466357a8e797aa78a19bd4a7d",
+      "translation": "51de4e678e4269de9f4f878dbc694985c447c1ae"
+    },
+    "view.menu.configureActiveGroup": {
+      "source": "73ff54e48b0bc7121621fefd6089e39256211683",
+      "translation": "d072fb9f925ceeceec93ae5368ceac5919ec0810"
+    },
+    "view.menu.deactivateActiveGroup": {
+      "source": "cb837ab369794b8a7f98fbcc5fc901718d2d9dbf",
+      "translation": "398265b8f5b6349b2ac230e3aa0356f6ef90eb88"
     },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -604,9 +872,17 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "f6de41947fa8d200dba09f0351ab75d3920a6e28"
     },
+    "view.menu.fitGroupToCards": {
+      "source": "ed58a1c5ccee1fba89ebae6845be5f32d6c733c9",
+      "translation": "68564bc0a1225ac6edb817005671070068306add"
+    },
     "view.menu.createGroupFromSelection": {
       "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
       "translation": "39feb00b93bdea9509b07dbd657af524b4d566f3"
+    },
+    "view.menu.createZoneFromSelection": {
+      "source": "807de5535ed0ad5a5d983eacb9ff3716d878dc4e",
+      "translation": "daff000cc44267fe1e789a1ff1f1504f112cb9c8"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -623,6 +899,18 @@
     "view.menu.sourceSubtaskOfTarget": {
       "source": "a4be670929e3ad0c0348d40116096509101e0f9f",
       "translation": "3e3276e09ec3d292c900e088b74f8ded2b5fa787"
+    },
+    "view.menu.dependencyLinks": {
+      "source": "0562f32dc56f5c702810cbe010068ddd38dbd69a",
+      "translation": "1857c47d180b0ec84a6131111378935dabe3a0e8"
+    },
+    "view.menu.subtaskLinks": {
+      "source": "173312c6e2592de729610a4d319877c9aa8d8b67",
+      "translation": "a854172f9a8217b3782722548556255f952eb6f9"
+    },
+    "view.menu.propertyLinks": {
+      "source": "235564256eba212f50846f34e52c0761104dcc03",
+      "translation": "639583c4f21eb316870662dd9016628e7d7b733d"
     },
     "view.menu.addPropertyLink": {
       "source": "6e295d7b5fe877b5551b4e808062b916dd717df5",
@@ -783,8 +1071,8 @@
   },
   "es": {
     "common.appName": {
-      "source": "fd824b3ba1713694a75da21b3f4cf97a42bab657",
-      "translation": "fd824b3ba1713694a75da21b3f4cf97a42bab657"
+      "source": "2f9c39a527e33f312b2d0914fb008da581913dcc",
+      "translation": "2f9c39a527e33f312b2d0914fb008da581913dcc"
     },
     "common.automatic": {
       "source": "ac9041e76816a34aba228a736ec30da6984c5777",
@@ -793,6 +1081,10 @@
     "common.cancel": {
       "source": "77dfd2135f4db726c47299bb55be26f7f4525a46",
       "translation": "c111e0ab9ddb1dfb79f8a12c741ba6dbdb07992a"
+    },
+    "common.close": {
+      "source": "bbfa773e5a63a5ea58c9b6207e608ca0120e592a",
+      "translation": "4b0816bbd5e9199abb37116947c79078b0f36fd0"
     },
     "common.card.one": {
       "source": "10b93da7c74f93af707c33f1ef412a2a92d9615b",
@@ -862,9 +1154,41 @@
       "source": "3622410a4a8fab47e39a4f05735ec87c93dcc8ab",
       "translation": "f682f0f4d34305e83a10613dd1a54a251d2a48fe"
     },
-    "notices.baseboardWaitingForBasesData": {
-      "source": "3c0f6a0e8db0a78ea91f32e0e4c56d5f98975b77",
-      "translation": "f66184414196a76b8dd21f955629bfe891716db5"
+    "notices.activeGroupDisabled": {
+      "source": "3ee2ddfc118717219b9bdff68b9a63881ba503d6",
+      "translation": "764f6115913c50d1896624e4ec8d6be551922efa"
+    },
+    "notices.activeGroupEnabled": {
+      "source": "543ef7d617d47b7ba03da5b0d6a6ddb943da4e3a",
+      "translation": "d1ed727d4fdee5fc76c144fbec6e402e3db5e03d"
+    },
+    "notices.activeGroupReadOnly": {
+      "source": "722dca50e751da27f4cc180c968d27bc6b7b979e",
+      "translation": "8ef11ad0a70a08c3f5a27059643dedcf748c9e64"
+    },
+    "notices.activeGroupTaskUpdateUnavailable": {
+      "source": "10a28d58ca6af418d08842620939e4b640eac556",
+      "translation": "cdfb6e0e334f3b93aac9385da8b2b61cda88b5bc"
+    },
+    "notices.activeGroupUpdated": {
+      "source": "c78ad3455f76a36acf79433077e4c7363eb7a4dd",
+      "translation": "3def2ae6672292dd43b0cab6191749fd25243505"
+    },
+    "notices.activeGroupActionRun": {
+      "source": "110af2d8e5e5717d2228f4a7223089953331156f",
+      "translation": "f8479185a1118f3d37221575ea747c4a0d49d5d0"
+    },
+    "notices.activeGroupActionNotTask": {
+      "source": "e9800a314aadaf3027a58a9310b41bd14e506b9e",
+      "translation": "ab8fb0e5f8ef8f6954325f7b08d88a7342980a1f"
+    },
+    "notices.activeGroupActionUnavailable": {
+      "source": "05b9d79c120ed0021290e290c62df0026f9377da",
+      "translation": "4a622eaa0004624a23955b322728948fbb6424c7"
+    },
+    "notices.canvasBasesWaitingForBasesData": {
+      "source": "a0bb20a5f9df7dc64407bc0329f524337231951c",
+      "translation": "2ac31b478125506ac336789b80dbd1f35d541762"
     },
     "notices.couldNotAddPropertyLink": {
       "source": "1432c25d668ca971f8de44c270644b9171220c5f",
@@ -877,6 +1201,10 @@
     "notices.couldNotRemovePropertyLink": {
       "source": "b2ad9dc15ce642c0ef1c526df2a34ff9afbf61ab",
       "translation": "7ffcb88022bd6535130068790acdc14174758512"
+    },
+    "notices.couldNotUpdateActiveGroup": {
+      "source": "b18b656c33b1d709f665d2396ab76cc2731cd357",
+      "translation": "171facdb3b2c4896c70694fee426a5ac1c3045b5"
     },
     "notices.couldNotUpdateLink": {
       "source": "70ceafd6c4531892fd867c3590de60b6f00c5cca",
@@ -899,12 +1227,12 @@
       "translation": "a9a6face35523d8014c73ef71f8b70917b66ca7d"
     },
     "notices.obsidianVersionRequired": {
-      "source": "626c430316d0f7bf4ce74ea6089bb45a34f9d28d",
-      "translation": "df1ac67314084a980286cf3be42f243a18de75ed"
+      "source": "62e440f2994ac4d9287d34ca774d3c0ac02667d0",
+      "translation": "9a17a766b0fc06d97b216e3dbc2393dee06f8d97"
     },
-    "notices.openBaseboardViewFirst": {
-      "source": "71e797527713fc1278a569c7263ddda3a7cf5aa3",
-      "translation": "00f63276f82ef0d0f3bbac01b6f3201c02d04fea"
+    "notices.openCanvasBasesViewFirst": {
+      "source": "ec0fd2571fc9d44a9938a201360905c6f2f241b7",
+      "translation": "eaacc9317fc9efd964f7581acdc1f78e86157ac7"
     },
     "notices.openBasesViewFirst": {
       "source": "da610fcbcddaf8f9408853df43a17500fe7d6491",
@@ -939,8 +1267,8 @@
       "translation": "1da03f66d902e460404e54ec84aba188bf383e25"
     },
     "notices.starterFilesReady": {
-      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
-      "translation": "cc96893ca471540a2e7bc425d5e837681d72bc4c"
+      "source": "96d0354a4f9aff5832c826fe766f079b9795f60f",
+      "translation": "a35f5a063d9561d3708c902946219755a5dce877"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -955,8 +1283,8 @@
       "translation": "e5f109e5ec14f953cae9b5fc670a2befb7321678"
     },
     "settings.defaults.canvasFolder.description": {
-      "source": "f5451548720b3d7c048f929105140ad491b1a8d9",
-      "translation": "fae9a5cc0cbeb2426d84d4dec163ca310521d897"
+      "source": "71b9f60c887e59721ed65a9ab0420ebab642d172",
+      "translation": "e7ae7d700c936986f926800930b587d9ee9e072c"
     },
     "settings.defaults.layout.name": {
       "source": "2ae3a9285af610786a6931294c6c13b82d1d24ba",
@@ -987,8 +1315,8 @@
       "translation": "31962b8f851704b221ee53bc86b5b9d594848c95"
     },
     "settings.defaults.bodyEditor.description": {
-      "source": "028774d660a4263a07cafb0d93477930fe30b5f5",
-      "translation": "81de83b168c78106c7ce1df0cc5694df1008aacd"
+      "source": "83a3799e10b83484407723be11a9e6a3afafa06e",
+      "translation": "aef324cdacc4d613a1d755d7b1a0d6233220e0b0"
     },
     "settings.tasknotes.heading": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
@@ -999,8 +1327,8 @@
       "translation": "055d46ccca0c48c189af2980e135f9da529e09f4"
     },
     "settings.tasknotes.integration.description": {
-      "source": "5312d39ae6ad1b8e203c70afff6a9adefa92152e",
-      "translation": "fab8f903dfe326b3c4fbdc96367d84c4390a3550"
+      "source": "d7ec0c5cad9da592c0a24d542f697ba3404cf6ce",
+      "translation": "4bae01b1fd78006de70ffea02b844a0e65e0a33b"
     },
     "settings.tasknotes.badges.name": {
       "source": "4a47f1e139d831149e20d0ad3fc59b8ed7c5561c",
@@ -1035,16 +1363,16 @@
       "translation": "05d419196c849c1e786cff896e65603558b17d32"
     },
     "settings.updateRules.preservePositions.description": {
-      "source": "1b9508fd361ceb9e78fa27281844f94f178a7f25",
-      "translation": "e481b6d11ee07e7b429b813948edcc8ab3840079"
+      "source": "b3b4dadbea9eab0fa344d7530d9f97919713252d",
+      "translation": "60a04a2e86a7329ca68464ed1338407e5d574a93"
     },
     "settings.updateRules.removeMissingNotes.name": {
       "source": "69a07189d1ee6ce5c99533af82a2ae60086e729f",
       "translation": "f213adc458a373be1322aba3cf8cae40bb66fe38"
     },
     "settings.updateRules.removeMissingNotes.description": {
-      "source": "26b3763b21644b0ebb40fb59e01de831c1074983",
-      "translation": "b2f87009a9265314243f67336e3099e0bea38b91"
+      "source": "240f89454d4d6acdbb25caa4aaa6e8f928bd2a93",
+      "translation": "5039f38abb202c169bb9d1481a976862cf991eee"
     },
     "settings.updateRules.nodeWidth.name": {
       "source": "08cf7bca56d478d335b2b9c3d0e184058dbb307f",
@@ -1067,16 +1395,16 @@
       "translation": "add12ca7e25ebc36794defe7b219ec3e02f5a67d"
     },
     "settings.language.description": {
-      "source": "b74f44cb84d7bfdef24613db569d51c614767eb4",
-      "translation": "2028080dc62c6989f73ac5d283bed0eb7a376b69"
+      "source": "633464233e79b995420f421284352c663c15891f",
+      "translation": "f5602c8837e9703b4dc6f143c2734afd0f6b4299"
     },
     "settings.language.name": {
       "source": "5a28c99d6d38a7489e8b1ab06a11507f8c6fd47f",
       "translation": "add12ca7e25ebc36794defe7b219ec3e02f5a67d"
     },
     "settings.language.dropdownDescription": {
-      "source": "601ea9a888accf03523827b9afb9b89b90c4b8f2",
-      "translation": "741384b03a569a622cceed3e4ee053563d346b54"
+      "source": "a95dba96cbb2d657f0e30a30f916dfe3c564006f",
+      "translation": "adadb4a2f8deacc1161e6457910720043c7d456d"
     },
     "options.layout.columns": {
       "source": "b337287f17401eb2db30ece3f3a3094217b413e0",
@@ -1145,6 +1473,14 @@
     "tasknotes.badges.tracked": {
       "source": "f453f5a887e880559f39d177175012d7adad9ac4",
       "translation": "3a7c6d6cb751143c7b18119ce17d1b76dfeb3952"
+    },
+    "tasknotes.badges.tracking": {
+      "source": "e81a151bd05091f9935dc3aba219eed346e7bb4f",
+      "translation": "9010eb0ae6d6516041439f32f5c7dbc97f9b28b6"
+    },
+    "tasknotes.badges.active": {
+      "source": "a733b809d2f1233496ab516eed0f3ef75cf3791a",
+      "translation": "10140fb91e528ec8502f406d0bfa403068cb62d0"
     },
     "tasknotes.relationships.blocks": {
       "source": "f7d5b2b95861daea9933ef0a243f733bbc79235e",
@@ -1219,8 +1555,8 @@
       "translation": "38374bfcd45093d50344b831d778cec61f11a94a"
     },
     "modal.preservePositions.description": {
-      "source": "4a70addb3cb30a12a488bed407561b96691cc9d9",
-      "translation": "e117622b02aa9879fd31b892611f3443299281b2"
+      "source": "8d4dc77a9baaffd0251d451574986fa97e201bc4",
+      "translation": "d212d8393071e6edc22145fb8a4950b2b8188a3d"
     },
     "modal.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -1241,6 +1577,10 @@
     "view.toolbar.addGroup": {
       "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
       "translation": "16c195db4a649c97dd5c7f424c72058432ff0b86"
+    },
+    "view.toolbar.addZone": {
+      "source": "0279d7313189283e312b36e83d146afe76680db9",
+      "translation": "6d3178f245644569dd4f3f29bfcfa9615231d6e4"
     },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -1286,6 +1626,18 @@
       "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
       "translation": "509940bf72a6ee7a3d71bc487025b00f5e4ef00d"
     },
+    "view.card.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0"
+    },
+    "view.card.noteColor": {
+      "source": "a5dad58668b83243fa855c04a906abfe710e0e45",
+      "translation": "ba85a61f5287c1cf1cddf244ceeeb6e94f9c884e"
+    },
+    "view.card.cardColor": {
+      "source": "2e1a93636a6096741d5aa40a98132acfbd75228a",
+      "translation": "5b8ef4c5a021c51d35e3ff81ecc81c04e03cd0bf"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "5de6f68124fdc311b56919c4d1f33e28532a2d81"
@@ -1298,6 +1650,178 @@
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "62f20d5cb909df79abe4ccf85299b6cc4405a92e"
     },
+    "view.linkDrag.releaseToLink": {
+      "source": "30af734941bdbde5e74a5d1adf918177098219d7",
+      "translation": "c2d28279ac324c06e62f121e912d7b116dd69f33"
+    },
+    "view.linkDrag.dragToCard": {
+      "source": "088156c3eaba8c07599a1843e385a4f41fa2ef47",
+      "translation": "92a632b59ab19fde4a41a9955bfb05763bceecff"
+    },
+    "view.linkDrag.cannotLinkHere": {
+      "source": "e0ce0f06b21166f101163697a47707264e78c650",
+      "translation": "0efc6bc282f7e806ef0ed2c5a268fad0cbf793db"
+    },
+    "view.group.active": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "27288b32b3c3a7e21b5de72441a814ce24dc8728"
+    },
+    "view.group.activeTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "e979b8ba84189ca4a406f35ac036d11e0392ad66"
+    },
+    "view.group.zoneTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "e979b8ba84189ca4a406f35ac036d11e0392ad66"
+    },
+    "view.group.label": {
+      "source": "74341e3c271df3c784e595b804b1f90be0f80429",
+      "translation": "07287eda176e9e23e604c82b26fef80a4dd6904b"
+    },
+    "view.group.action": {
+      "source": "f4e4cb8146eebbf05fc00860419e8d9b9f1b67c2",
+      "translation": "4a5e5955543e120c712417331678ec708cd9cdb5"
+    },
+    "view.group.actionSetProperty": {
+      "source": "0072a167d4fee18c3b8d259bada3014dff641371",
+      "translation": "eb47381ac000e1f4750c45ac407bab747ff96330"
+    },
+    "view.group.actionCompleteTask": {
+      "source": "af20ec58720a70b4d05fb78d3500c7af26fd37b8",
+      "translation": "d859efd423f674d8a6a3d0a9e37124b58a82a3f5"
+    },
+    "view.group.actionUncompleteTask": {
+      "source": "79d6acda2f4e9574ebfeaee4447459b59683d2b3",
+      "translation": "e7a3add520fbe2c35117c79f78cf5809670b1b2a"
+    },
+    "view.group.actionArchiveTask": {
+      "source": "03d82ba7907ae1c9c34b442b8de36b436a13fc99",
+      "translation": "4a537195e826c044733a59548c457efa3623cf7d"
+    },
+    "view.group.actionUnarchiveTask": {
+      "source": "bcd2c2d3ea900f171fe4e4babedbcd5826838fb2",
+      "translation": "7bf9bed0b4dd95664b251eab86e6983d807456cc"
+    },
+    "view.group.actionStartTimeTracking": {
+      "source": "7151516a05b9f16fd6d876ce009551328cdfeff2",
+      "translation": "ae5c238a912e7b05af05b10faa583291874f3803"
+    },
+    "view.group.actionStopTimeTracking": {
+      "source": "d830f5133dafe2f2c8325d37811c4901efa364a8",
+      "translation": "6f7c4cfa80f27e0a76d0804edf762dd302da70af"
+    },
+    "view.group.actionStartPomodoro": {
+      "source": "b5924c20fa7da66235c95fdded5c9529a11a4a73",
+      "translation": "c34df107b9d510b645452768d1835460ba2337dd"
+    },
+    "view.group.actionAssignPomodoro": {
+      "source": "5ed2c0b7fa74e11f2bb31db18d7c967fe7afa527",
+      "translation": "f4c1d79a6de2003e4e927e6681ad9b3048dc6920"
+    },
+    "view.group.actionCompleteRecurring": {
+      "source": "eb2125c7238d7f8f35434a16a3be08a912794eb4",
+      "translation": "c23bcb9318dfdc4d4395e5941c6bfd5c2f7a769b"
+    },
+    "view.group.actionSkipRecurring": {
+      "source": "9648841dc8789017f672c117b1bc754d5cc08b29",
+      "translation": "cf9d9a830ef4ed7eda0479726c30f67c0d1b8bc0"
+    },
+    "view.group.property": {
+      "source": "9ae33a7d0ecb82cae8f04aafab20bf90425b7b8c",
+      "translation": "937160ada2888f555de07a15a29db0470db5577c"
+    },
+    "view.group.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "4271eb8ae4f587eca7e45b6feb3efbf6a61b4974"
+    },
+    "view.group.updateMode": {
+      "source": "9fac6527645ba5d4025a166d382ef4f52305083e",
+      "translation": "64294e56dad4a47821440a5be9fa595aea5f64c0"
+    },
+    "view.group.valueType": {
+      "source": "a956485e60c24642bdc24465480775891fba80d6",
+      "translation": "cac355b9462c280de4aa94db2909031cd401c3d6"
+    },
+    "view.group.updateModeReplace": {
+      "source": "a7cf7b25a703b308887c7f1d100c4326ef20ac46",
+      "translation": "b0c9848955e7829f9294255324fc3d00311a7492"
+    },
+    "view.group.updateModeAppend": {
+      "source": "6b3a602280be24f5c0e41945a5a73a105b0c54c4",
+      "translation": "41261d093150199de11788622c139ef70e6e5267"
+    },
+    "view.group.updateModeAppendUnique": {
+      "source": "2cc8d9f9c0ab46208ea57f674730cb6e4bd8a49f",
+      "translation": "ef64a5cd11dd4bd40f147729bab9f28d37dc93fe"
+    },
+    "view.group.updateModeRemove": {
+      "source": "e963907dac5cd5c017869b4c96c18021c9bd058b",
+      "translation": "be78bcf6d43b410d30feb1acdf86964b5dfe6970"
+    },
+    "view.group.updateModeClear": {
+      "source": "719ea396ad92e01b4757ec2b93bb1e5f270f771d",
+      "translation": "d7b82b2125ce686c51e37129e0a0e334c8bfed08"
+    },
+    "view.group.valueTypeAuto": {
+      "source": "c614ba7c453cdcd4d21b20e8286c6266c891e0c6",
+      "translation": "c9c992be184b96c7d40d7586bd49730c3e23ebf6"
+    },
+    "view.group.valueTypeString": {
+      "source": "c3328c39b0e29f78e9ff45db674248b1d245887d",
+      "translation": "6eeba656c0f3cafd6e0af4fcd90468390e8ee571"
+    },
+    "view.group.valueTypeNumber": {
+      "source": "b7baa1d40c4ea29afc9098732bffee2a861a6c44",
+      "translation": "1d91f4b8d8d653bd6f32933c4ed92e33aa8ab752"
+    },
+    "view.group.valueTypeBoolean": {
+      "source": "b76ff4906f33c2dd97ddd929b9662ba8cac6174c",
+      "translation": "f0f79a62dee1695e591fff0700f3ab7c84fb97f9"
+    },
+    "view.group.valueTypeDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "bcc476092dcf939d7a85ca79d76ff9e48d5597f3"
+    },
+    "view.group.valueTypeList": {
+      "source": "a1fffaaafb7cc996685bceb829c053cc4f7de43d",
+      "translation": "e41a947762e9f88925ed12a98b72205fc705e2ec"
+    },
+    "view.group.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0"
+    },
+    "view.group.writeRule": {
+      "source": "e42f054b2974ad83a5bca96ea87112514fc83db3",
+      "translation": "acae4db1e50ed7a50eb3aa68797a9bd4deac65be"
+    },
+    "view.group.groupRuleLocked": {
+      "source": "7c7a4212647e7154812f9a90ce62b149d303f8f0",
+      "translation": "830c44fd072d0fcea56beee72d96d5ec44b2821b"
+    },
+    "view.group.dropResult": {
+      "source": "d8a8bf37c90d50fa26abe4b297b441f27d0daf28",
+      "translation": "d46f1c71190d1e4dc0d9f56f1c6e905730be86c4"
+    },
+    "view.group.previewWrite": {
+      "source": "c077f564847fdb1c70258590955e163d391893ba",
+      "translation": "c077f564847fdb1c70258590955e163d391893ba"
+    },
+    "view.group.previewClear": {
+      "source": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868",
+      "translation": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868"
+    },
+    "view.group.previewAction": {
+      "source": "34c09447a51c35c7878c0c125d9d874bf088c266",
+      "translation": "34c09447a51c35c7878c0c125d9d874bf088c266"
+    },
+    "view.group.emptyValue": {
+      "source": "2464254a17a92aba20f96b8a0216d88b9ef8c15e",
+      "translation": "81b304a0610f26fb7e21d4d9cf8f8270ae48efc5"
+    },
+    "view.group.propertyRequired": {
+      "source": "6dbff942a005991d025fe9fe4223de5ef4c1d778",
+      "translation": "3bb7678997536b024573081a845b9e2c4ca2e412"
+    },
     "view.group.createTitle": {
       "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
       "translation": "ab71ba6025e3e462f16bb76571b67722502d9bc5"
@@ -1306,9 +1830,17 @@
       "source": "171a0606f7c74580fd3982cf57c49d604104120a",
       "translation": "dd18fd863702f6a01c5c608d6e558b5a39e8d60b"
     },
+    "view.group.defaultZoneName": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "27288b32b3c3a7e21b5de72441a814ce24dc8728"
+    },
     "view.group.create": {
       "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
       "translation": "48a0686f58318623637083a4fa0e39abb00acde3"
+    },
+    "view.group.createZone": {
+      "source": "5ae01175f207c3086ef197de15b6774a80b7d9d2",
+      "translation": "c4a456ef65ebce1733015690d20e7b84c848536d"
     },
     "view.group.renameTitle": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -1317,6 +1849,10 @@
     "view.group.rename": {
       "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
       "translation": "c963c0d98acb0c80aad7c8f976e0bde3019be284"
+    },
+    "view.group.saveActiveGroup": {
+      "source": "59d37aff09d7712a8992f239782c3701a39202da",
+      "translation": "4f164cd779345b6fed9b1c832e4085c03e71b95a"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -1370,6 +1906,14 @@
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "8a0a4650066c090caadde19db192ae3cd0846d71"
     },
+    "view.menu.setCardColor": {
+      "source": "f5b3969bb8b4d7f0704d9023076541ca1942fefe",
+      "translation": "8be22a706bd3af1e57828cba3799d121ed05f63e"
+    },
+    "view.menu.clearCardColor": {
+      "source": "5519c8e0cba7397fb5b70018b49243e44d81e08b",
+      "translation": "be44e90cd415b66f7a1613d75a37ee6117a6f5a1"
+    },
     "view.menu.addPinnedNote": {
       "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
       "translation": "7d37297d95465749a8ea1f210998f83a35e98a78"
@@ -1377,6 +1921,18 @@
     "view.menu.addCard": {
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "0b7aaf3c67880d7a576e24ce64bd6be56828df67"
+    },
+    "view.menu.activateGroup": {
+      "source": "a0a89785e4181d8466357a8e797aa78a19bd4a7d",
+      "translation": "d92c7c910bf7bc29cf25d5f3594243a597c3c4a3"
+    },
+    "view.menu.configureActiveGroup": {
+      "source": "73ff54e48b0bc7121621fefd6089e39256211683",
+      "translation": "815746ea40f56d62b265684b55f0a3bce48565b5"
+    },
+    "view.menu.deactivateActiveGroup": {
+      "source": "cb837ab369794b8a7f98fbcc5fc901718d2d9dbf",
+      "translation": "4306a1ae14769bbe24427c1a5ff56527e6c21916"
     },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -1386,9 +1942,17 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "88363196686124bd014373d65a73cf3916fcf4f7"
     },
+    "view.menu.fitGroupToCards": {
+      "source": "ed58a1c5ccee1fba89ebae6845be5f32d6c733c9",
+      "translation": "ab58817c3ffcd14f800ede59561a2755da5f89e9"
+    },
     "view.menu.createGroupFromSelection": {
       "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
       "translation": "42029f672ea90ff6c0838314dfde9fb71b6e7875"
+    },
+    "view.menu.createZoneFromSelection": {
+      "source": "807de5535ed0ad5a5d983eacb9ff3716d878dc4e",
+      "translation": "41d596563bb29f9ed62f85088ebf417a1579235c"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -1405,6 +1969,18 @@
     "view.menu.sourceSubtaskOfTarget": {
       "source": "a4be670929e3ad0c0348d40116096509101e0f9f",
       "translation": "6f4d74ca961b8300c71cc15c18217c056720e4cc"
+    },
+    "view.menu.dependencyLinks": {
+      "source": "0562f32dc56f5c702810cbe010068ddd38dbd69a",
+      "translation": "3b0a4afcd8af206c1e8b5899917dae9ce0346672"
+    },
+    "view.menu.subtaskLinks": {
+      "source": "173312c6e2592de729610a4d319877c9aa8d8b67",
+      "translation": "e152bd3c84e31d83619a7d40ace064148d3e7e1c"
+    },
+    "view.menu.propertyLinks": {
+      "source": "235564256eba212f50846f34e52c0761104dcc03",
+      "translation": "81d14981161106f68d3ff61c1e2fcfc1f51f651a"
     },
     "view.menu.addPropertyLink": {
       "source": "6e295d7b5fe877b5551b4e808062b916dd717df5",
@@ -1565,8 +2141,8 @@
   },
   "fr": {
     "common.appName": {
-      "source": "fd824b3ba1713694a75da21b3f4cf97a42bab657",
-      "translation": "fd824b3ba1713694a75da21b3f4cf97a42bab657"
+      "source": "2f9c39a527e33f312b2d0914fb008da581913dcc",
+      "translation": "2f9c39a527e33f312b2d0914fb008da581913dcc"
     },
     "common.automatic": {
       "source": "ac9041e76816a34aba228a736ec30da6984c5777",
@@ -1575,6 +2151,10 @@
     "common.cancel": {
       "source": "77dfd2135f4db726c47299bb55be26f7f4525a46",
       "translation": "49ba3292420c74828e7892fadc66f3f4ee4c0111"
+    },
+    "common.close": {
+      "source": "bbfa773e5a63a5ea58c9b6207e608ca0120e592a",
+      "translation": "5ab4ec640d654dc4cb487135d6cb944aaeaa07fc"
     },
     "common.card.one": {
       "source": "10b93da7c74f93af707c33f1ef412a2a92d9615b",
@@ -1644,9 +2224,41 @@
       "source": "3622410a4a8fab47e39a4f05735ec87c93dcc8ab",
       "translation": "6c5409d407e1464f6b73d8f6c023340fa5e6baf9"
     },
-    "notices.baseboardWaitingForBasesData": {
-      "source": "3c0f6a0e8db0a78ea91f32e0e4c56d5f98975b77",
-      "translation": "f9f441ab88172c6810e5a2348a0d3b9a5e14498c"
+    "notices.activeGroupDisabled": {
+      "source": "3ee2ddfc118717219b9bdff68b9a63881ba503d6",
+      "translation": "24b5be7d846922e7f111dc4f17b5812eac3957c1"
+    },
+    "notices.activeGroupEnabled": {
+      "source": "543ef7d617d47b7ba03da5b0d6a6ddb943da4e3a",
+      "translation": "6f2f66be44acc6ebcba94cfc58d2b16d4f793c24"
+    },
+    "notices.activeGroupReadOnly": {
+      "source": "722dca50e751da27f4cc180c968d27bc6b7b979e",
+      "translation": "0a562b7326b7882481e022c3a5ab86960dbea6fc"
+    },
+    "notices.activeGroupTaskUpdateUnavailable": {
+      "source": "10a28d58ca6af418d08842620939e4b640eac556",
+      "translation": "0368d242c2eddf240616f3afcbb0d226f77e9d60"
+    },
+    "notices.activeGroupUpdated": {
+      "source": "c78ad3455f76a36acf79433077e4c7363eb7a4dd",
+      "translation": "c225fad1023bfe35fae9b21feffb6178579f1a19"
+    },
+    "notices.activeGroupActionRun": {
+      "source": "110af2d8e5e5717d2228f4a7223089953331156f",
+      "translation": "cb47fbfcbab30c26bfd5bc061fd9194932d698b4"
+    },
+    "notices.activeGroupActionNotTask": {
+      "source": "e9800a314aadaf3027a58a9310b41bd14e506b9e",
+      "translation": "43d018bb3ea34c92d4834a8659cd4fd978329dd6"
+    },
+    "notices.activeGroupActionUnavailable": {
+      "source": "05b9d79c120ed0021290e290c62df0026f9377da",
+      "translation": "344375bebc6714c61f28a42d0a2313681b29dfb2"
+    },
+    "notices.canvasBasesWaitingForBasesData": {
+      "source": "a0bb20a5f9df7dc64407bc0329f524337231951c",
+      "translation": "bf4ba8bc0828f02b511000658a2b3fd3060a4cff"
     },
     "notices.couldNotAddPropertyLink": {
       "source": "1432c25d668ca971f8de44c270644b9171220c5f",
@@ -1659,6 +2271,10 @@
     "notices.couldNotRemovePropertyLink": {
       "source": "b2ad9dc15ce642c0ef1c526df2a34ff9afbf61ab",
       "translation": "fd3e37a944f614604bd29674f0312c9be7b40750"
+    },
+    "notices.couldNotUpdateActiveGroup": {
+      "source": "b18b656c33b1d709f665d2396ab76cc2731cd357",
+      "translation": "80290b315806ee3fbc6cce0ea1b8c20f2d9e1dc0"
     },
     "notices.couldNotUpdateLink": {
       "source": "70ceafd6c4531892fd867c3590de60b6f00c5cca",
@@ -1681,12 +2297,12 @@
       "translation": "40ea7e7f04a89100a6debba1ef1416f9abd86285"
     },
     "notices.obsidianVersionRequired": {
-      "source": "626c430316d0f7bf4ce74ea6089bb45a34f9d28d",
-      "translation": "330f0775346bfec2a9c2fea6592e5f97933a99bd"
+      "source": "62e440f2994ac4d9287d34ca774d3c0ac02667d0",
+      "translation": "07396e80f1781ef05634105cc3f7c15cbf3e6ab8"
     },
-    "notices.openBaseboardViewFirst": {
-      "source": "71e797527713fc1278a569c7263ddda3a7cf5aa3",
-      "translation": "b2454b4d758481359ec903e2415fdb745d351cd6"
+    "notices.openCanvasBasesViewFirst": {
+      "source": "ec0fd2571fc9d44a9938a201360905c6f2f241b7",
+      "translation": "3c26a93c01ea5e8ea94772d52967ef6fe8483a5f"
     },
     "notices.openBasesViewFirst": {
       "source": "da610fcbcddaf8f9408853df43a17500fe7d6491",
@@ -1721,8 +2337,8 @@
       "translation": "482f916a94665cffa4cd9de94648be27db5252ac"
     },
     "notices.starterFilesReady": {
-      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
-      "translation": "0fdf2a36ea806df8d51eb7759337846f9df0fa75"
+      "source": "96d0354a4f9aff5832c826fe766f079b9795f60f",
+      "translation": "7aa618969ed5aadbb75ec350928e089db05adeba"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -1737,8 +2353,8 @@
       "translation": "93648b5c3ec87226c2efc825d96c8eef993a4eba"
     },
     "settings.defaults.canvasFolder.description": {
-      "source": "f5451548720b3d7c048f929105140ad491b1a8d9",
-      "translation": "974e1a7c351fefdd77e7941518a42e0f1e676e97"
+      "source": "71b9f60c887e59721ed65a9ab0420ebab642d172",
+      "translation": "af5b45ed5ea588f86a9752908f2002c02f96c262"
     },
     "settings.defaults.layout.name": {
       "source": "2ae3a9285af610786a6931294c6c13b82d1d24ba",
@@ -1769,8 +2385,8 @@
       "translation": "53ee7cdd2b96ba1dc4f60ed6fec7b0d967bec1d7"
     },
     "settings.defaults.bodyEditor.description": {
-      "source": "028774d660a4263a07cafb0d93477930fe30b5f5",
-      "translation": "3d624a1c6de589dd413bf5d081df4244e72ee37d"
+      "source": "83a3799e10b83484407723be11a9e6a3afafa06e",
+      "translation": "60ba7f4f31c0fea053b37a743c43fd60ab317f02"
     },
     "settings.tasknotes.heading": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
@@ -1781,8 +2397,8 @@
       "translation": "1d439f62ca7446a53618f39ff3da37d3d27e80d1"
     },
     "settings.tasknotes.integration.description": {
-      "source": "5312d39ae6ad1b8e203c70afff6a9adefa92152e",
-      "translation": "216590759d123f2fa6bfc40ec1a9f208ff95e24a"
+      "source": "d7ec0c5cad9da592c0a24d542f697ba3404cf6ce",
+      "translation": "6aba8cbdd73dadf1f0211216b8c9aa57df857534"
     },
     "settings.tasknotes.badges.name": {
       "source": "4a47f1e139d831149e20d0ad3fc59b8ed7c5561c",
@@ -1817,16 +2433,16 @@
       "translation": "40a9e726ff9786e3d108b224d258d86474e034c2"
     },
     "settings.updateRules.preservePositions.description": {
-      "source": "1b9508fd361ceb9e78fa27281844f94f178a7f25",
-      "translation": "c283b5a940b9086cd3c5d0894a74298ad91594ac"
+      "source": "b3b4dadbea9eab0fa344d7530d9f97919713252d",
+      "translation": "49403389d35b65ae8c71b32f87f039a16e7b037d"
     },
     "settings.updateRules.removeMissingNotes.name": {
       "source": "69a07189d1ee6ce5c99533af82a2ae60086e729f",
       "translation": "fd2dd0e9f4a26f82713eca24b160dacb2016cc8c"
     },
     "settings.updateRules.removeMissingNotes.description": {
-      "source": "26b3763b21644b0ebb40fb59e01de831c1074983",
-      "translation": "695f4430a9f5c40a69df5f53aeb19d6018403bf4"
+      "source": "240f89454d4d6acdbb25caa4aaa6e8f928bd2a93",
+      "translation": "83458fe19e3c26e12989fa68e832672ef2752ca7"
     },
     "settings.updateRules.nodeWidth.name": {
       "source": "08cf7bca56d478d335b2b9c3d0e184058dbb307f",
@@ -1849,16 +2465,16 @@
       "translation": "d36a7f5b30c0d29538afea14f2e2d99e99bac035"
     },
     "settings.language.description": {
-      "source": "b74f44cb84d7bfdef24613db569d51c614767eb4",
-      "translation": "cbff41e73096cebdd63b02d87dfca0ed4b59e767"
+      "source": "633464233e79b995420f421284352c663c15891f",
+      "translation": "faf9957b4117b3c0e03f639c1941e58acb650d57"
     },
     "settings.language.name": {
       "source": "5a28c99d6d38a7489e8b1ab06a11507f8c6fd47f",
       "translation": "d36a7f5b30c0d29538afea14f2e2d99e99bac035"
     },
     "settings.language.dropdownDescription": {
-      "source": "601ea9a888accf03523827b9afb9b89b90c4b8f2",
-      "translation": "1f2c7c28c0b254851e765a096f677853eb8fec7a"
+      "source": "a95dba96cbb2d657f0e30a30f916dfe3c564006f",
+      "translation": "2e6d5c6799cfac0b3a23dafef26b448c2a3a0873"
     },
     "options.layout.columns": {
       "source": "b337287f17401eb2db30ece3f3a3094217b413e0",
@@ -1927,6 +2543,14 @@
     "tasknotes.badges.tracked": {
       "source": "f453f5a887e880559f39d177175012d7adad9ac4",
       "translation": "29293f77b8551328d64750def055b448da8122c9"
+    },
+    "tasknotes.badges.tracking": {
+      "source": "e81a151bd05091f9935dc3aba219eed346e7bb4f",
+      "translation": "9c7e45b78f1630903386f712db19683d29acc653"
+    },
+    "tasknotes.badges.active": {
+      "source": "a733b809d2f1233496ab516eed0f3ef75cf3791a",
+      "translation": "2eb75f8458bd815f1cdfbbc067cdf6e87eaba50f"
     },
     "tasknotes.relationships.blocks": {
       "source": "f7d5b2b95861daea9933ef0a243f733bbc79235e",
@@ -2001,8 +2625,8 @@
       "translation": "632336c7492786b1f586b694e35ea6b7d3b35177"
     },
     "modal.preservePositions.description": {
-      "source": "4a70addb3cb30a12a488bed407561b96691cc9d9",
-      "translation": "30310cf857ee9b98b649af274fea1fde6d6f12a1"
+      "source": "8d4dc77a9baaffd0251d451574986fa97e201bc4",
+      "translation": "fbd9896afe3f039ef8a8a0a21d7326381dac49ab"
     },
     "modal.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -2023,6 +2647,10 @@
     "view.toolbar.addGroup": {
       "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
       "translation": "3f13cea3ada4f3b4d973e868dab8374332a520b1"
+    },
+    "view.toolbar.addZone": {
+      "source": "0279d7313189283e312b36e83d146afe76680db9",
+      "translation": "85f56481882621cb7163b27c1d2929b78b1f6b5e"
     },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -2068,6 +2696,18 @@
       "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
       "translation": "21ed4bb7a29f0e4e149801a3ce2f4316c28a1d8a"
     },
+    "view.card.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "145c4326e92bd951de43c1c9af9158c7b49a0d76"
+    },
+    "view.card.noteColor": {
+      "source": "a5dad58668b83243fa855c04a906abfe710e0e45",
+      "translation": "4880f2fe92696276bfddd071cbcfffa017e9b8dd"
+    },
+    "view.card.cardColor": {
+      "source": "2e1a93636a6096741d5aa40a98132acfbd75228a",
+      "translation": "2324fe83aed031fd3c968e7e22164b29161fa752"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "b7c1e243a844c2b8675a6e41ae88ce68b9cddd3a"
@@ -2080,6 +2720,178 @@
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "9b52df38efa2ec31b718747dc96f4ba9e35e92e7"
     },
+    "view.linkDrag.releaseToLink": {
+      "source": "30af734941bdbde5e74a5d1adf918177098219d7",
+      "translation": "44cf2fdc1d360356744310a8a3c68544455e5f40"
+    },
+    "view.linkDrag.dragToCard": {
+      "source": "088156c3eaba8c07599a1843e385a4f41fa2ef47",
+      "translation": "0a1b3d6d80459ff9b58fc907bc00993a64b9e2f8"
+    },
+    "view.linkDrag.cannotLinkHere": {
+      "source": "e0ce0f06b21166f101163697a47707264e78c650",
+      "translation": "8cf8b9f7b3c3b31136651b3e3912000862ae3590"
+    },
+    "view.group.active": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "03efccb49f3ff5f0055a644eae98835dda00b789"
+    },
+    "view.group.activeTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "0cb189b595e549a1b17573da5548afee9ce50936"
+    },
+    "view.group.zoneTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "0cb189b595e549a1b17573da5548afee9ce50936"
+    },
+    "view.group.label": {
+      "source": "74341e3c271df3c784e595b804b1f90be0f80429",
+      "translation": "f5485bbae830562cc92c3a6301192327bf9265f7"
+    },
+    "view.group.action": {
+      "source": "f4e4cb8146eebbf05fc00860419e8d9b9f1b67c2",
+      "translation": "5206ffccb205335496cb3cfbe39d3e5fe8b98a4d"
+    },
+    "view.group.actionSetProperty": {
+      "source": "0072a167d4fee18c3b8d259bada3014dff641371",
+      "translation": "9d333edf68b6c85cb8df9117b03880bd21340545"
+    },
+    "view.group.actionCompleteTask": {
+      "source": "af20ec58720a70b4d05fb78d3500c7af26fd37b8",
+      "translation": "8e094a1544e89454a7c784e1fb3aa42a015118f2"
+    },
+    "view.group.actionUncompleteTask": {
+      "source": "79d6acda2f4e9574ebfeaee4447459b59683d2b3",
+      "translation": "72274ccdf673f7e981293096ce8bc29084f22da6"
+    },
+    "view.group.actionArchiveTask": {
+      "source": "03d82ba7907ae1c9c34b442b8de36b436a13fc99",
+      "translation": "6d21b19ac019661b49c9c67809cab86fa23f0852"
+    },
+    "view.group.actionUnarchiveTask": {
+      "source": "bcd2c2d3ea900f171fe4e4babedbcd5826838fb2",
+      "translation": "5dd5a148fda3171ee51edf6a567f29c7967b341e"
+    },
+    "view.group.actionStartTimeTracking": {
+      "source": "7151516a05b9f16fd6d876ce009551328cdfeff2",
+      "translation": "d8bc3ba48329917ae195be2848764dd19327a27d"
+    },
+    "view.group.actionStopTimeTracking": {
+      "source": "d830f5133dafe2f2c8325d37811c4901efa364a8",
+      "translation": "2e3435178495aae88e66b4d53b3efcd85e107e19"
+    },
+    "view.group.actionStartPomodoro": {
+      "source": "b5924c20fa7da66235c95fdded5c9529a11a4a73",
+      "translation": "9e1079d5d7873d9de2f9dd748ac8395c312e02ba"
+    },
+    "view.group.actionAssignPomodoro": {
+      "source": "5ed2c0b7fa74e11f2bb31db18d7c967fe7afa527",
+      "translation": "42b0b5dfb8ba91028b9d6f5cfe077bddd797788d"
+    },
+    "view.group.actionCompleteRecurring": {
+      "source": "eb2125c7238d7f8f35434a16a3be08a912794eb4",
+      "translation": "e4443cb841ae42690687991077beffa14f9a0979"
+    },
+    "view.group.actionSkipRecurring": {
+      "source": "9648841dc8789017f672c117b1bc754d5cc08b29",
+      "translation": "d229a8fd57a8ff661c0ca9194db1a9f32b1f50f3"
+    },
+    "view.group.property": {
+      "source": "9ae33a7d0ecb82cae8f04aafab20bf90425b7b8c",
+      "translation": "5e345e0c779b141916c8e1320368947f344e1ba0"
+    },
+    "view.group.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "68f92b0dd425b559cc848cdf0655319f5dda6dc1"
+    },
+    "view.group.updateMode": {
+      "source": "9fac6527645ba5d4025a166d382ef4f52305083e",
+      "translation": "ab3af0827abf49838ee633c4994fb7ba65a1f831"
+    },
+    "view.group.valueType": {
+      "source": "a956485e60c24642bdc24465480775891fba80d6",
+      "translation": "2f0baffb6f1aa6c2edad45bb7a168fc260f91cf9"
+    },
+    "view.group.updateModeReplace": {
+      "source": "a7cf7b25a703b308887c7f1d100c4326ef20ac46",
+      "translation": "db2c67bc24f1ff76f474e01e6ad7f6e22aee8a5d"
+    },
+    "view.group.updateModeAppend": {
+      "source": "6b3a602280be24f5c0e41945a5a73a105b0c54c4",
+      "translation": "87c57ed173ea17c02ec96ec099ee6a81d79dabc2"
+    },
+    "view.group.updateModeAppendUnique": {
+      "source": "2cc8d9f9c0ab46208ea57f674730cb6e4bd8a49f",
+      "translation": "0355789c4e70d35ef4b4c900885101101ec8aafd"
+    },
+    "view.group.updateModeRemove": {
+      "source": "e963907dac5cd5c017869b4c96c18021c9bd058b",
+      "translation": "54ec24a19c21526ece9590a592e3f9c8964b6f5a"
+    },
+    "view.group.updateModeClear": {
+      "source": "719ea396ad92e01b4757ec2b93bb1e5f270f771d",
+      "translation": "fe23de7b572d52a48cc8cdd2bdadc92fdaeff15f"
+    },
+    "view.group.valueTypeAuto": {
+      "source": "c614ba7c453cdcd4d21b20e8286c6266c891e0c6",
+      "translation": "f8a3c37beb27ca1fbb28f3e039798abce83de933"
+    },
+    "view.group.valueTypeString": {
+      "source": "c3328c39b0e29f78e9ff45db674248b1d245887d",
+      "translation": "ff9afef1eae0a920c4ef18c87f9f2967a054c8dd"
+    },
+    "view.group.valueTypeNumber": {
+      "source": "b7baa1d40c4ea29afc9098732bffee2a861a6c44",
+      "translation": "e68491e91c7c64501c49173e8744d09191424cb2"
+    },
+    "view.group.valueTypeBoolean": {
+      "source": "b76ff4906f33c2dd97ddd929b9662ba8cac6174c",
+      "translation": "76d7ac236d99f050a90e851e5cc9846b0f65bc7d"
+    },
+    "view.group.valueTypeDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d"
+    },
+    "view.group.valueTypeList": {
+      "source": "a1fffaaafb7cc996685bceb829c053cc4f7de43d",
+      "translation": "4231be1747285e4a3497f48d5fdd22b59dd75e83"
+    },
+    "view.group.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "145c4326e92bd951de43c1c9af9158c7b49a0d76"
+    },
+    "view.group.writeRule": {
+      "source": "e42f054b2974ad83a5bca96ea87112514fc83db3",
+      "translation": "811cb44f640187361b0479fd20455f1ceacf9405"
+    },
+    "view.group.groupRuleLocked": {
+      "source": "7c7a4212647e7154812f9a90ce62b149d303f8f0",
+      "translation": "085615c5499ad91a7d28dde8caa4b279b4b8584c"
+    },
+    "view.group.dropResult": {
+      "source": "d8a8bf37c90d50fa26abe4b297b441f27d0daf28",
+      "translation": "a2a300d931e957d252ac610d6854ab1a743aa173"
+    },
+    "view.group.previewWrite": {
+      "source": "c077f564847fdb1c70258590955e163d391893ba",
+      "translation": "c077f564847fdb1c70258590955e163d391893ba"
+    },
+    "view.group.previewClear": {
+      "source": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868",
+      "translation": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868"
+    },
+    "view.group.previewAction": {
+      "source": "34c09447a51c35c7878c0c125d9d874bf088c266",
+      "translation": "34c09447a51c35c7878c0c125d9d874bf088c266"
+    },
+    "view.group.emptyValue": {
+      "source": "2464254a17a92aba20f96b8a0216d88b9ef8c15e",
+      "translation": "9621fd9fb26a03e86dad0c0b595137878d1ba01e"
+    },
+    "view.group.propertyRequired": {
+      "source": "6dbff942a005991d025fe9fe4223de5ef4c1d778",
+      "translation": "c3fab5205e7facf22092494a34a16f4a43990fb1"
+    },
     "view.group.createTitle": {
       "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
       "translation": "9031a3d61c6d745a712ec235cf7e93bca25d1a56"
@@ -2088,9 +2900,17 @@
       "source": "171a0606f7c74580fd3982cf57c49d604104120a",
       "translation": "1026d22e2a7c1aae2be863f5be84cc05d7677e65"
     },
+    "view.group.defaultZoneName": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "03efccb49f3ff5f0055a644eae98835dda00b789"
+    },
     "view.group.create": {
       "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
       "translation": "1a6861723c6988e95ccc2010a3eca9a44fae0458"
+    },
+    "view.group.createZone": {
+      "source": "5ae01175f207c3086ef197de15b6774a80b7d9d2",
+      "translation": "dae1cdbebbf70cd018dec9e3c666fda33285f3c0"
     },
     "view.group.renameTitle": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -2099,6 +2919,10 @@
     "view.group.rename": {
       "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
       "translation": "8e8a86e80cbb7bbf771a301ce63564dd93391541"
+    },
+    "view.group.saveActiveGroup": {
+      "source": "59d37aff09d7712a8992f239782c3701a39202da",
+      "translation": "6527777012b6aa1fcaac9a661ae0136a82d7ddb9"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -2152,6 +2976,14 @@
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "432cd4ac46f652a648bed09760de144608293295"
     },
+    "view.menu.setCardColor": {
+      "source": "f5b3969bb8b4d7f0704d9023076541ca1942fefe",
+      "translation": "6ff33bd659c2d29dfd9d5cdcc08dfe571d7d3bd5"
+    },
+    "view.menu.clearCardColor": {
+      "source": "5519c8e0cba7397fb5b70018b49243e44d81e08b",
+      "translation": "a2f865f9e68613f2f1ae190f9104bb5e5df67842"
+    },
     "view.menu.addPinnedNote": {
       "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
       "translation": "b9c6918c7ca6e976528485d30a0efd46c3825b6e"
@@ -2159,6 +2991,18 @@
     "view.menu.addCard": {
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "58744e263e4bc3a9cb40b8933649f3c437aee1f1"
+    },
+    "view.menu.activateGroup": {
+      "source": "a0a89785e4181d8466357a8e797aa78a19bd4a7d",
+      "translation": "67e0d6fa2cecae52a70e1896a940c9e31acaf777"
+    },
+    "view.menu.configureActiveGroup": {
+      "source": "73ff54e48b0bc7121621fefd6089e39256211683",
+      "translation": "1ef63dc47b3bf9d8898e75bfca85fd5a2d0adde1"
+    },
+    "view.menu.deactivateActiveGroup": {
+      "source": "cb837ab369794b8a7f98fbcc5fc901718d2d9dbf",
+      "translation": "0757920e9636b334af47bdb7517ef40009a2c52c"
     },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -2168,9 +3012,17 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "64ba04798494b141ccb2971451811c1da77f53e1"
     },
+    "view.menu.fitGroupToCards": {
+      "source": "ed58a1c5ccee1fba89ebae6845be5f32d6c733c9",
+      "translation": "539d9ffeb153a61c865ce4ed10e3a6083a552d0c"
+    },
     "view.menu.createGroupFromSelection": {
       "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
       "translation": "00dbab269ee29e150026a87c666d964864614e13"
+    },
+    "view.menu.createZoneFromSelection": {
+      "source": "807de5535ed0ad5a5d983eacb9ff3716d878dc4e",
+      "translation": "7dcce525d6a71bc7be7be039be1442208cae9b16"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -2187,6 +3039,18 @@
     "view.menu.sourceSubtaskOfTarget": {
       "source": "a4be670929e3ad0c0348d40116096509101e0f9f",
       "translation": "75c66657d981636e5489565bca498a116c4296ad"
+    },
+    "view.menu.dependencyLinks": {
+      "source": "0562f32dc56f5c702810cbe010068ddd38dbd69a",
+      "translation": "cd5c621829635196a0ec91d9999ed2c61e11913f"
+    },
+    "view.menu.subtaskLinks": {
+      "source": "173312c6e2592de729610a4d319877c9aa8d8b67",
+      "translation": "b8c605d6478947d70d80136c055af12dd97b127a"
+    },
+    "view.menu.propertyLinks": {
+      "source": "235564256eba212f50846f34e52c0761104dcc03",
+      "translation": "b1fe5e790d404db0909808b81abe04832fde0c58"
     },
     "view.menu.addPropertyLink": {
       "source": "6e295d7b5fe877b5551b4e808062b916dd717df5",
@@ -2347,8 +3211,8 @@
   },
   "ja": {
     "common.appName": {
-      "source": "fd824b3ba1713694a75da21b3f4cf97a42bab657",
-      "translation": "fd824b3ba1713694a75da21b3f4cf97a42bab657"
+      "source": "2f9c39a527e33f312b2d0914fb008da581913dcc",
+      "translation": "2f9c39a527e33f312b2d0914fb008da581913dcc"
     },
     "common.automatic": {
       "source": "ac9041e76816a34aba228a736ec30da6984c5777",
@@ -2357,6 +3221,10 @@
     "common.cancel": {
       "source": "77dfd2135f4db726c47299bb55be26f7f4525a46",
       "translation": "269b0f92e460f3dd51ddf582098d0a998d525974"
+    },
+    "common.close": {
+      "source": "bbfa773e5a63a5ea58c9b6207e608ca0120e592a",
+      "translation": "3da5c1855151b370ca9064a6d547d92bc9b89ce5"
     },
     "common.card.one": {
       "source": "10b93da7c74f93af707c33f1ef412a2a92d9615b",
@@ -2426,9 +3294,41 @@
       "source": "3622410a4a8fab47e39a4f05735ec87c93dcc8ab",
       "translation": "b6b039f9135af4d1e41bf1c5d8c3f4821293683c"
     },
-    "notices.baseboardWaitingForBasesData": {
-      "source": "3c0f6a0e8db0a78ea91f32e0e4c56d5f98975b77",
-      "translation": "49dba3c22d4173edf9b92e0da8aa7273a67fc746"
+    "notices.activeGroupDisabled": {
+      "source": "3ee2ddfc118717219b9bdff68b9a63881ba503d6",
+      "translation": "c7df7732648ee55ea8d0faaa27e568395c038f0f"
+    },
+    "notices.activeGroupEnabled": {
+      "source": "543ef7d617d47b7ba03da5b0d6a6ddb943da4e3a",
+      "translation": "7740074e28527a80a22a7afbc5a23b1c3af1b0ea"
+    },
+    "notices.activeGroupReadOnly": {
+      "source": "722dca50e751da27f4cc180c968d27bc6b7b979e",
+      "translation": "8661b91b49a32f648d03c2089d33d42bdf20344c"
+    },
+    "notices.activeGroupTaskUpdateUnavailable": {
+      "source": "10a28d58ca6af418d08842620939e4b640eac556",
+      "translation": "158e2c06e705f9a39965b553112d12e80cd3f172"
+    },
+    "notices.activeGroupUpdated": {
+      "source": "c78ad3455f76a36acf79433077e4c7363eb7a4dd",
+      "translation": "95715a6fdd85ed0b8b61564f0d309520b32564ac"
+    },
+    "notices.activeGroupActionRun": {
+      "source": "110af2d8e5e5717d2228f4a7223089953331156f",
+      "translation": "127b283c675d55df0d0910dc8e455c939a912e15"
+    },
+    "notices.activeGroupActionNotTask": {
+      "source": "e9800a314aadaf3027a58a9310b41bd14e506b9e",
+      "translation": "3ba396c579f4173003792cf41cc374284d7ef85b"
+    },
+    "notices.activeGroupActionUnavailable": {
+      "source": "05b9d79c120ed0021290e290c62df0026f9377da",
+      "translation": "46c6a4dfff230ae811697fa16a475098308380ab"
+    },
+    "notices.canvasBasesWaitingForBasesData": {
+      "source": "a0bb20a5f9df7dc64407bc0329f524337231951c",
+      "translation": "f1ae32df7ef069a541011026b47af6fa6870fd54"
     },
     "notices.couldNotAddPropertyLink": {
       "source": "1432c25d668ca971f8de44c270644b9171220c5f",
@@ -2441,6 +3341,10 @@
     "notices.couldNotRemovePropertyLink": {
       "source": "b2ad9dc15ce642c0ef1c526df2a34ff9afbf61ab",
       "translation": "0f5a6fc7d834c588f36cd6600ca97e301f0b7231"
+    },
+    "notices.couldNotUpdateActiveGroup": {
+      "source": "b18b656c33b1d709f665d2396ab76cc2731cd357",
+      "translation": "a382e6c91169d73b3d35a231334dc365be7874b6"
     },
     "notices.couldNotUpdateLink": {
       "source": "70ceafd6c4531892fd867c3590de60b6f00c5cca",
@@ -2463,12 +3367,12 @@
       "translation": "66c5877ae87d3dba843ce288ec9e639a1a87bc8f"
     },
     "notices.obsidianVersionRequired": {
-      "source": "626c430316d0f7bf4ce74ea6089bb45a34f9d28d",
-      "translation": "2e543323e3fa10fcfd68d63cb14c4ccf626fc981"
+      "source": "62e440f2994ac4d9287d34ca774d3c0ac02667d0",
+      "translation": "57d5fc35b7944dc33c8b9f45dfabebc8d69caa34"
     },
-    "notices.openBaseboardViewFirst": {
-      "source": "71e797527713fc1278a569c7263ddda3a7cf5aa3",
-      "translation": "1a0e2da78d5be4bcbc76baa5961950d4d9613cee"
+    "notices.openCanvasBasesViewFirst": {
+      "source": "ec0fd2571fc9d44a9938a201360905c6f2f241b7",
+      "translation": "7a486eed76198edb03e0cd219340c3ec5c003f29"
     },
     "notices.openBasesViewFirst": {
       "source": "da610fcbcddaf8f9408853df43a17500fe7d6491",
@@ -2503,8 +3407,8 @@
       "translation": "9915cc7e52ddbc17e0c6de1055dfe7c756798458"
     },
     "notices.starterFilesReady": {
-      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
-      "translation": "0f534138a902813e6a6ecaf9438b54150fe4b280"
+      "source": "96d0354a4f9aff5832c826fe766f079b9795f60f",
+      "translation": "c8a74f3af065eb024127c4a29536784ee351f844"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -2519,8 +3423,8 @@
       "translation": "e1071ab66f826eb304903a000b93026fa96d8ff5"
     },
     "settings.defaults.canvasFolder.description": {
-      "source": "f5451548720b3d7c048f929105140ad491b1a8d9",
-      "translation": "6dacac09cf7ff8b70254ffd7694375fb86310728"
+      "source": "71b9f60c887e59721ed65a9ab0420ebab642d172",
+      "translation": "cb6f6040ff28eddeb5c7c9f7748a298316e95e79"
     },
     "settings.defaults.layout.name": {
       "source": "2ae3a9285af610786a6931294c6c13b82d1d24ba",
@@ -2551,8 +3455,8 @@
       "translation": "c191eb09da0b5c68ad95c3226a52762928985025"
     },
     "settings.defaults.bodyEditor.description": {
-      "source": "028774d660a4263a07cafb0d93477930fe30b5f5",
-      "translation": "00552f019d615e10f5e4ab31b49f6aa6efe6cded"
+      "source": "83a3799e10b83484407723be11a9e6a3afafa06e",
+      "translation": "1570295c9a883f0feb1acec3568b9b2b8256d264"
     },
     "settings.tasknotes.heading": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
@@ -2563,8 +3467,8 @@
       "translation": "4ff252d66b9732f502eca5ac3e1e9d224e8b7ad1"
     },
     "settings.tasknotes.integration.description": {
-      "source": "5312d39ae6ad1b8e203c70afff6a9adefa92152e",
-      "translation": "56e2e93ec7c4f63aa18ca81c41f4e19a0f055f80"
+      "source": "d7ec0c5cad9da592c0a24d542f697ba3404cf6ce",
+      "translation": "565997bd1b76115981d6343d8b695f215e246ea5"
     },
     "settings.tasknotes.badges.name": {
       "source": "4a47f1e139d831149e20d0ad3fc59b8ed7c5561c",
@@ -2599,16 +3503,16 @@
       "translation": "93e793870b2694b6434de56e8514d3ffec813874"
     },
     "settings.updateRules.preservePositions.description": {
-      "source": "1b9508fd361ceb9e78fa27281844f94f178a7f25",
-      "translation": "872da204d79fa612b8f42a0532aad34ab06cdbb4"
+      "source": "b3b4dadbea9eab0fa344d7530d9f97919713252d",
+      "translation": "9785c85849b8e64e43b318d7f02c033320bc1403"
     },
     "settings.updateRules.removeMissingNotes.name": {
       "source": "69a07189d1ee6ce5c99533af82a2ae60086e729f",
       "translation": "a08f8897492494a2844827b692b6a97c2de8a6e1"
     },
     "settings.updateRules.removeMissingNotes.description": {
-      "source": "26b3763b21644b0ebb40fb59e01de831c1074983",
-      "translation": "e677143c7e4297aed1a4adc3b33b3e140a8a22b5"
+      "source": "240f89454d4d6acdbb25caa4aaa6e8f928bd2a93",
+      "translation": "a7c779a49d6c3dae842c5d6521ebcb760b331b48"
     },
     "settings.updateRules.nodeWidth.name": {
       "source": "08cf7bca56d478d335b2b9c3d0e184058dbb307f",
@@ -2631,16 +3535,16 @@
       "translation": "302c6a85316ba7ce01eb3bc6712e05b7f2330d61"
     },
     "settings.language.description": {
-      "source": "b74f44cb84d7bfdef24613db569d51c614767eb4",
-      "translation": "b783f1a1ffc34ac6742862b0bb033338bb3ee2af"
+      "source": "633464233e79b995420f421284352c663c15891f",
+      "translation": "ce74edf2c176c97fb0c441e6315b139f62468eee"
     },
     "settings.language.name": {
       "source": "5a28c99d6d38a7489e8b1ab06a11507f8c6fd47f",
       "translation": "73315542977d1b31f6d38bdacfcffc59caf2c0ed"
     },
     "settings.language.dropdownDescription": {
-      "source": "601ea9a888accf03523827b9afb9b89b90c4b8f2",
-      "translation": "670d2bbdfac44f7a8b8371614ff68a8d95783d1d"
+      "source": "a95dba96cbb2d657f0e30a30f916dfe3c564006f",
+      "translation": "a61380f5c5afa3f7a0970e5caa7e33610018123e"
     },
     "options.layout.columns": {
       "source": "b337287f17401eb2db30ece3f3a3094217b413e0",
@@ -2709,6 +3613,14 @@
     "tasknotes.badges.tracked": {
       "source": "f453f5a887e880559f39d177175012d7adad9ac4",
       "translation": "c1341235d31b4c9c355038809511771219aa70b5"
+    },
+    "tasknotes.badges.tracking": {
+      "source": "e81a151bd05091f9935dc3aba219eed346e7bb4f",
+      "translation": "1b6e87b91c85e9710b0fee3bc125668cc4a6ce08"
+    },
+    "tasknotes.badges.active": {
+      "source": "a733b809d2f1233496ab516eed0f3ef75cf3791a",
+      "translation": "ae9c112a0daad305deaa4ee89ec340c2b777de88"
     },
     "tasknotes.relationships.blocks": {
       "source": "f7d5b2b95861daea9933ef0a243f733bbc79235e",
@@ -2783,8 +3695,8 @@
       "translation": "a0532346fbac348b24a2bb35c702f6f01f39c4f0"
     },
     "modal.preservePositions.description": {
-      "source": "4a70addb3cb30a12a488bed407561b96691cc9d9",
-      "translation": "48342d5968d1bda870e90f0e2f276bc54fe278af"
+      "source": "8d4dc77a9baaffd0251d451574986fa97e201bc4",
+      "translation": "b606f6349f1a06c93fb5c4ffcbc894f94dbce6ee"
     },
     "modal.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -2805,6 +3717,10 @@
     "view.toolbar.addGroup": {
       "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
       "translation": "ccf90ff864c8dc655116fa44a029125db6f1ceaf"
+    },
+    "view.toolbar.addZone": {
+      "source": "0279d7313189283e312b36e83d146afe76680db9",
+      "translation": "0f614d11a76778bb2cf506300737039285cdf9ef"
     },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -2850,6 +3766,18 @@
       "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
       "translation": "d001cddb96ba8d635fd5871d5866e0027e989fb0"
     },
+    "view.card.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "1391f4a4c627d7b473e4ce3b4da340c1f7fba13d"
+    },
+    "view.card.noteColor": {
+      "source": "a5dad58668b83243fa855c04a906abfe710e0e45",
+      "translation": "d85d68e9512f152204da358952c40dad203a7d34"
+    },
+    "view.card.cardColor": {
+      "source": "2e1a93636a6096741d5aa40a98132acfbd75228a",
+      "translation": "c5fc6cc4635194cfc37103c4e68d0a3b18fd4b7b"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "b8af0031b7ac2980fc95230d362738493ab28843"
@@ -2862,6 +3790,178 @@
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "668c47681816344b0eb0cdfda1821e5ec694460f"
     },
+    "view.linkDrag.releaseToLink": {
+      "source": "30af734941bdbde5e74a5d1adf918177098219d7",
+      "translation": "1b3400b700f46a195ea3ee638c61470bd781000d"
+    },
+    "view.linkDrag.dragToCard": {
+      "source": "088156c3eaba8c07599a1843e385a4f41fa2ef47",
+      "translation": "0eb7549ad345dd6f52b8c0fcc8c8b3394e1f856b"
+    },
+    "view.linkDrag.cannotLinkHere": {
+      "source": "e0ce0f06b21166f101163697a47707264e78c650",
+      "translation": "e6a4eb2cdbe741553e5aaa0f3a795a75dee689c4"
+    },
+    "view.group.active": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "d5e3c8de7392c3b4311b4ddfb89423199a29fc0c"
+    },
+    "view.group.activeTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "06868c850852939337f5c5c0df15a80e0b8c9581"
+    },
+    "view.group.zoneTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "06868c850852939337f5c5c0df15a80e0b8c9581"
+    },
+    "view.group.label": {
+      "source": "74341e3c271df3c784e595b804b1f90be0f80429",
+      "translation": "82126c46a44bd337f3199428cf4ae41a7cb0efa9"
+    },
+    "view.group.action": {
+      "source": "f4e4cb8146eebbf05fc00860419e8d9b9f1b67c2",
+      "translation": "a811992fc84004ab6967e5ac5577a8241bd2becb"
+    },
+    "view.group.actionSetProperty": {
+      "source": "0072a167d4fee18c3b8d259bada3014dff641371",
+      "translation": "352bec43909f50107c779ff6609e4cfacc4acb84"
+    },
+    "view.group.actionCompleteTask": {
+      "source": "af20ec58720a70b4d05fb78d3500c7af26fd37b8",
+      "translation": "c3c841a3efecbbb93e14efd435619baea5451c1b"
+    },
+    "view.group.actionUncompleteTask": {
+      "source": "79d6acda2f4e9574ebfeaee4447459b59683d2b3",
+      "translation": "2008ecb71f9c780e984817632197a81a9994bd27"
+    },
+    "view.group.actionArchiveTask": {
+      "source": "03d82ba7907ae1c9c34b442b8de36b436a13fc99",
+      "translation": "ef267e796462d87b6a3f969fe7803c5955dbe3fd"
+    },
+    "view.group.actionUnarchiveTask": {
+      "source": "bcd2c2d3ea900f171fe4e4babedbcd5826838fb2",
+      "translation": "9d2bdade8d809a7d5210dd9b5fbdd5943fc75a5e"
+    },
+    "view.group.actionStartTimeTracking": {
+      "source": "7151516a05b9f16fd6d876ce009551328cdfeff2",
+      "translation": "0f32dbb5524c66979c57a3a779c79d52edec70a8"
+    },
+    "view.group.actionStopTimeTracking": {
+      "source": "d830f5133dafe2f2c8325d37811c4901efa364a8",
+      "translation": "391e8e69cd8b328b9a0c4994d0e4446c34e8085d"
+    },
+    "view.group.actionStartPomodoro": {
+      "source": "b5924c20fa7da66235c95fdded5c9529a11a4a73",
+      "translation": "58e3e6b03ebb2cdaed087ed533a58f36a3123aec"
+    },
+    "view.group.actionAssignPomodoro": {
+      "source": "5ed2c0b7fa74e11f2bb31db18d7c967fe7afa527",
+      "translation": "41bba2b8ac1a885bfb52a246b12597148c4e037a"
+    },
+    "view.group.actionCompleteRecurring": {
+      "source": "eb2125c7238d7f8f35434a16a3be08a912794eb4",
+      "translation": "ce42d010236789e4f96e6f257d8cc3e588daa896"
+    },
+    "view.group.actionSkipRecurring": {
+      "source": "9648841dc8789017f672c117b1bc754d5cc08b29",
+      "translation": "162220e25241021965902cb3bb01f21daec2e32a"
+    },
+    "view.group.property": {
+      "source": "9ae33a7d0ecb82cae8f04aafab20bf90425b7b8c",
+      "translation": "c552eacf2c614645405d2d9ed1149443ba4b8e66"
+    },
+    "view.group.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "cb5dd49b97a515a380290de57df2adc8b4e2c73d"
+    },
+    "view.group.updateMode": {
+      "source": "9fac6527645ba5d4025a166d382ef4f52305083e",
+      "translation": "38fc086dc5e71dc6e120e670bdbea8c64ce4d32c"
+    },
+    "view.group.valueType": {
+      "source": "a956485e60c24642bdc24465480775891fba80d6",
+      "translation": "e97a8ec97eb67175d92638494d7f116e0fa76528"
+    },
+    "view.group.updateModeReplace": {
+      "source": "a7cf7b25a703b308887c7f1d100c4326ef20ac46",
+      "translation": "b78545216af8445141d29f3986c7a5ba775450e6"
+    },
+    "view.group.updateModeAppend": {
+      "source": "6b3a602280be24f5c0e41945a5a73a105b0c54c4",
+      "translation": "aec344de806dc4871614deaf704480590f1381f4"
+    },
+    "view.group.updateModeAppendUnique": {
+      "source": "2cc8d9f9c0ab46208ea57f674730cb6e4bd8a49f",
+      "translation": "cb30a5a4b81241c2bdf5ae2399fa6f38a20e0bc6"
+    },
+    "view.group.updateModeRemove": {
+      "source": "e963907dac5cd5c017869b4c96c18021c9bd058b",
+      "translation": "5cbdf1fd708232abb78ea2f8bc3cbfd907573b43"
+    },
+    "view.group.updateModeClear": {
+      "source": "719ea396ad92e01b4757ec2b93bb1e5f270f771d",
+      "translation": "a8e51527055eb0af63475cfbbc0bdee9cc0f5134"
+    },
+    "view.group.valueTypeAuto": {
+      "source": "c614ba7c453cdcd4d21b20e8286c6266c891e0c6",
+      "translation": "9a0688084617b1a522fb3a686debd4b4245cae67"
+    },
+    "view.group.valueTypeString": {
+      "source": "c3328c39b0e29f78e9ff45db674248b1d245887d",
+      "translation": "eab6741c0f596830bffc91eb993f5b3fcfc32b9a"
+    },
+    "view.group.valueTypeNumber": {
+      "source": "b7baa1d40c4ea29afc9098732bffee2a861a6c44",
+      "translation": "7675e5cac1fab77ab5f05977fb31d83bf20df3bf"
+    },
+    "view.group.valueTypeBoolean": {
+      "source": "b76ff4906f33c2dd97ddd929b9662ba8cac6174c",
+      "translation": "2b378411c83eba3aa85bd574d28ca8cd40b40e03"
+    },
+    "view.group.valueTypeDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "d2aee2e6d770da7f7bbb471e7da79f619e3f723f"
+    },
+    "view.group.valueTypeList": {
+      "source": "a1fffaaafb7cc996685bceb829c053cc4f7de43d",
+      "translation": "b096d14061757613f9bb4fc3fdebeed1df3d7feb"
+    },
+    "view.group.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "1391f4a4c627d7b473e4ce3b4da340c1f7fba13d"
+    },
+    "view.group.writeRule": {
+      "source": "e42f054b2974ad83a5bca96ea87112514fc83db3",
+      "translation": "b951c793d9ae717b1a7dd839edd7e0bcc837aed0"
+    },
+    "view.group.groupRuleLocked": {
+      "source": "7c7a4212647e7154812f9a90ce62b149d303f8f0",
+      "translation": "a966b6f1aab76bcb6994fec5ba286a8d7470485f"
+    },
+    "view.group.dropResult": {
+      "source": "d8a8bf37c90d50fa26abe4b297b441f27d0daf28",
+      "translation": "1c18b5b5bb340f99dbb83d588d6f561b006af84d"
+    },
+    "view.group.previewWrite": {
+      "source": "c077f564847fdb1c70258590955e163d391893ba",
+      "translation": "c077f564847fdb1c70258590955e163d391893ba"
+    },
+    "view.group.previewClear": {
+      "source": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868",
+      "translation": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868"
+    },
+    "view.group.previewAction": {
+      "source": "34c09447a51c35c7878c0c125d9d874bf088c266",
+      "translation": "34c09447a51c35c7878c0c125d9d874bf088c266"
+    },
+    "view.group.emptyValue": {
+      "source": "2464254a17a92aba20f96b8a0216d88b9ef8c15e",
+      "translation": "70d65061de58e38c7509621e809b088964c38a34"
+    },
+    "view.group.propertyRequired": {
+      "source": "6dbff942a005991d025fe9fe4223de5ef4c1d778",
+      "translation": "866e41bac18e1dc0648f449761a67c77b4e04e11"
+    },
     "view.group.createTitle": {
       "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
       "translation": "49dbd7dc238240a9fcf7a2d7bfea9672350a9107"
@@ -2870,9 +3970,17 @@
       "source": "171a0606f7c74580fd3982cf57c49d604104120a",
       "translation": "7769eea4413b1212495a9afbe62538149207ae0b"
     },
+    "view.group.defaultZoneName": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "d5e3c8de7392c3b4311b4ddfb89423199a29fc0c"
+    },
     "view.group.create": {
       "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
       "translation": "614f2eaaffaf673b5cb5258a36e27c17905e85d3"
+    },
+    "view.group.createZone": {
+      "source": "5ae01175f207c3086ef197de15b6774a80b7d9d2",
+      "translation": "a0aa19e3204f1a1725ad98073eedd8ed0c333289"
     },
     "view.group.renameTitle": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -2881,6 +3989,10 @@
     "view.group.rename": {
       "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
       "translation": "3c7e4e9fee828522c3ef54577f43086345f0eff2"
+    },
+    "view.group.saveActiveGroup": {
+      "source": "59d37aff09d7712a8992f239782c3701a39202da",
+      "translation": "e406a8a2bab51101de94392205dde6386b9a91b3"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -2934,6 +4046,14 @@
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "ffc91b4d93868a62d7c0ee0eceb075f19b4be49d"
     },
+    "view.menu.setCardColor": {
+      "source": "f5b3969bb8b4d7f0704d9023076541ca1942fefe",
+      "translation": "f1f194bc0c911e0e2616b288811b1971e75c396e"
+    },
+    "view.menu.clearCardColor": {
+      "source": "5519c8e0cba7397fb5b70018b49243e44d81e08b",
+      "translation": "595510854a02ac8371beb00a4d5c3dc3832df95f"
+    },
     "view.menu.addPinnedNote": {
       "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
       "translation": "91af2326739d549289889b7423b9d378073cc8d4"
@@ -2941,6 +4061,18 @@
     "view.menu.addCard": {
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "cab7e6ecdf3baf8e96864c851d955cce6eb53ee1"
+    },
+    "view.menu.activateGroup": {
+      "source": "a0a89785e4181d8466357a8e797aa78a19bd4a7d",
+      "translation": "0e4011a5248f35e744fcdbb51a77475e966177e2"
+    },
+    "view.menu.configureActiveGroup": {
+      "source": "73ff54e48b0bc7121621fefd6089e39256211683",
+      "translation": "0f97cb1a9f2991f6a608712c3ba1db6634a4ca17"
+    },
+    "view.menu.deactivateActiveGroup": {
+      "source": "cb837ab369794b8a7f98fbcc5fc901718d2d9dbf",
+      "translation": "c2b88b3134be17c0844c3ac0939248bf1b859729"
     },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -2950,9 +4082,17 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "aa414a7991ff7e84f21832eafa76966daea787bd"
     },
+    "view.menu.fitGroupToCards": {
+      "source": "ed58a1c5ccee1fba89ebae6845be5f32d6c733c9",
+      "translation": "70ef38dfa4323cd35afcb1fa271355cc40579940"
+    },
     "view.menu.createGroupFromSelection": {
       "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
       "translation": "9c8cf759975b89d286641bd92f4f234333ff943f"
+    },
+    "view.menu.createZoneFromSelection": {
+      "source": "807de5535ed0ad5a5d983eacb9ff3716d878dc4e",
+      "translation": "f2ab17fbf5268b0deac3a717a94f4488f65be7dc"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -2969,6 +4109,18 @@
     "view.menu.sourceSubtaskOfTarget": {
       "source": "a4be670929e3ad0c0348d40116096509101e0f9f",
       "translation": "263020d0968816d883f34007875cd7f52f1ecf2a"
+    },
+    "view.menu.dependencyLinks": {
+      "source": "0562f32dc56f5c702810cbe010068ddd38dbd69a",
+      "translation": "8fdc8ba382d56b121744988c29871470272bd46d"
+    },
+    "view.menu.subtaskLinks": {
+      "source": "173312c6e2592de729610a4d319877c9aa8d8b67",
+      "translation": "d64e0fd189ee7ab1f5811090b8ee22381d250c38"
+    },
+    "view.menu.propertyLinks": {
+      "source": "235564256eba212f50846f34e52c0761104dcc03",
+      "translation": "897564f48a94d4e115eb4c28f5d5139d5a1df73e"
     },
     "view.menu.addPropertyLink": {
       "source": "6e295d7b5fe877b5551b4e808062b916dd717df5",
@@ -3129,8 +4281,8 @@
   },
   "ko": {
     "common.appName": {
-      "source": "fd824b3ba1713694a75da21b3f4cf97a42bab657",
-      "translation": "fd824b3ba1713694a75da21b3f4cf97a42bab657"
+      "source": "2f9c39a527e33f312b2d0914fb008da581913dcc",
+      "translation": "2f9c39a527e33f312b2d0914fb008da581913dcc"
     },
     "common.automatic": {
       "source": "ac9041e76816a34aba228a736ec30da6984c5777",
@@ -3139,6 +4291,10 @@
     "common.cancel": {
       "source": "77dfd2135f4db726c47299bb55be26f7f4525a46",
       "translation": "19b2d19bc14102ec9341f4c8ea5b65daa910826c"
+    },
+    "common.close": {
+      "source": "bbfa773e5a63a5ea58c9b6207e608ca0120e592a",
+      "translation": "94b7dba15907e474aa063789b143a640389f2b45"
     },
     "common.card.one": {
       "source": "10b93da7c74f93af707c33f1ef412a2a92d9615b",
@@ -3208,9 +4364,41 @@
       "source": "3622410a4a8fab47e39a4f05735ec87c93dcc8ab",
       "translation": "1a1bbb60554d4f0e0bc6a934587359b3bd7944fe"
     },
-    "notices.baseboardWaitingForBasesData": {
-      "source": "3c0f6a0e8db0a78ea91f32e0e4c56d5f98975b77",
-      "translation": "efd43291bf8aae581c2151f8ebbd6bcfd36b6874"
+    "notices.activeGroupDisabled": {
+      "source": "3ee2ddfc118717219b9bdff68b9a63881ba503d6",
+      "translation": "f27c97217bb0785e45d3bd75d1da87ed0d70ce8d"
+    },
+    "notices.activeGroupEnabled": {
+      "source": "543ef7d617d47b7ba03da5b0d6a6ddb943da4e3a",
+      "translation": "88252c551c5e61e216f5abe82788254abc3e348b"
+    },
+    "notices.activeGroupReadOnly": {
+      "source": "722dca50e751da27f4cc180c968d27bc6b7b979e",
+      "translation": "8d84bb8777476310921f07050f170971532ad0b5"
+    },
+    "notices.activeGroupTaskUpdateUnavailable": {
+      "source": "10a28d58ca6af418d08842620939e4b640eac556",
+      "translation": "69b30860d734fcedc4d618311952d5f301425dea"
+    },
+    "notices.activeGroupUpdated": {
+      "source": "c78ad3455f76a36acf79433077e4c7363eb7a4dd",
+      "translation": "3700a9d7c157589200a33427158d5853da136b12"
+    },
+    "notices.activeGroupActionRun": {
+      "source": "110af2d8e5e5717d2228f4a7223089953331156f",
+      "translation": "7aa28eb3a619160cd4b228704f326251d3c42a61"
+    },
+    "notices.activeGroupActionNotTask": {
+      "source": "e9800a314aadaf3027a58a9310b41bd14e506b9e",
+      "translation": "8aea2fa004bbf3d214bfb639d63d22844bab7c00"
+    },
+    "notices.activeGroupActionUnavailable": {
+      "source": "05b9d79c120ed0021290e290c62df0026f9377da",
+      "translation": "5079731cec0f18576baf38c4b112d04428a25504"
+    },
+    "notices.canvasBasesWaitingForBasesData": {
+      "source": "a0bb20a5f9df7dc64407bc0329f524337231951c",
+      "translation": "751d8dd81d23d568c73884f6ab424e5ff1424d54"
     },
     "notices.couldNotAddPropertyLink": {
       "source": "1432c25d668ca971f8de44c270644b9171220c5f",
@@ -3223,6 +4411,10 @@
     "notices.couldNotRemovePropertyLink": {
       "source": "b2ad9dc15ce642c0ef1c526df2a34ff9afbf61ab",
       "translation": "b31dfd75143329dd85812125ed703222ad6cd70f"
+    },
+    "notices.couldNotUpdateActiveGroup": {
+      "source": "b18b656c33b1d709f665d2396ab76cc2731cd357",
+      "translation": "7c914e876859c1fca1a7314b56076144c8e2aded"
     },
     "notices.couldNotUpdateLink": {
       "source": "70ceafd6c4531892fd867c3590de60b6f00c5cca",
@@ -3245,12 +4437,12 @@
       "translation": "ff0655e149d2f0cdc0e1756e57559bc99e083846"
     },
     "notices.obsidianVersionRequired": {
-      "source": "626c430316d0f7bf4ce74ea6089bb45a34f9d28d",
-      "translation": "044dfefee3748de86051e47ab71e210715b0b4bf"
+      "source": "62e440f2994ac4d9287d34ca774d3c0ac02667d0",
+      "translation": "bb7eb13b1fbb076dfb2505c7404f872e6e1f72ce"
     },
-    "notices.openBaseboardViewFirst": {
-      "source": "71e797527713fc1278a569c7263ddda3a7cf5aa3",
-      "translation": "66fe16bb0cea4c7a7884289eed93b6180c8e8b8e"
+    "notices.openCanvasBasesViewFirst": {
+      "source": "ec0fd2571fc9d44a9938a201360905c6f2f241b7",
+      "translation": "4414c91a9d1b80da4b37abd3d56f936204d6163b"
     },
     "notices.openBasesViewFirst": {
       "source": "da610fcbcddaf8f9408853df43a17500fe7d6491",
@@ -3285,8 +4477,8 @@
       "translation": "0ce3d468df39bc8a2dfcd047c0f670fb6e954fc3"
     },
     "notices.starterFilesReady": {
-      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
-      "translation": "aa226546cb577fb86eec6e95726aad24108be620"
+      "source": "96d0354a4f9aff5832c826fe766f079b9795f60f",
+      "translation": "c7a359783d840a1234a5cf00edeacf664001062e"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -3301,8 +4493,8 @@
       "translation": "e4e7b080533667d02228faff19d7bb86e8e376ca"
     },
     "settings.defaults.canvasFolder.description": {
-      "source": "f5451548720b3d7c048f929105140ad491b1a8d9",
-      "translation": "526d670effb4958cda54bc8cffc6bd84dbebd907"
+      "source": "71b9f60c887e59721ed65a9ab0420ebab642d172",
+      "translation": "f3a6d858ad0625ba4c5570f4285add7474b8c2a5"
     },
     "settings.defaults.layout.name": {
       "source": "2ae3a9285af610786a6931294c6c13b82d1d24ba",
@@ -3333,8 +4525,8 @@
       "translation": "9e2f39e076a9e88e1c642f14749b236731e2775a"
     },
     "settings.defaults.bodyEditor.description": {
-      "source": "028774d660a4263a07cafb0d93477930fe30b5f5",
-      "translation": "c8a328c6e641992319cf79c41dee35e931b78291"
+      "source": "83a3799e10b83484407723be11a9e6a3afafa06e",
+      "translation": "d849207aa56f571f2c4b9720a599248d257e3d96"
     },
     "settings.tasknotes.heading": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
@@ -3345,8 +4537,8 @@
       "translation": "16f1ceccd10a7898311887ef7b49784ec3d717ca"
     },
     "settings.tasknotes.integration.description": {
-      "source": "5312d39ae6ad1b8e203c70afff6a9adefa92152e",
-      "translation": "6005801e1bbdf38ebfd20f997113dd43cefde60b"
+      "source": "d7ec0c5cad9da592c0a24d542f697ba3404cf6ce",
+      "translation": "ba08aa8e3a891c54241d1953da09267675a03a4d"
     },
     "settings.tasknotes.badges.name": {
       "source": "4a47f1e139d831149e20d0ad3fc59b8ed7c5561c",
@@ -3381,16 +4573,16 @@
       "translation": "45f3fb8636db5a448d33b00706ca2109924c9cba"
     },
     "settings.updateRules.preservePositions.description": {
-      "source": "1b9508fd361ceb9e78fa27281844f94f178a7f25",
-      "translation": "ba01087c079a53cfb1a29604ab5abded3d94ab91"
+      "source": "b3b4dadbea9eab0fa344d7530d9f97919713252d",
+      "translation": "b550b5247145aef7df353122ca14b98a7fb2823d"
     },
     "settings.updateRules.removeMissingNotes.name": {
       "source": "69a07189d1ee6ce5c99533af82a2ae60086e729f",
       "translation": "94709d8470652780b9ee89f66a4ec0eabbd274de"
     },
     "settings.updateRules.removeMissingNotes.description": {
-      "source": "26b3763b21644b0ebb40fb59e01de831c1074983",
-      "translation": "514f9491f6c5280fdedebec30e0784026f1187df"
+      "source": "240f89454d4d6acdbb25caa4aaa6e8f928bd2a93",
+      "translation": "6ffd743ce036a8aded4ed81a92b491ed6d675760"
     },
     "settings.updateRules.nodeWidth.name": {
       "source": "08cf7bca56d478d335b2b9c3d0e184058dbb307f",
@@ -3413,16 +4605,16 @@
       "translation": "53eae44a18e3be17062bdbc759568ea554465e35"
     },
     "settings.language.description": {
-      "source": "b74f44cb84d7bfdef24613db569d51c614767eb4",
-      "translation": "a110e08b219a3efe8e7301966e79b95661fbfdd2"
+      "source": "633464233e79b995420f421284352c663c15891f",
+      "translation": "ed7fb9d79999ea9006e3aa68ebf4df53bba6c824"
     },
     "settings.language.name": {
       "source": "5a28c99d6d38a7489e8b1ab06a11507f8c6fd47f",
       "translation": "523ce6adc7fe0ce14570a5c45cae6a39dfa5d7f9"
     },
     "settings.language.dropdownDescription": {
-      "source": "601ea9a888accf03523827b9afb9b89b90c4b8f2",
-      "translation": "88a15e7613ac5562de1e0bb8a9fa9e5da278e101"
+      "source": "a95dba96cbb2d657f0e30a30f916dfe3c564006f",
+      "translation": "779a05adb75f1ec6fd9ed55feb81dda9728a53e6"
     },
     "options.layout.columns": {
       "source": "b337287f17401eb2db30ece3f3a3094217b413e0",
@@ -3491,6 +4683,14 @@
     "tasknotes.badges.tracked": {
       "source": "f453f5a887e880559f39d177175012d7adad9ac4",
       "translation": "e95b14542a47453b6686fd58f28405db5e723274"
+    },
+    "tasknotes.badges.tracking": {
+      "source": "e81a151bd05091f9935dc3aba219eed346e7bb4f",
+      "translation": "fdcea3fe2aee0774af3c8e947d3ab537e1706269"
+    },
+    "tasknotes.badges.active": {
+      "source": "a733b809d2f1233496ab516eed0f3ef75cf3791a",
+      "translation": "6a2123a3fc38220d2d5323626d949fa51245dddd"
     },
     "tasknotes.relationships.blocks": {
       "source": "f7d5b2b95861daea9933ef0a243f733bbc79235e",
@@ -3565,8 +4765,8 @@
       "translation": "2ce95bfb8ee93597ca2fd006b90df6f20f35f835"
     },
     "modal.preservePositions.description": {
-      "source": "4a70addb3cb30a12a488bed407561b96691cc9d9",
-      "translation": "3c989487cd3a02f2c60c788f464c936b9d370aa6"
+      "source": "8d4dc77a9baaffd0251d451574986fa97e201bc4",
+      "translation": "b4e687b91dbd9235d68dfc82ce1cf8b2553cc65c"
     },
     "modal.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -3587,6 +4787,10 @@
     "view.toolbar.addGroup": {
       "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
       "translation": "bc71356fa2623784c4d7fcbf9da6159e39c416e6"
+    },
+    "view.toolbar.addZone": {
+      "source": "0279d7313189283e312b36e83d146afe76680db9",
+      "translation": "8bab9e995f53ac1418e0badc9ff4d5e433d78d57"
     },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -3632,6 +4836,18 @@
       "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
       "translation": "60652abf30a1074ce30e4beea6c892a3bda93a7e"
     },
+    "view.card.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "9f8b556bc85538d82964b8440cb87d3675499a5a"
+    },
+    "view.card.noteColor": {
+      "source": "a5dad58668b83243fa855c04a906abfe710e0e45",
+      "translation": "9c082f7b5d14519240e54edc180bb2503c52ce9a"
+    },
+    "view.card.cardColor": {
+      "source": "2e1a93636a6096741d5aa40a98132acfbd75228a",
+      "translation": "feb06fdf9be2357cee676b107de6517b8f9ae153"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "167a1c2a73cd530852f1a1b55481b61458085d3c"
@@ -3644,6 +4860,178 @@
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "3599c49f2710b7734809a8a9fc8e10e7c9b46289"
     },
+    "view.linkDrag.releaseToLink": {
+      "source": "30af734941bdbde5e74a5d1adf918177098219d7",
+      "translation": "5c7627ec2f1bd461e44125a1fbc83ed808c5c084"
+    },
+    "view.linkDrag.dragToCard": {
+      "source": "088156c3eaba8c07599a1843e385a4f41fa2ef47",
+      "translation": "cd1658142e0103a3f50ab6251ae9d39e11e1e216"
+    },
+    "view.linkDrag.cannotLinkHere": {
+      "source": "e0ce0f06b21166f101163697a47707264e78c650",
+      "translation": "f76976f8c0f92f0e590f50d0771c96f1a420dffd"
+    },
+    "view.group.active": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "19db38e30c8d2e64a8bacbd45e6b1083df6efc77"
+    },
+    "view.group.activeTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "41a6b0eddbd9edb04148b9c7036c3d97a30c5f0e"
+    },
+    "view.group.zoneTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "41a6b0eddbd9edb04148b9c7036c3d97a30c5f0e"
+    },
+    "view.group.label": {
+      "source": "74341e3c271df3c784e595b804b1f90be0f80429",
+      "translation": "757430dd102f9ffe209cea7abdc91f33e026ffa2"
+    },
+    "view.group.action": {
+      "source": "f4e4cb8146eebbf05fc00860419e8d9b9f1b67c2",
+      "translation": "de23e4f680875b93815f01f06f4df561b4492e39"
+    },
+    "view.group.actionSetProperty": {
+      "source": "0072a167d4fee18c3b8d259bada3014dff641371",
+      "translation": "9a4478738ae322071ac07d9b0abc0eaae9ab4435"
+    },
+    "view.group.actionCompleteTask": {
+      "source": "af20ec58720a70b4d05fb78d3500c7af26fd37b8",
+      "translation": "0ea904605d4ea720e3f01ceb0ff7c55985258445"
+    },
+    "view.group.actionUncompleteTask": {
+      "source": "79d6acda2f4e9574ebfeaee4447459b59683d2b3",
+      "translation": "35f3cbb7a84bc1b54d1c19ac868bb39a4544e6c6"
+    },
+    "view.group.actionArchiveTask": {
+      "source": "03d82ba7907ae1c9c34b442b8de36b436a13fc99",
+      "translation": "983d4ff7defbda495bef1093c10665bab8abea67"
+    },
+    "view.group.actionUnarchiveTask": {
+      "source": "bcd2c2d3ea900f171fe4e4babedbcd5826838fb2",
+      "translation": "f2f2bbc41477dea9d22fdd3a7132dc6d06ce6d9d"
+    },
+    "view.group.actionStartTimeTracking": {
+      "source": "7151516a05b9f16fd6d876ce009551328cdfeff2",
+      "translation": "377dc05d9ce07fa4a95a9dc900477bcfd366e5e2"
+    },
+    "view.group.actionStopTimeTracking": {
+      "source": "d830f5133dafe2f2c8325d37811c4901efa364a8",
+      "translation": "1649b8cfa61018bc5de689ea4aed3b6368a63afa"
+    },
+    "view.group.actionStartPomodoro": {
+      "source": "b5924c20fa7da66235c95fdded5c9529a11a4a73",
+      "translation": "e21a14587c6edc2253302c611906d79a94a574fa"
+    },
+    "view.group.actionAssignPomodoro": {
+      "source": "5ed2c0b7fa74e11f2bb31db18d7c967fe7afa527",
+      "translation": "27dcf392c2c57ffe124cd3d70e7a32775d8e3623"
+    },
+    "view.group.actionCompleteRecurring": {
+      "source": "eb2125c7238d7f8f35434a16a3be08a912794eb4",
+      "translation": "7202765c070fa06427c1b64a1a1aa36fd535c661"
+    },
+    "view.group.actionSkipRecurring": {
+      "source": "9648841dc8789017f672c117b1bc754d5cc08b29",
+      "translation": "01e03b0ae5e8df870079187dcf28395eb12512b9"
+    },
+    "view.group.property": {
+      "source": "9ae33a7d0ecb82cae8f04aafab20bf90425b7b8c",
+      "translation": "85de958b5fc43698a7002df1f094e30b214fb8df"
+    },
+    "view.group.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "50d055d31163e312aacc1d4727d81033d734964c"
+    },
+    "view.group.updateMode": {
+      "source": "9fac6527645ba5d4025a166d382ef4f52305083e",
+      "translation": "6fdc425456cc1057f3a52ad294d0c43de53e0962"
+    },
+    "view.group.valueType": {
+      "source": "a956485e60c24642bdc24465480775891fba80d6",
+      "translation": "88bbf4dd825cf134b88e86e95671e04082d569c7"
+    },
+    "view.group.updateModeReplace": {
+      "source": "a7cf7b25a703b308887c7f1d100c4326ef20ac46",
+      "translation": "75b73b7fa2561a9decd75fb8d13a99a09c590b67"
+    },
+    "view.group.updateModeAppend": {
+      "source": "6b3a602280be24f5c0e41945a5a73a105b0c54c4",
+      "translation": "5794299536757b25c8eafa1a5f33844fb6fb12f6"
+    },
+    "view.group.updateModeAppendUnique": {
+      "source": "2cc8d9f9c0ab46208ea57f674730cb6e4bd8a49f",
+      "translation": "52e4eec402bbf390c621b77a2072d0d146c60f9c"
+    },
+    "view.group.updateModeRemove": {
+      "source": "e963907dac5cd5c017869b4c96c18021c9bd058b",
+      "translation": "11f2aa43b254fefb50a880378a3381183c537e47"
+    },
+    "view.group.updateModeClear": {
+      "source": "719ea396ad92e01b4757ec2b93bb1e5f270f771d",
+      "translation": "bc539fed7842a1150143cee80ad9def5d21a0a8f"
+    },
+    "view.group.valueTypeAuto": {
+      "source": "c614ba7c453cdcd4d21b20e8286c6266c891e0c6",
+      "translation": "b09fd898779e057ac12055abeb0633c2b67adae2"
+    },
+    "view.group.valueTypeString": {
+      "source": "c3328c39b0e29f78e9ff45db674248b1d245887d",
+      "translation": "6223fadb9d09da0d0d0f880902bafd91d5cc9a63"
+    },
+    "view.group.valueTypeNumber": {
+      "source": "b7baa1d40c4ea29afc9098732bffee2a861a6c44",
+      "translation": "3764f40469e4eda7c41cd5ed4484156c7d3ca6b6"
+    },
+    "view.group.valueTypeBoolean": {
+      "source": "b76ff4906f33c2dd97ddd929b9662ba8cac6174c",
+      "translation": "2e83b6b1bddc8451fe9442f0051d6bd5c9140c79"
+    },
+    "view.group.valueTypeDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "5caa75a8f14ac9f68ef71bf816151420e9283ac9"
+    },
+    "view.group.valueTypeList": {
+      "source": "a1fffaaafb7cc996685bceb829c053cc4f7de43d",
+      "translation": "b6071ac7eb3de82a5af1ab71130e4bc07c1f8a10"
+    },
+    "view.group.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "9f8b556bc85538d82964b8440cb87d3675499a5a"
+    },
+    "view.group.writeRule": {
+      "source": "e42f054b2974ad83a5bca96ea87112514fc83db3",
+      "translation": "d5d139fcfc03ad85e280903305b4c82e73f1d27d"
+    },
+    "view.group.groupRuleLocked": {
+      "source": "7c7a4212647e7154812f9a90ce62b149d303f8f0",
+      "translation": "f41f9cbeff4b2594a10e2b4319963f7140bf4de6"
+    },
+    "view.group.dropResult": {
+      "source": "d8a8bf37c90d50fa26abe4b297b441f27d0daf28",
+      "translation": "9193f0a633ac3dc429707476c6e7f72ed87e36cf"
+    },
+    "view.group.previewWrite": {
+      "source": "c077f564847fdb1c70258590955e163d391893ba",
+      "translation": "c077f564847fdb1c70258590955e163d391893ba"
+    },
+    "view.group.previewClear": {
+      "source": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868",
+      "translation": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868"
+    },
+    "view.group.previewAction": {
+      "source": "34c09447a51c35c7878c0c125d9d874bf088c266",
+      "translation": "34c09447a51c35c7878c0c125d9d874bf088c266"
+    },
+    "view.group.emptyValue": {
+      "source": "2464254a17a92aba20f96b8a0216d88b9ef8c15e",
+      "translation": "0bdd1ef59df5b2de8e341ff05f44ea2f68eda5bb"
+    },
+    "view.group.propertyRequired": {
+      "source": "6dbff942a005991d025fe9fe4223de5ef4c1d778",
+      "translation": "cadd4e8ed3bb5f7ee943b30622cb02afa74fe9e9"
+    },
     "view.group.createTitle": {
       "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
       "translation": "1d9749ffcc44e556d55db4181bc32c2034c75557"
@@ -3652,9 +5040,17 @@
       "source": "171a0606f7c74580fd3982cf57c49d604104120a",
       "translation": "32280569150ddc6adee653e1a27759e29f5e3868"
     },
+    "view.group.defaultZoneName": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "19db38e30c8d2e64a8bacbd45e6b1083df6efc77"
+    },
     "view.group.create": {
       "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
       "translation": "f839ef88bd8224f1b1fa3f82f0cf91cc7b8a8713"
+    },
+    "view.group.createZone": {
+      "source": "5ae01175f207c3086ef197de15b6774a80b7d9d2",
+      "translation": "97d299a3da8a61dc8b6ecf2dc124f557fec5a934"
     },
     "view.group.renameTitle": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -3663,6 +5059,10 @@
     "view.group.rename": {
       "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
       "translation": "697401e7189a6d97b3138a6ef1ec1a6ef96e577b"
+    },
+    "view.group.saveActiveGroup": {
+      "source": "59d37aff09d7712a8992f239782c3701a39202da",
+      "translation": "e9f4bd11d0b283b10bb94584ddcf2dd0cd8b5f5b"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -3716,6 +5116,14 @@
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "21dde39b247351c5211b416d1d7efd6343bb148a"
     },
+    "view.menu.setCardColor": {
+      "source": "f5b3969bb8b4d7f0704d9023076541ca1942fefe",
+      "translation": "0fbcecdd8ec61757734d48d87f372c1609ef3eac"
+    },
+    "view.menu.clearCardColor": {
+      "source": "5519c8e0cba7397fb5b70018b49243e44d81e08b",
+      "translation": "92746d7c605c31b946640088a8b28036dcdbb4fd"
+    },
     "view.menu.addPinnedNote": {
       "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
       "translation": "bb31523d5befb9cf313754c2abd4e5eb3e6d42bd"
@@ -3723,6 +5131,18 @@
     "view.menu.addCard": {
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "96e7574b113d5566925dd3137d0634b9bc1e1cb9"
+    },
+    "view.menu.activateGroup": {
+      "source": "a0a89785e4181d8466357a8e797aa78a19bd4a7d",
+      "translation": "61d8b97f5d85950cdb5facc9455c2648946391a8"
+    },
+    "view.menu.configureActiveGroup": {
+      "source": "73ff54e48b0bc7121621fefd6089e39256211683",
+      "translation": "655ca45a8df45988082db4beae00428a4de98e92"
+    },
+    "view.menu.deactivateActiveGroup": {
+      "source": "cb837ab369794b8a7f98fbcc5fc901718d2d9dbf",
+      "translation": "4c39d729e8827081f1866db47c29cddcc146ee8b"
     },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -3732,9 +5152,17 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "a69b5777a59e3d761aa981c30a33dad8838c7532"
     },
+    "view.menu.fitGroupToCards": {
+      "source": "ed58a1c5ccee1fba89ebae6845be5f32d6c733c9",
+      "translation": "bb6115da9e6fee33bda1cf50a32ca8cb552520a2"
+    },
     "view.menu.createGroupFromSelection": {
       "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
       "translation": "3616d39d6e4f54125176fef19693827d93676162"
+    },
+    "view.menu.createZoneFromSelection": {
+      "source": "807de5535ed0ad5a5d983eacb9ff3716d878dc4e",
+      "translation": "c3e90d13edea4952446682ab89c8c7e0c169456f"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -3751,6 +5179,18 @@
     "view.menu.sourceSubtaskOfTarget": {
       "source": "a4be670929e3ad0c0348d40116096509101e0f9f",
       "translation": "5dec0dd5ef6f43fea8dd9299de0fd94615906673"
+    },
+    "view.menu.dependencyLinks": {
+      "source": "0562f32dc56f5c702810cbe010068ddd38dbd69a",
+      "translation": "8258ceae19794a515dc44910a005a779feb80b12"
+    },
+    "view.menu.subtaskLinks": {
+      "source": "173312c6e2592de729610a4d319877c9aa8d8b67",
+      "translation": "e3e7a87392677fa8120c99e21090156e4b927ab6"
+    },
+    "view.menu.propertyLinks": {
+      "source": "235564256eba212f50846f34e52c0761104dcc03",
+      "translation": "b18520b8a1ddc0caa3fe8d290e402eb7fd4ab930"
     },
     "view.menu.addPropertyLink": {
       "source": "6e295d7b5fe877b5551b4e808062b916dd717df5",
@@ -3911,8 +5351,8 @@
   },
   "pt": {
     "common.appName": {
-      "source": "fd824b3ba1713694a75da21b3f4cf97a42bab657",
-      "translation": "fd824b3ba1713694a75da21b3f4cf97a42bab657"
+      "source": "2f9c39a527e33f312b2d0914fb008da581913dcc",
+      "translation": "2f9c39a527e33f312b2d0914fb008da581913dcc"
     },
     "common.automatic": {
       "source": "ac9041e76816a34aba228a736ec30da6984c5777",
@@ -3921,6 +5361,10 @@
     "common.cancel": {
       "source": "77dfd2135f4db726c47299bb55be26f7f4525a46",
       "translation": "c111e0ab9ddb1dfb79f8a12c741ba6dbdb07992a"
+    },
+    "common.close": {
+      "source": "bbfa773e5a63a5ea58c9b6207e608ca0120e592a",
+      "translation": "7b2006fd7af83ba80a15503c44121886c4c93990"
     },
     "common.card.one": {
       "source": "10b93da7c74f93af707c33f1ef412a2a92d9615b",
@@ -3990,9 +5434,41 @@
       "source": "3622410a4a8fab47e39a4f05735ec87c93dcc8ab",
       "translation": "04be50ee821727313f2b4dc1315029c31b483d47"
     },
-    "notices.baseboardWaitingForBasesData": {
-      "source": "3c0f6a0e8db0a78ea91f32e0e4c56d5f98975b77",
-      "translation": "aa6bbb13983a33344f8c3379001b68690c94a4e5"
+    "notices.activeGroupDisabled": {
+      "source": "3ee2ddfc118717219b9bdff68b9a63881ba503d6",
+      "translation": "e81029496ca9c9c1b369ee901c54fc5b359ceca5"
+    },
+    "notices.activeGroupEnabled": {
+      "source": "543ef7d617d47b7ba03da5b0d6a6ddb943da4e3a",
+      "translation": "ebeabe5e9dcdfb6c740669395fd4927abf0039f8"
+    },
+    "notices.activeGroupReadOnly": {
+      "source": "722dca50e751da27f4cc180c968d27bc6b7b979e",
+      "translation": "a7b9b7f95bd14cd467cc461ad36f30a0224d0a7e"
+    },
+    "notices.activeGroupTaskUpdateUnavailable": {
+      "source": "10a28d58ca6af418d08842620939e4b640eac556",
+      "translation": "1fdd5cdc0de87c877d517fb68bd66dce507a1dab"
+    },
+    "notices.activeGroupUpdated": {
+      "source": "c78ad3455f76a36acf79433077e4c7363eb7a4dd",
+      "translation": "b506627a189af1857b0265a9b49c31b97764bd34"
+    },
+    "notices.activeGroupActionRun": {
+      "source": "110af2d8e5e5717d2228f4a7223089953331156f",
+      "translation": "d298fc41b729562ce8f3f00bc3d76997debedc2f"
+    },
+    "notices.activeGroupActionNotTask": {
+      "source": "e9800a314aadaf3027a58a9310b41bd14e506b9e",
+      "translation": "5872f5c342b29d98661cba984cf74f40746b91de"
+    },
+    "notices.activeGroupActionUnavailable": {
+      "source": "05b9d79c120ed0021290e290c62df0026f9377da",
+      "translation": "660c59a646ab42a0dd827f83cacd6dc18dcf062b"
+    },
+    "notices.canvasBasesWaitingForBasesData": {
+      "source": "a0bb20a5f9df7dc64407bc0329f524337231951c",
+      "translation": "9145346f42f5635daa07b1a951d91514cc7f5a12"
     },
     "notices.couldNotAddPropertyLink": {
       "source": "1432c25d668ca971f8de44c270644b9171220c5f",
@@ -4005,6 +5481,10 @@
     "notices.couldNotRemovePropertyLink": {
       "source": "b2ad9dc15ce642c0ef1c526df2a34ff9afbf61ab",
       "translation": "07a357188676a5f943c26d5feffd79d0b99afa31"
+    },
+    "notices.couldNotUpdateActiveGroup": {
+      "source": "b18b656c33b1d709f665d2396ab76cc2731cd357",
+      "translation": "12dcaf206e018106bdeca882fd56f980cd534408"
     },
     "notices.couldNotUpdateLink": {
       "source": "70ceafd6c4531892fd867c3590de60b6f00c5cca",
@@ -4027,12 +5507,12 @@
       "translation": "ae44370320e71d7a918cd5f824874222f716da92"
     },
     "notices.obsidianVersionRequired": {
-      "source": "626c430316d0f7bf4ce74ea6089bb45a34f9d28d",
-      "translation": "8aeb5af5c75e97c7dfbdc22b691dc50e99a9431e"
+      "source": "62e440f2994ac4d9287d34ca774d3c0ac02667d0",
+      "translation": "74a1fe9b5b2164263f6679040201a8fccaa475e7"
     },
-    "notices.openBaseboardViewFirst": {
-      "source": "71e797527713fc1278a569c7263ddda3a7cf5aa3",
-      "translation": "10baecdfac13d28c4fc9201a326faaec5f70ba56"
+    "notices.openCanvasBasesViewFirst": {
+      "source": "ec0fd2571fc9d44a9938a201360905c6f2f241b7",
+      "translation": "03a36d05967fff941fe92bf4172e8b7366f6bc91"
     },
     "notices.openBasesViewFirst": {
       "source": "da610fcbcddaf8f9408853df43a17500fe7d6491",
@@ -4067,8 +5547,8 @@
       "translation": "5dc26de9f42d040eb944ed4600bee4e9d934290c"
     },
     "notices.starterFilesReady": {
-      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
-      "translation": "60e2a4f0e30bf4575c27067b7753bb0b7378ef4d"
+      "source": "96d0354a4f9aff5832c826fe766f079b9795f60f",
+      "translation": "b7c8d53dec42da35ad404b474833c6c941ae8cad"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -4083,8 +5563,8 @@
       "translation": "431cfe099014a294d9d9f40faf2a29a351ed2d57"
     },
     "settings.defaults.canvasFolder.description": {
-      "source": "f5451548720b3d7c048f929105140ad491b1a8d9",
-      "translation": "9d394e38b40a381744cf9aa8e86b06a8c0796a6d"
+      "source": "71b9f60c887e59721ed65a9ab0420ebab642d172",
+      "translation": "527841ce4e515c11d120e173db1b3faa0a2d0ebe"
     },
     "settings.defaults.layout.name": {
       "source": "2ae3a9285af610786a6931294c6c13b82d1d24ba",
@@ -4115,8 +5595,8 @@
       "translation": "89c55bb6970c236639f164dfe82c5726dae8bf93"
     },
     "settings.defaults.bodyEditor.description": {
-      "source": "028774d660a4263a07cafb0d93477930fe30b5f5",
-      "translation": "a3137bbe607872a1ac87a27c6950efc076408fe8"
+      "source": "83a3799e10b83484407723be11a9e6a3afafa06e",
+      "translation": "f3e406e3ef006a892c29bff0c23c025fb81c31a1"
     },
     "settings.tasknotes.heading": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
@@ -4127,8 +5607,8 @@
       "translation": "dcf1d06ea754c8c9b0f9a96466c7080488d838cd"
     },
     "settings.tasknotes.integration.description": {
-      "source": "5312d39ae6ad1b8e203c70afff6a9adefa92152e",
-      "translation": "6a12f4010bae3f4b1026e9a81e307b428740697e"
+      "source": "d7ec0c5cad9da592c0a24d542f697ba3404cf6ce",
+      "translation": "7d824233746d48ca99962637321228d6e675d676"
     },
     "settings.tasknotes.badges.name": {
       "source": "4a47f1e139d831149e20d0ad3fc59b8ed7c5561c",
@@ -4163,16 +5643,16 @@
       "translation": "13abace444159fc823f3f65a388d9f1b5d9dc002"
     },
     "settings.updateRules.preservePositions.description": {
-      "source": "1b9508fd361ceb9e78fa27281844f94f178a7f25",
-      "translation": "6728fcfa62f3a91af90a5c4146f82cea40a4194b"
+      "source": "b3b4dadbea9eab0fa344d7530d9f97919713252d",
+      "translation": "0a6c67f072673cc6ebce3f73178765b70e3676a4"
     },
     "settings.updateRules.removeMissingNotes.name": {
       "source": "69a07189d1ee6ce5c99533af82a2ae60086e729f",
       "translation": "46489ba733c4bfce3ee420c2d857eaf8ed9ec1ca"
     },
     "settings.updateRules.removeMissingNotes.description": {
-      "source": "26b3763b21644b0ebb40fb59e01de831c1074983",
-      "translation": "19d446b5a7e7797a806fe0e97e0ae61d170f0149"
+      "source": "240f89454d4d6acdbb25caa4aaa6e8f928bd2a93",
+      "translation": "fc3efc6ecc13f42a99886e1cdc176127c1233595"
     },
     "settings.updateRules.nodeWidth.name": {
       "source": "08cf7bca56d478d335b2b9c3d0e184058dbb307f",
@@ -4195,16 +5675,16 @@
       "translation": "bb39718775e1cf9819bac2b6994cc960c6aa857e"
     },
     "settings.language.description": {
-      "source": "b74f44cb84d7bfdef24613db569d51c614767eb4",
-      "translation": "4ab7a2a81581170ce44f3aa469d372fa4f35020e"
+      "source": "633464233e79b995420f421284352c663c15891f",
+      "translation": "17e4d4e236cf4831b3164c935080358708b492a7"
     },
     "settings.language.name": {
       "source": "5a28c99d6d38a7489e8b1ab06a11507f8c6fd47f",
       "translation": "bb39718775e1cf9819bac2b6994cc960c6aa857e"
     },
     "settings.language.dropdownDescription": {
-      "source": "601ea9a888accf03523827b9afb9b89b90c4b8f2",
-      "translation": "59dc1cae79e1700f896b8c103db73505a15be215"
+      "source": "a95dba96cbb2d657f0e30a30f916dfe3c564006f",
+      "translation": "3e3537d1fee5a81176ae8c932b5e8824f6132ecd"
     },
     "options.layout.columns": {
       "source": "b337287f17401eb2db30ece3f3a3094217b413e0",
@@ -4273,6 +5753,14 @@
     "tasknotes.badges.tracked": {
       "source": "f453f5a887e880559f39d177175012d7adad9ac4",
       "translation": "512383a65583979136446b517162dc17b11d2156"
+    },
+    "tasknotes.badges.tracking": {
+      "source": "e81a151bd05091f9935dc3aba219eed346e7bb4f",
+      "translation": "2e10a847a5e80cdc33f7838420630e96a53ac9d8"
+    },
+    "tasknotes.badges.active": {
+      "source": "a733b809d2f1233496ab516eed0f3ef75cf3791a",
+      "translation": "8263fde6ccc45af17242f0c98b7c57d5f6a06b1d"
     },
     "tasknotes.relationships.blocks": {
       "source": "f7d5b2b95861daea9933ef0a243f733bbc79235e",
@@ -4347,8 +5835,8 @@
       "translation": "5f2e7092796916e6c5a5f71efc7769c9cb1ee3a2"
     },
     "modal.preservePositions.description": {
-      "source": "4a70addb3cb30a12a488bed407561b96691cc9d9",
-      "translation": "546f4e9f13921ea1ae5daa7e5ae7c1d47338d7c1"
+      "source": "8d4dc77a9baaffd0251d451574986fa97e201bc4",
+      "translation": "d564fae20ee9b710e8caf8b5bdf2e95c934ecf52"
     },
     "modal.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -4369,6 +5857,10 @@
     "view.toolbar.addGroup": {
       "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
       "translation": "d313ac2bd64566af382aa7767d917a4a01cf6639"
+    },
+    "view.toolbar.addZone": {
+      "source": "0279d7313189283e312b36e83d146afe76680db9",
+      "translation": "ea731e422a4179007bcf44631a6f63a0d5d90dad"
     },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -4414,6 +5906,18 @@
       "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
       "translation": "860ec2c45533773a9b0d7e7e5c5ec300dfac2937"
     },
+    "view.card.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "62037d43904a0a11e1f2de8da8ae8f1d08e8c829"
+    },
+    "view.card.noteColor": {
+      "source": "a5dad58668b83243fa855c04a906abfe710e0e45",
+      "translation": "48b45f37cfb7952e0c598e6aa7cdbdac565de3df"
+    },
+    "view.card.cardColor": {
+      "source": "2e1a93636a6096741d5aa40a98132acfbd75228a",
+      "translation": "eee634d99552c0babf157097ad57962463594b0c"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "c177934bfb0fa9c021195ca2368454a5608f895f"
@@ -4426,6 +5930,178 @@
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "7d155af65618f571a50c17bb70e571c294d9eed4"
     },
+    "view.linkDrag.releaseToLink": {
+      "source": "30af734941bdbde5e74a5d1adf918177098219d7",
+      "translation": "c06afa50c0f1d412f7aae7a67840e208022d0ebc"
+    },
+    "view.linkDrag.dragToCard": {
+      "source": "088156c3eaba8c07599a1843e385a4f41fa2ef47",
+      "translation": "7730c346f596c91df02dffb8fd7398ccfa8feef3"
+    },
+    "view.linkDrag.cannotLinkHere": {
+      "source": "e0ce0f06b21166f101163697a47707264e78c650",
+      "translation": "bc2c98ce084f86ae45ed3d89df2dd7f96f65443b"
+    },
+    "view.group.active": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "27288b32b3c3a7e21b5de72441a814ce24dc8728"
+    },
+    "view.group.activeTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "b134e7b4172501ad2681ca8efe3860a63b6094c0"
+    },
+    "view.group.zoneTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "b134e7b4172501ad2681ca8efe3860a63b6094c0"
+    },
+    "view.group.label": {
+      "source": "74341e3c271df3c784e595b804b1f90be0f80429",
+      "translation": "c1266bf2653a9e9c68aea6a18beb4f75211963ea"
+    },
+    "view.group.action": {
+      "source": "f4e4cb8146eebbf05fc00860419e8d9b9f1b67c2",
+      "translation": "9a5650899a009f9bb6efb6e5dbd9d07251b36a30"
+    },
+    "view.group.actionSetProperty": {
+      "source": "0072a167d4fee18c3b8d259bada3014dff641371",
+      "translation": "313676d49eacb804743943ab8a4c0eed7462d112"
+    },
+    "view.group.actionCompleteTask": {
+      "source": "af20ec58720a70b4d05fb78d3500c7af26fd37b8",
+      "translation": "57680869f3ced8deebb71c83741559694015262b"
+    },
+    "view.group.actionUncompleteTask": {
+      "source": "79d6acda2f4e9574ebfeaee4447459b59683d2b3",
+      "translation": "81f41f4b816eb23d6a402a9592816b64372c46c4"
+    },
+    "view.group.actionArchiveTask": {
+      "source": "03d82ba7907ae1c9c34b442b8de36b436a13fc99",
+      "translation": "7921375a2aa8716eb735e705cc359848cfd911ff"
+    },
+    "view.group.actionUnarchiveTask": {
+      "source": "bcd2c2d3ea900f171fe4e4babedbcd5826838fb2",
+      "translation": "ca991717ee95b746565865415276298fd82f3678"
+    },
+    "view.group.actionStartTimeTracking": {
+      "source": "7151516a05b9f16fd6d876ce009551328cdfeff2",
+      "translation": "15cbbadebaffcc24f2954aad3e59a608815b4096"
+    },
+    "view.group.actionStopTimeTracking": {
+      "source": "d830f5133dafe2f2c8325d37811c4901efa364a8",
+      "translation": "1e78d6b7f16ef9acf6bb2091ea2033e7ea813b38"
+    },
+    "view.group.actionStartPomodoro": {
+      "source": "b5924c20fa7da66235c95fdded5c9529a11a4a73",
+      "translation": "c34df107b9d510b645452768d1835460ba2337dd"
+    },
+    "view.group.actionAssignPomodoro": {
+      "source": "5ed2c0b7fa74e11f2bb31db18d7c967fe7afa527",
+      "translation": "bd2f2e9a2735c75b2bbaf1a54826c254e3d5908b"
+    },
+    "view.group.actionCompleteRecurring": {
+      "source": "eb2125c7238d7f8f35434a16a3be08a912794eb4",
+      "translation": "13f41a1b506925104a4836d00aa89e4608a092ee"
+    },
+    "view.group.actionSkipRecurring": {
+      "source": "9648841dc8789017f672c117b1bc754d5cc08b29",
+      "translation": "e37b5d75756843d7c4c17f4cb6c8cb674d45bc12"
+    },
+    "view.group.property": {
+      "source": "9ae33a7d0ecb82cae8f04aafab20bf90425b7b8c",
+      "translation": "d9753811efeeea05cac39b24cfcd2031618bec8d"
+    },
+    "view.group.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "4271eb8ae4f587eca7e45b6feb3efbf6a61b4974"
+    },
+    "view.group.updateMode": {
+      "source": "9fac6527645ba5d4025a166d382ef4f52305083e",
+      "translation": "f3af17270f9a68f8ef8c1aecd71fd26ca98b930c"
+    },
+    "view.group.valueType": {
+      "source": "a956485e60c24642bdc24465480775891fba80d6",
+      "translation": "cac355b9462c280de4aa94db2909031cd401c3d6"
+    },
+    "view.group.updateModeReplace": {
+      "source": "a7cf7b25a703b308887c7f1d100c4326ef20ac46",
+      "translation": "2b7c46de1394716d86a94701e47684e8eab447e0"
+    },
+    "view.group.updateModeAppend": {
+      "source": "6b3a602280be24f5c0e41945a5a73a105b0c54c4",
+      "translation": "189f04e8ef5f517c4b3677cfe5c54f132c3e2386"
+    },
+    "view.group.updateModeAppendUnique": {
+      "source": "2cc8d9f9c0ab46208ea57f674730cb6e4bd8a49f",
+      "translation": "e03781e92182eaeace9ddfaedc68e02e350df838"
+    },
+    "view.group.updateModeRemove": {
+      "source": "e963907dac5cd5c017869b4c96c18021c9bd058b",
+      "translation": "4bd4ea834263041f15d7f587362b519a1afb60e0"
+    },
+    "view.group.updateModeClear": {
+      "source": "719ea396ad92e01b4757ec2b93bb1e5f270f771d",
+      "translation": "765fbe39a2a7541764869d8a2dd0bc32dd352a14"
+    },
+    "view.group.valueTypeAuto": {
+      "source": "c614ba7c453cdcd4d21b20e8286c6266c891e0c6",
+      "translation": "c9c992be184b96c7d40d7586bd49730c3e23ebf6"
+    },
+    "view.group.valueTypeString": {
+      "source": "c3328c39b0e29f78e9ff45db674248b1d245887d",
+      "translation": "6eeba656c0f3cafd6e0af4fcd90468390e8ee571"
+    },
+    "view.group.valueTypeNumber": {
+      "source": "b7baa1d40c4ea29afc9098732bffee2a861a6c44",
+      "translation": "1d91f4b8d8d653bd6f32933c4ed92e33aa8ab752"
+    },
+    "view.group.valueTypeBoolean": {
+      "source": "b76ff4906f33c2dd97ddd929b9662ba8cac6174c",
+      "translation": "f0f79a62dee1695e591fff0700f3ab7c84fb97f9"
+    },
+    "view.group.valueTypeDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "e5e429bcc9c2e4a41a3c7a4d96203be6cb273b11"
+    },
+    "view.group.valueTypeList": {
+      "source": "a1fffaaafb7cc996685bceb829c053cc4f7de43d",
+      "translation": "e41a947762e9f88925ed12a98b72205fc705e2ec"
+    },
+    "view.group.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "62037d43904a0a11e1f2de8da8ae8f1d08e8c829"
+    },
+    "view.group.writeRule": {
+      "source": "e42f054b2974ad83a5bca96ea87112514fc83db3",
+      "translation": "9921450c99b420f7e58fc9106de54e1e510f9043"
+    },
+    "view.group.groupRuleLocked": {
+      "source": "7c7a4212647e7154812f9a90ce62b149d303f8f0",
+      "translation": "796a4419a4bb8ae55f4a47ce83ae2e06d23de7c3"
+    },
+    "view.group.dropResult": {
+      "source": "d8a8bf37c90d50fa26abe4b297b441f27d0daf28",
+      "translation": "1440448a1f0ca34ef72c98788f9a2f58121ec66d"
+    },
+    "view.group.previewWrite": {
+      "source": "c077f564847fdb1c70258590955e163d391893ba",
+      "translation": "c077f564847fdb1c70258590955e163d391893ba"
+    },
+    "view.group.previewClear": {
+      "source": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868",
+      "translation": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868"
+    },
+    "view.group.previewAction": {
+      "source": "34c09447a51c35c7878c0c125d9d874bf088c266",
+      "translation": "34c09447a51c35c7878c0c125d9d874bf088c266"
+    },
+    "view.group.emptyValue": {
+      "source": "2464254a17a92aba20f96b8a0216d88b9ef8c15e",
+      "translation": "65225370bebc69db5ac9306cac09dc905f055ab4"
+    },
+    "view.group.propertyRequired": {
+      "source": "6dbff942a005991d025fe9fe4223de5ef4c1d778",
+      "translation": "1cde7588aec8aa222d818c4bd27dc115f31dc213"
+    },
     "view.group.createTitle": {
       "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
       "translation": "9a10c95cbb2f18e50d7c7c256850f4feb2bf950a"
@@ -4434,9 +6110,17 @@
       "source": "171a0606f7c74580fd3982cf57c49d604104120a",
       "translation": "dd18fd863702f6a01c5c608d6e558b5a39e8d60b"
     },
+    "view.group.defaultZoneName": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "27288b32b3c3a7e21b5de72441a814ce24dc8728"
+    },
     "view.group.create": {
       "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
       "translation": "af3d3c69e68708c03bab47a118b692b8e98aba94"
+    },
+    "view.group.createZone": {
+      "source": "5ae01175f207c3086ef197de15b6774a80b7d9d2",
+      "translation": "0ec365ec0a490b6a38de2638d154b8dea350d9b2"
     },
     "view.group.renameTitle": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -4445,6 +6129,10 @@
     "view.group.rename": {
       "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
       "translation": "5f9fc71a02dafbb9e5045e084ef655815d795630"
+    },
+    "view.group.saveActiveGroup": {
+      "source": "59d37aff09d7712a8992f239782c3701a39202da",
+      "translation": "93f1c695aa792811d0350afa2197a7fe8be50670"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -4498,6 +6186,14 @@
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "0513b3aeb0d429a50d959ca2c23416a2e4920f5f"
     },
+    "view.menu.setCardColor": {
+      "source": "f5b3969bb8b4d7f0704d9023076541ca1942fefe",
+      "translation": "86fbc50284102f00781aee2b2da779922c3f985e"
+    },
+    "view.menu.clearCardColor": {
+      "source": "5519c8e0cba7397fb5b70018b49243e44d81e08b",
+      "translation": "11e6c67e80ea2e9a9260fde28ecc28294c5b5597"
+    },
     "view.menu.addPinnedNote": {
       "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
       "translation": "10232b2692b9834a6ab77058db1c4e98f4bee44a"
@@ -4505,6 +6201,18 @@
     "view.menu.addCard": {
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "d58083f04fa5df7cbe861e9feca9c48882a04be5"
+    },
+    "view.menu.activateGroup": {
+      "source": "a0a89785e4181d8466357a8e797aa78a19bd4a7d",
+      "translation": "a8c6cdaac29f19835feebc4c0bc7855239c49141"
+    },
+    "view.menu.configureActiveGroup": {
+      "source": "73ff54e48b0bc7121621fefd6089e39256211683",
+      "translation": "815746ea40f56d62b265684b55f0a3bce48565b5"
+    },
+    "view.menu.deactivateActiveGroup": {
+      "source": "cb837ab369794b8a7f98fbcc5fc901718d2d9dbf",
+      "translation": "00bff0e081c355c209428b8c1fc46033d80fbf25"
     },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -4514,9 +6222,17 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "4083e64ec708b7e754c617a9fc94615e2264059e"
     },
+    "view.menu.fitGroupToCards": {
+      "source": "ed58a1c5ccee1fba89ebae6845be5f32d6c733c9",
+      "translation": "36dcaf8701c887afd762e1406b334550abca03e2"
+    },
     "view.menu.createGroupFromSelection": {
       "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
       "translation": "060ea694b2c48d5c41badc5abdd3ca666f4ca22b"
+    },
+    "view.menu.createZoneFromSelection": {
+      "source": "807de5535ed0ad5a5d983eacb9ff3716d878dc4e",
+      "translation": "f5f825ff083e04183fe0fac6421d0f2e10019d3e"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -4533,6 +6249,18 @@
     "view.menu.sourceSubtaskOfTarget": {
       "source": "a4be670929e3ad0c0348d40116096509101e0f9f",
       "translation": "5f3cebbef8b2f76e3bcd9df16eb1e3de89539c37"
+    },
+    "view.menu.dependencyLinks": {
+      "source": "0562f32dc56f5c702810cbe010068ddd38dbd69a",
+      "translation": "0cab31a2f1031965aa1958f2a84252a76d6b6904"
+    },
+    "view.menu.subtaskLinks": {
+      "source": "173312c6e2592de729610a4d319877c9aa8d8b67",
+      "translation": "2498d952429933ac32eca2d47ba57cb65045ba41"
+    },
+    "view.menu.propertyLinks": {
+      "source": "235564256eba212f50846f34e52c0761104dcc03",
+      "translation": "b6e6709d5f4e4e8a5d25f936b22ce6e22940cf86"
     },
     "view.menu.addPropertyLink": {
       "source": "6e295d7b5fe877b5551b4e808062b916dd717df5",
@@ -4693,8 +6421,8 @@
   },
   "ru": {
     "common.appName": {
-      "source": "fd824b3ba1713694a75da21b3f4cf97a42bab657",
-      "translation": "fd824b3ba1713694a75da21b3f4cf97a42bab657"
+      "source": "2f9c39a527e33f312b2d0914fb008da581913dcc",
+      "translation": "2f9c39a527e33f312b2d0914fb008da581913dcc"
     },
     "common.automatic": {
       "source": "ac9041e76816a34aba228a736ec30da6984c5777",
@@ -4703,6 +6431,10 @@
     "common.cancel": {
       "source": "77dfd2135f4db726c47299bb55be26f7f4525a46",
       "translation": "0ec753be8df955a117404fb634b01b45eb386e2a"
+    },
+    "common.close": {
+      "source": "bbfa773e5a63a5ea58c9b6207e608ca0120e592a",
+      "translation": "4ae50d30739d5840bbfe51db96addbde85c96537"
     },
     "common.card.one": {
       "source": "10b93da7c74f93af707c33f1ef412a2a92d9615b",
@@ -4772,9 +6504,41 @@
       "source": "3622410a4a8fab47e39a4f05735ec87c93dcc8ab",
       "translation": "e11cbb76368f5f80072f0f4495b70f89ac2516b7"
     },
-    "notices.baseboardWaitingForBasesData": {
-      "source": "3c0f6a0e8db0a78ea91f32e0e4c56d5f98975b77",
-      "translation": "2e922b108d54aff3c02b5440787e22dcd764bca7"
+    "notices.activeGroupDisabled": {
+      "source": "3ee2ddfc118717219b9bdff68b9a63881ba503d6",
+      "translation": "566925ecefc822ac6248f4624f6fab43da4441e1"
+    },
+    "notices.activeGroupEnabled": {
+      "source": "543ef7d617d47b7ba03da5b0d6a6ddb943da4e3a",
+      "translation": "75e8526982a6a8895fad790a467ab24053bfae4c"
+    },
+    "notices.activeGroupReadOnly": {
+      "source": "722dca50e751da27f4cc180c968d27bc6b7b979e",
+      "translation": "20079219ec5529765f219b244d800c33947204e1"
+    },
+    "notices.activeGroupTaskUpdateUnavailable": {
+      "source": "10a28d58ca6af418d08842620939e4b640eac556",
+      "translation": "12d8f108720275ec9f03b2a4dfa1d7c64d284609"
+    },
+    "notices.activeGroupUpdated": {
+      "source": "c78ad3455f76a36acf79433077e4c7363eb7a4dd",
+      "translation": "76ecf85fdd50d45eddbfecc04f0aafa35be8a77c"
+    },
+    "notices.activeGroupActionRun": {
+      "source": "110af2d8e5e5717d2228f4a7223089953331156f",
+      "translation": "002e2e007ca7b729c4340509ac334c48e40b9e3e"
+    },
+    "notices.activeGroupActionNotTask": {
+      "source": "e9800a314aadaf3027a58a9310b41bd14e506b9e",
+      "translation": "9644231d01065301eaa2758e406aaa294fdfea4b"
+    },
+    "notices.activeGroupActionUnavailable": {
+      "source": "05b9d79c120ed0021290e290c62df0026f9377da",
+      "translation": "af5e036d7d798d7948b8525befe3a6f5e780039f"
+    },
+    "notices.canvasBasesWaitingForBasesData": {
+      "source": "a0bb20a5f9df7dc64407bc0329f524337231951c",
+      "translation": "bd3285b8ecb144017d104ae1bc3978ca55d3b549"
     },
     "notices.couldNotAddPropertyLink": {
       "source": "1432c25d668ca971f8de44c270644b9171220c5f",
@@ -4787,6 +6551,10 @@
     "notices.couldNotRemovePropertyLink": {
       "source": "b2ad9dc15ce642c0ef1c526df2a34ff9afbf61ab",
       "translation": "217f0a18c4d16a1dbfe6bd7a661acf17bd15a224"
+    },
+    "notices.couldNotUpdateActiveGroup": {
+      "source": "b18b656c33b1d709f665d2396ab76cc2731cd357",
+      "translation": "0ba3c29a31df2693a6c7c6333b357ba9755eff2b"
     },
     "notices.couldNotUpdateLink": {
       "source": "70ceafd6c4531892fd867c3590de60b6f00c5cca",
@@ -4809,12 +6577,12 @@
       "translation": "734d5b5d4eb5e11a12eadfbb694681db6956c283"
     },
     "notices.obsidianVersionRequired": {
-      "source": "626c430316d0f7bf4ce74ea6089bb45a34f9d28d",
-      "translation": "25ea41d45866659e4c604d199ed0ab4883d34268"
+      "source": "62e440f2994ac4d9287d34ca774d3c0ac02667d0",
+      "translation": "14c577ab4694ed4990da1d25cf960e1e03f75ee9"
     },
-    "notices.openBaseboardViewFirst": {
-      "source": "71e797527713fc1278a569c7263ddda3a7cf5aa3",
-      "translation": "a469bd53f6a3e80e0565905ec6f99b7d41e0a9eb"
+    "notices.openCanvasBasesViewFirst": {
+      "source": "ec0fd2571fc9d44a9938a201360905c6f2f241b7",
+      "translation": "6dffe73469b6168de8149270e29e855f0c04dca2"
     },
     "notices.openBasesViewFirst": {
       "source": "da610fcbcddaf8f9408853df43a17500fe7d6491",
@@ -4849,8 +6617,8 @@
       "translation": "e0e2ad4e7407bb0d1ec3d4b74f1c9c140edeaf86"
     },
     "notices.starterFilesReady": {
-      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
-      "translation": "9b4084ef96e87051865ba5a8b085aa437155738f"
+      "source": "96d0354a4f9aff5832c826fe766f079b9795f60f",
+      "translation": "5dfb7a457c06275d1d7d9060949cfe7b8f2212e5"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -4865,8 +6633,8 @@
       "translation": "545e85b474d2d75c1377df6c0020d51de0ad45aa"
     },
     "settings.defaults.canvasFolder.description": {
-      "source": "f5451548720b3d7c048f929105140ad491b1a8d9",
-      "translation": "e67c88c5b244825435595ca43ac2b089c4e41720"
+      "source": "71b9f60c887e59721ed65a9ab0420ebab642d172",
+      "translation": "8262066b775c218917e497ef5cd2f2445c6e246e"
     },
     "settings.defaults.layout.name": {
       "source": "2ae3a9285af610786a6931294c6c13b82d1d24ba",
@@ -4897,8 +6665,8 @@
       "translation": "2d4630cb591ebc2cd004e10b54a1c4ae07c2cd72"
     },
     "settings.defaults.bodyEditor.description": {
-      "source": "028774d660a4263a07cafb0d93477930fe30b5f5",
-      "translation": "3fa18a599fced0afbb69aa7c07e477e7aca062c7"
+      "source": "83a3799e10b83484407723be11a9e6a3afafa06e",
+      "translation": "b134f0ee7aea13bd6b48524ebce48fde42d26ef0"
     },
     "settings.tasknotes.heading": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
@@ -4909,8 +6677,8 @@
       "translation": "8085109094c1595abde428fb0971dc8e3fd238a5"
     },
     "settings.tasknotes.integration.description": {
-      "source": "5312d39ae6ad1b8e203c70afff6a9adefa92152e",
-      "translation": "904ad2822326861ed3818d8165d3fae11bfb9564"
+      "source": "d7ec0c5cad9da592c0a24d542f697ba3404cf6ce",
+      "translation": "260b53c48ee561f270530f81f8c9cfc3ec346db2"
     },
     "settings.tasknotes.badges.name": {
       "source": "4a47f1e139d831149e20d0ad3fc59b8ed7c5561c",
@@ -4945,16 +6713,16 @@
       "translation": "cd9256d448cccddf87c9d60fb12879c42cb83960"
     },
     "settings.updateRules.preservePositions.description": {
-      "source": "1b9508fd361ceb9e78fa27281844f94f178a7f25",
-      "translation": "e04f5db2ec7b15a085d1ebde40c5edb1ca29fcef"
+      "source": "b3b4dadbea9eab0fa344d7530d9f97919713252d",
+      "translation": "0d0dcf74965c70b0ad77141f2cc12cb7f7281494"
     },
     "settings.updateRules.removeMissingNotes.name": {
       "source": "69a07189d1ee6ce5c99533af82a2ae60086e729f",
       "translation": "9b6804520f798bf67f7191d540b7d77c7ae46360"
     },
     "settings.updateRules.removeMissingNotes.description": {
-      "source": "26b3763b21644b0ebb40fb59e01de831c1074983",
-      "translation": "de1b752ceb8302523a06136f7d9c43c0b1e74419"
+      "source": "240f89454d4d6acdbb25caa4aaa6e8f928bd2a93",
+      "translation": "078ef5317550d4d8bb5834c45db0a6a2b41a7ee8"
     },
     "settings.updateRules.nodeWidth.name": {
       "source": "08cf7bca56d478d335b2b9c3d0e184058dbb307f",
@@ -4977,16 +6745,16 @@
       "translation": "d9396e7d7f043091de61ff08bda4303b21e81987"
     },
     "settings.language.description": {
-      "source": "b74f44cb84d7bfdef24613db569d51c614767eb4",
-      "translation": "3dba5309436df11d49b76b7e553b897807b7394d"
+      "source": "633464233e79b995420f421284352c663c15891f",
+      "translation": "4f1f25d74f118ac6092a2d8c05b3b54b644d046c"
     },
     "settings.language.name": {
       "source": "5a28c99d6d38a7489e8b1ab06a11507f8c6fd47f",
       "translation": "d9396e7d7f043091de61ff08bda4303b21e81987"
     },
     "settings.language.dropdownDescription": {
-      "source": "601ea9a888accf03523827b9afb9b89b90c4b8f2",
-      "translation": "d1bfe0dd0098bdca701ddefb9a95eed8589b697d"
+      "source": "a95dba96cbb2d657f0e30a30f916dfe3c564006f",
+      "translation": "2d5bd096ecb5d1a17848bf3134461c2f61d051f8"
     },
     "options.layout.columns": {
       "source": "b337287f17401eb2db30ece3f3a3094217b413e0",
@@ -5055,6 +6823,14 @@
     "tasknotes.badges.tracked": {
       "source": "f453f5a887e880559f39d177175012d7adad9ac4",
       "translation": "6df18e52556a5959944bdc40fde7efb75df58816"
+    },
+    "tasknotes.badges.tracking": {
+      "source": "e81a151bd05091f9935dc3aba219eed346e7bb4f",
+      "translation": "2eb0833b3c6141f492b104f2fcf0207bbab295e4"
+    },
+    "tasknotes.badges.active": {
+      "source": "a733b809d2f1233496ab516eed0f3ef75cf3791a",
+      "translation": "76ddd792f8fd11cc0483a4642dbb0044f74ad807"
     },
     "tasknotes.relationships.blocks": {
       "source": "f7d5b2b95861daea9933ef0a243f733bbc79235e",
@@ -5129,8 +6905,8 @@
       "translation": "e3673ebf907ec46d58f52e196f74666335ad2995"
     },
     "modal.preservePositions.description": {
-      "source": "4a70addb3cb30a12a488bed407561b96691cc9d9",
-      "translation": "f4c88106699ad1b26ac6cb9fa12c66d5b11827ed"
+      "source": "8d4dc77a9baaffd0251d451574986fa97e201bc4",
+      "translation": "847c5277437606dbbbab8ff245ac65afec99c2dc"
     },
     "modal.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -5151,6 +6927,10 @@
     "view.toolbar.addGroup": {
       "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
       "translation": "a83b4b4a0c1e1c8d70ac10c5ce8a858aa2b68f77"
+    },
+    "view.toolbar.addZone": {
+      "source": "0279d7313189283e312b36e83d146afe76680db9",
+      "translation": "14de13b963e337662e82ebdd50dc56c25f3f24f2"
     },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -5196,6 +6976,18 @@
       "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
       "translation": "84a5fa8d98116735a047a228cd69eb12578400f7"
     },
+    "view.card.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "84b22ed2aa3351bebda0b0d2723f4dbad131f73f"
+    },
+    "view.card.noteColor": {
+      "source": "a5dad58668b83243fa855c04a906abfe710e0e45",
+      "translation": "cf397aacacf5e8b3a3c913f54ab49d50d8717d04"
+    },
+    "view.card.cardColor": {
+      "source": "2e1a93636a6096741d5aa40a98132acfbd75228a",
+      "translation": "752751321d0c4ebb6a7daa3901c2c236193f1ab9"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "f4c4c4f3016ba7c2b30754a75cb93008a5c15af9"
@@ -5208,6 +7000,178 @@
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "f0f2e9e40072adc94d1513c4f3824f4f17cb5d7a"
     },
+    "view.linkDrag.releaseToLink": {
+      "source": "30af734941bdbde5e74a5d1adf918177098219d7",
+      "translation": "b07c75c13e1711d1064cdd995f0276cadfad07b9"
+    },
+    "view.linkDrag.dragToCard": {
+      "source": "088156c3eaba8c07599a1843e385a4f41fa2ef47",
+      "translation": "7baff289577c180516dbeb52fb4da46a4dfb9efd"
+    },
+    "view.linkDrag.cannotLinkHere": {
+      "source": "e0ce0f06b21166f101163697a47707264e78c650",
+      "translation": "59fced618a16c023bac9c716613d706231d1d819"
+    },
+    "view.group.active": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "8e5e9e399b7f33f16383a90bc918c290b8cfe8dc"
+    },
+    "view.group.activeTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "f488b27b310e1e8ec2e287394e5ad96e6e8f068c"
+    },
+    "view.group.zoneTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "f488b27b310e1e8ec2e287394e5ad96e6e8f068c"
+    },
+    "view.group.label": {
+      "source": "74341e3c271df3c784e595b804b1f90be0f80429",
+      "translation": "8358572fd682c7443056135854db56ea5fc215f6"
+    },
+    "view.group.action": {
+      "source": "f4e4cb8146eebbf05fc00860419e8d9b9f1b67c2",
+      "translation": "3c8d8a6831adb23fe4e42dbb2535685f6829f191"
+    },
+    "view.group.actionSetProperty": {
+      "source": "0072a167d4fee18c3b8d259bada3014dff641371",
+      "translation": "0d7a408d4fa78359334f20a48bc123cfeca1fc48"
+    },
+    "view.group.actionCompleteTask": {
+      "source": "af20ec58720a70b4d05fb78d3500c7af26fd37b8",
+      "translation": "0ab4b1f8288c563166c0308552b4137f34acdb75"
+    },
+    "view.group.actionUncompleteTask": {
+      "source": "79d6acda2f4e9574ebfeaee4447459b59683d2b3",
+      "translation": "b1c10647b5d8d8d705473f5e3de3e4390187b46f"
+    },
+    "view.group.actionArchiveTask": {
+      "source": "03d82ba7907ae1c9c34b442b8de36b436a13fc99",
+      "translation": "9b04f9c0e9db9ace4bf788a0e0e19433409c7b2a"
+    },
+    "view.group.actionUnarchiveTask": {
+      "source": "bcd2c2d3ea900f171fe4e4babedbcd5826838fb2",
+      "translation": "14c8a849daf1f8136426e976b430769ba1a97a80"
+    },
+    "view.group.actionStartTimeTracking": {
+      "source": "7151516a05b9f16fd6d876ce009551328cdfeff2",
+      "translation": "13f1659f76541ba0efed346edd8f7792e9745023"
+    },
+    "view.group.actionStopTimeTracking": {
+      "source": "d830f5133dafe2f2c8325d37811c4901efa364a8",
+      "translation": "366be94b2a2165ebbcde5ee48dafb7eec10ce000"
+    },
+    "view.group.actionStartPomodoro": {
+      "source": "b5924c20fa7da66235c95fdded5c9529a11a4a73",
+      "translation": "324b80be8321a683cd811c4df4be238419bf0b36"
+    },
+    "view.group.actionAssignPomodoro": {
+      "source": "5ed2c0b7fa74e11f2bb31db18d7c967fe7afa527",
+      "translation": "f3dcd41e03706ea2e26bfb2746a9d6585a3b2cd6"
+    },
+    "view.group.actionCompleteRecurring": {
+      "source": "eb2125c7238d7f8f35434a16a3be08a912794eb4",
+      "translation": "01ea122a42c7ac70593bc6b9e950531f9ed21fe8"
+    },
+    "view.group.actionSkipRecurring": {
+      "source": "9648841dc8789017f672c117b1bc754d5cc08b29",
+      "translation": "f6147fd4a3590d7f8f43e2c0d09588f6bcb3e74f"
+    },
+    "view.group.property": {
+      "source": "9ae33a7d0ecb82cae8f04aafab20bf90425b7b8c",
+      "translation": "7fae0cab92b5cac13eb3bd2a16c93872d8b5557b"
+    },
+    "view.group.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "9f0b990967c8a2ada3bb962f5b22ca8907ee22bc"
+    },
+    "view.group.updateMode": {
+      "source": "9fac6527645ba5d4025a166d382ef4f52305083e",
+      "translation": "32e71295640b19ed2c5e4c1f733ff6feb73ed56a"
+    },
+    "view.group.valueType": {
+      "source": "a956485e60c24642bdc24465480775891fba80d6",
+      "translation": "90b50ceaa326463e03496d659f8199021c25ce98"
+    },
+    "view.group.updateModeReplace": {
+      "source": "a7cf7b25a703b308887c7f1d100c4326ef20ac46",
+      "translation": "d772cc53bede6e44e64f862afe35055aaaca00f3"
+    },
+    "view.group.updateModeAppend": {
+      "source": "6b3a602280be24f5c0e41945a5a73a105b0c54c4",
+      "translation": "559a87f7cc13d01e7e4a37fc684578883226ffc7"
+    },
+    "view.group.updateModeAppendUnique": {
+      "source": "2cc8d9f9c0ab46208ea57f674730cb6e4bd8a49f",
+      "translation": "39a0bbb2fd442d29ca69f06e2a7cf3324c41fe88"
+    },
+    "view.group.updateModeRemove": {
+      "source": "e963907dac5cd5c017869b4c96c18021c9bd058b",
+      "translation": "86ea33aef5e95d4fcc0f64369dd9a131a61638b8"
+    },
+    "view.group.updateModeClear": {
+      "source": "719ea396ad92e01b4757ec2b93bb1e5f270f771d",
+      "translation": "98b2073ed1815f288ac63c708534b37596de135d"
+    },
+    "view.group.valueTypeAuto": {
+      "source": "c614ba7c453cdcd4d21b20e8286c6266c891e0c6",
+      "translation": "5695330ffb54d44301da7fbbf620bf9744120eb6"
+    },
+    "view.group.valueTypeString": {
+      "source": "c3328c39b0e29f78e9ff45db674248b1d245887d",
+      "translation": "93970437e20f055e2656bbea2a513236abcf4948"
+    },
+    "view.group.valueTypeNumber": {
+      "source": "b7baa1d40c4ea29afc9098732bffee2a861a6c44",
+      "translation": "4d0f3e5c745f8f590aa28a66796a4a3b33d12e98"
+    },
+    "view.group.valueTypeBoolean": {
+      "source": "b76ff4906f33c2dd97ddd929b9662ba8cac6174c",
+      "translation": "3c2c205243d30755112688c5f55943af470be64d"
+    },
+    "view.group.valueTypeDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "a5b49d2ebad23bf2780e72101fede3d124506a4f"
+    },
+    "view.group.valueTypeList": {
+      "source": "a1fffaaafb7cc996685bceb829c053cc4f7de43d",
+      "translation": "a21729ad14630242d605618901c3b3b73107e4e0"
+    },
+    "view.group.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "84b22ed2aa3351bebda0b0d2723f4dbad131f73f"
+    },
+    "view.group.writeRule": {
+      "source": "e42f054b2974ad83a5bca96ea87112514fc83db3",
+      "translation": "5617c80f1ae4dc05e0c57916d5163b786008ad3d"
+    },
+    "view.group.groupRuleLocked": {
+      "source": "7c7a4212647e7154812f9a90ce62b149d303f8f0",
+      "translation": "9254092bce9a51ce94e661b7b81a79d881991809"
+    },
+    "view.group.dropResult": {
+      "source": "d8a8bf37c90d50fa26abe4b297b441f27d0daf28",
+      "translation": "8bd4f2e7d4af68678fd96d5d6c3e9a47cfa7c4a5"
+    },
+    "view.group.previewWrite": {
+      "source": "c077f564847fdb1c70258590955e163d391893ba",
+      "translation": "c077f564847fdb1c70258590955e163d391893ba"
+    },
+    "view.group.previewClear": {
+      "source": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868",
+      "translation": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868"
+    },
+    "view.group.previewAction": {
+      "source": "34c09447a51c35c7878c0c125d9d874bf088c266",
+      "translation": "34c09447a51c35c7878c0c125d9d874bf088c266"
+    },
+    "view.group.emptyValue": {
+      "source": "2464254a17a92aba20f96b8a0216d88b9ef8c15e",
+      "translation": "74b6a81189e3a770706ae0dc8d466c685a65c67a"
+    },
+    "view.group.propertyRequired": {
+      "source": "6dbff942a005991d025fe9fe4223de5ef4c1d778",
+      "translation": "402fa9a5233ff46ebdffa0507415e6a573ea63f2"
+    },
     "view.group.createTitle": {
       "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
       "translation": "305f47257435e1e1ec291119a52e61d0178ec6df"
@@ -5216,9 +7180,17 @@
       "source": "171a0606f7c74580fd3982cf57c49d604104120a",
       "translation": "ae8ad7b53c3a02aa6816d9eaf1126a6e92bdf9e3"
     },
+    "view.group.defaultZoneName": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "8e5e9e399b7f33f16383a90bc918c290b8cfe8dc"
+    },
     "view.group.create": {
       "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
       "translation": "84370a2097272da416f570e5d8827287e94b3248"
+    },
+    "view.group.createZone": {
+      "source": "5ae01175f207c3086ef197de15b6774a80b7d9d2",
+      "translation": "cc09650c82138ff3d1b4eae257e7ca254da0d8e0"
     },
     "view.group.renameTitle": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -5227,6 +7199,10 @@
     "view.group.rename": {
       "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
       "translation": "715e8f0c321e3352d3bf4be4d187457699a2ff4f"
+    },
+    "view.group.saveActiveGroup": {
+      "source": "59d37aff09d7712a8992f239782c3701a39202da",
+      "translation": "dcfff4aa7251852c48256eaaaf5d731f54be6c35"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -5280,6 +7256,14 @@
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "a092ae871fdf2848ee4eb46d6d198a89bb783f29"
     },
+    "view.menu.setCardColor": {
+      "source": "f5b3969bb8b4d7f0704d9023076541ca1942fefe",
+      "translation": "774a86efb0a54cbdf0c60d51c2b739afd2b0df5b"
+    },
+    "view.menu.clearCardColor": {
+      "source": "5519c8e0cba7397fb5b70018b49243e44d81e08b",
+      "translation": "1474ce225cebc18943353066bcd14cfcab18e311"
+    },
     "view.menu.addPinnedNote": {
       "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
       "translation": "d5ebd4e31659e2fa4986a391cf09c1f698ccb013"
@@ -5287,6 +7271,18 @@
     "view.menu.addCard": {
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "c814d23ba2e730ab4a983a8cec75ff49475b1467"
+    },
+    "view.menu.activateGroup": {
+      "source": "a0a89785e4181d8466357a8e797aa78a19bd4a7d",
+      "translation": "a5c37da241589819cdfa0b5d95d7796074379ad3"
+    },
+    "view.menu.configureActiveGroup": {
+      "source": "73ff54e48b0bc7121621fefd6089e39256211683",
+      "translation": "8e8e5feaa9dd2b2cc71210bbbfc22485c8f55892"
+    },
+    "view.menu.deactivateActiveGroup": {
+      "source": "cb837ab369794b8a7f98fbcc5fc901718d2d9dbf",
+      "translation": "4860c70082093163eb0b59c985186bd54a176f7f"
     },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -5296,9 +7292,17 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "05b970e68bb424dbc78e035610e84b9bba7eaec1"
     },
+    "view.menu.fitGroupToCards": {
+      "source": "ed58a1c5ccee1fba89ebae6845be5f32d6c733c9",
+      "translation": "989c0ff195ec07dec61d99c1fa7fc3a3bce7d897"
+    },
     "view.menu.createGroupFromSelection": {
       "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
       "translation": "ebe39357adfb0b88c937ace39e7f5cb083b5e859"
+    },
+    "view.menu.createZoneFromSelection": {
+      "source": "807de5535ed0ad5a5d983eacb9ff3716d878dc4e",
+      "translation": "3dee3a0fcf989fb822d903c51ceb98801325d8bf"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -5315,6 +7319,18 @@
     "view.menu.sourceSubtaskOfTarget": {
       "source": "a4be670929e3ad0c0348d40116096509101e0f9f",
       "translation": "3aa8394fc1db4faac7aec4e07b6c52c6eee01fdc"
+    },
+    "view.menu.dependencyLinks": {
+      "source": "0562f32dc56f5c702810cbe010068ddd38dbd69a",
+      "translation": "898afdf0e68e6f324dbd785826a874ddba5e7295"
+    },
+    "view.menu.subtaskLinks": {
+      "source": "173312c6e2592de729610a4d319877c9aa8d8b67",
+      "translation": "71f53f28abf4fff6daef647a06377a22ac2b8e60"
+    },
+    "view.menu.propertyLinks": {
+      "source": "235564256eba212f50846f34e52c0761104dcc03",
+      "translation": "47fae86538721955a5512e247a2ca6e647dff590"
     },
     "view.menu.addPropertyLink": {
       "source": "6e295d7b5fe877b5551b4e808062b916dd717df5",
@@ -5475,8 +7491,8 @@
   },
   "zh": {
     "common.appName": {
-      "source": "fd824b3ba1713694a75da21b3f4cf97a42bab657",
-      "translation": "fd824b3ba1713694a75da21b3f4cf97a42bab657"
+      "source": "2f9c39a527e33f312b2d0914fb008da581913dcc",
+      "translation": "2f9c39a527e33f312b2d0914fb008da581913dcc"
     },
     "common.automatic": {
       "source": "ac9041e76816a34aba228a736ec30da6984c5777",
@@ -5485,6 +7501,10 @@
     "common.cancel": {
       "source": "77dfd2135f4db726c47299bb55be26f7f4525a46",
       "translation": "4d0b4688c787cf6c33c744bdad5f7d7f56b0feee"
+    },
+    "common.close": {
+      "source": "bbfa773e5a63a5ea58c9b6207e608ca0120e592a",
+      "translation": "6c14bd7f6f9e54e46024d35dfe2c4548c9a3821d"
     },
     "common.card.one": {
       "source": "10b93da7c74f93af707c33f1ef412a2a92d9615b",
@@ -5554,9 +7574,41 @@
       "source": "3622410a4a8fab47e39a4f05735ec87c93dcc8ab",
       "translation": "095a6735ba3e8edbd2954eccf3350c14dee7dc09"
     },
-    "notices.baseboardWaitingForBasesData": {
-      "source": "3c0f6a0e8db0a78ea91f32e0e4c56d5f98975b77",
-      "translation": "f33c931c4a8501aa874f4e3d740b0cbc52245c0d"
+    "notices.activeGroupDisabled": {
+      "source": "3ee2ddfc118717219b9bdff68b9a63881ba503d6",
+      "translation": "52f016152457543797b8b97930a30d20169758a4"
+    },
+    "notices.activeGroupEnabled": {
+      "source": "543ef7d617d47b7ba03da5b0d6a6ddb943da4e3a",
+      "translation": "1cfba6b23ccbb1b96e0da9a842806bae2deb6f5b"
+    },
+    "notices.activeGroupReadOnly": {
+      "source": "722dca50e751da27f4cc180c968d27bc6b7b979e",
+      "translation": "a92233fa469da015abc56947e307664446a57a28"
+    },
+    "notices.activeGroupTaskUpdateUnavailable": {
+      "source": "10a28d58ca6af418d08842620939e4b640eac556",
+      "translation": "0d70bb25dc1a316bbc51f6651ae70121934f74fb"
+    },
+    "notices.activeGroupUpdated": {
+      "source": "c78ad3455f76a36acf79433077e4c7363eb7a4dd",
+      "translation": "636144cce11bcee4d0ac3d7d9dad9b0bd9ecad65"
+    },
+    "notices.activeGroupActionRun": {
+      "source": "110af2d8e5e5717d2228f4a7223089953331156f",
+      "translation": "868aa51fc374cb5dd1187c5006d8333596acf5ef"
+    },
+    "notices.activeGroupActionNotTask": {
+      "source": "e9800a314aadaf3027a58a9310b41bd14e506b9e",
+      "translation": "6df4e059e1ba0c5e63cdce8704e926dcf9a46cd7"
+    },
+    "notices.activeGroupActionUnavailable": {
+      "source": "05b9d79c120ed0021290e290c62df0026f9377da",
+      "translation": "3c9ac371ea7f6214e3b8f1f36dbfc9d35ef39e61"
+    },
+    "notices.canvasBasesWaitingForBasesData": {
+      "source": "a0bb20a5f9df7dc64407bc0329f524337231951c",
+      "translation": "0a7c3886b2446baeed7eab48e55cb39330382b5b"
     },
     "notices.couldNotAddPropertyLink": {
       "source": "1432c25d668ca971f8de44c270644b9171220c5f",
@@ -5569,6 +7621,10 @@
     "notices.couldNotRemovePropertyLink": {
       "source": "b2ad9dc15ce642c0ef1c526df2a34ff9afbf61ab",
       "translation": "218e0e11a7cac2daf9f4feea75623f5b88ebe55d"
+    },
+    "notices.couldNotUpdateActiveGroup": {
+      "source": "b18b656c33b1d709f665d2396ab76cc2731cd357",
+      "translation": "1f9bca1416eab4443795e1b69c6f9448ec35ce96"
     },
     "notices.couldNotUpdateLink": {
       "source": "70ceafd6c4531892fd867c3590de60b6f00c5cca",
@@ -5591,12 +7647,12 @@
       "translation": "5cb2df5e802dc4dc1c2d12fc074b7b5e8536e2ee"
     },
     "notices.obsidianVersionRequired": {
-      "source": "626c430316d0f7bf4ce74ea6089bb45a34f9d28d",
-      "translation": "82ea34ff474e8d4d33e75a5fa0b605c70feac9e7"
+      "source": "62e440f2994ac4d9287d34ca774d3c0ac02667d0",
+      "translation": "bd5e65001c2b1397f3bf9f96f280673789375394"
     },
-    "notices.openBaseboardViewFirst": {
-      "source": "71e797527713fc1278a569c7263ddda3a7cf5aa3",
-      "translation": "02e54a6378bb5bb54364976703a7a3a9b8f2d2c4"
+    "notices.openCanvasBasesViewFirst": {
+      "source": "ec0fd2571fc9d44a9938a201360905c6f2f241b7",
+      "translation": "e76efc7b68b411365367f690c1dc0b7830b52347"
     },
     "notices.openBasesViewFirst": {
       "source": "da610fcbcddaf8f9408853df43a17500fe7d6491",
@@ -5631,8 +7687,8 @@
       "translation": "4a043eb99965761255ed5ae64b3b885f481f64f5"
     },
     "notices.starterFilesReady": {
-      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
-      "translation": "c89b4cdf5aee1ea20cc4aab2096650798c16cf9b"
+      "source": "96d0354a4f9aff5832c826fe766f079b9795f60f",
+      "translation": "a618a41bd87604abdd91ae2c00f7cd4afc48a112"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -5647,8 +7703,8 @@
       "translation": "753c47f2cd6d413a75c2fcfeb9829fdf8024b787"
     },
     "settings.defaults.canvasFolder.description": {
-      "source": "f5451548720b3d7c048f929105140ad491b1a8d9",
-      "translation": "bb689ca6b3979334933bb17aef6d43d51d3d0ebc"
+      "source": "71b9f60c887e59721ed65a9ab0420ebab642d172",
+      "translation": "01285dda67298b2e8fb56fad1ccd5322982b11d8"
     },
     "settings.defaults.layout.name": {
       "source": "2ae3a9285af610786a6931294c6c13b82d1d24ba",
@@ -5679,8 +7735,8 @@
       "translation": "05066bb9470c57c9c17910fcb8013baaa0b3dc98"
     },
     "settings.defaults.bodyEditor.description": {
-      "source": "028774d660a4263a07cafb0d93477930fe30b5f5",
-      "translation": "5240bd9490d9227fe9cf90fe2b5493ddcaf5a5fe"
+      "source": "83a3799e10b83484407723be11a9e6a3afafa06e",
+      "translation": "7dcd4a3286f857b55a46fec33eac3beeb767c3d8"
     },
     "settings.tasknotes.heading": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
@@ -5691,8 +7747,8 @@
       "translation": "71ae2db406980c7241e401ea15aad4136668fb8f"
     },
     "settings.tasknotes.integration.description": {
-      "source": "5312d39ae6ad1b8e203c70afff6a9adefa92152e",
-      "translation": "278af8874302d23eeb4611ee0cf955b616f32eed"
+      "source": "d7ec0c5cad9da592c0a24d542f697ba3404cf6ce",
+      "translation": "f5e1063cc5d10a3b85fc4f79cad65c65c40597e4"
     },
     "settings.tasknotes.badges.name": {
       "source": "4a47f1e139d831149e20d0ad3fc59b8ed7c5561c",
@@ -5727,16 +7783,16 @@
       "translation": "0ff69736af68dad1378bd0fbb0d850f23d87f6c9"
     },
     "settings.updateRules.preservePositions.description": {
-      "source": "1b9508fd361ceb9e78fa27281844f94f178a7f25",
-      "translation": "02b984d8f6d413a1d6d7956df52251c00ac810dc"
+      "source": "b3b4dadbea9eab0fa344d7530d9f97919713252d",
+      "translation": "cfb018d3b14e56ba052b49d4bffdb20715c2b1f4"
     },
     "settings.updateRules.removeMissingNotes.name": {
       "source": "69a07189d1ee6ce5c99533af82a2ae60086e729f",
       "translation": "3359103afdb6c433be8016c1facc3a31171c6a88"
     },
     "settings.updateRules.removeMissingNotes.description": {
-      "source": "26b3763b21644b0ebb40fb59e01de831c1074983",
-      "translation": "8f14c4c0d43d26c10910751aad89ad482671e617"
+      "source": "240f89454d4d6acdbb25caa4aaa6e8f928bd2a93",
+      "translation": "666319035fcb7e08f2f01cbddd8143524dbc12f3"
     },
     "settings.updateRules.nodeWidth.name": {
       "source": "08cf7bca56d478d335b2b9c3d0e184058dbb307f",
@@ -5759,16 +7815,16 @@
       "translation": "d5d8edd12c086fe7b4f8111054448f345bd82d19"
     },
     "settings.language.description": {
-      "source": "b74f44cb84d7bfdef24613db569d51c614767eb4",
-      "translation": "0401ced7f531bd2e5ab40151c791a9a820f6c12e"
+      "source": "633464233e79b995420f421284352c663c15891f",
+      "translation": "672c8aaec2ee7af837cd8fa2bb2365ed248331dd"
     },
     "settings.language.name": {
       "source": "5a28c99d6d38a7489e8b1ab06a11507f8c6fd47f",
       "translation": "d5d8edd12c086fe7b4f8111054448f345bd82d19"
     },
     "settings.language.dropdownDescription": {
-      "source": "601ea9a888accf03523827b9afb9b89b90c4b8f2",
-      "translation": "2b007fb93f680eb4a0ccd76f176458cb92094ea5"
+      "source": "a95dba96cbb2d657f0e30a30f916dfe3c564006f",
+      "translation": "0799e844bba2d3bdee0057bd462a3d6d5cc8d18a"
     },
     "options.layout.columns": {
       "source": "b337287f17401eb2db30ece3f3a3094217b413e0",
@@ -5837,6 +7893,14 @@
     "tasknotes.badges.tracked": {
       "source": "f453f5a887e880559f39d177175012d7adad9ac4",
       "translation": "d9329e1baa5188394e5b34a139dfef8847558c30"
+    },
+    "tasknotes.badges.tracking": {
+      "source": "e81a151bd05091f9935dc3aba219eed346e7bb4f",
+      "translation": "47382036b23e1e4fb6e2776be32620031cc3bbb5"
+    },
+    "tasknotes.badges.active": {
+      "source": "a733b809d2f1233496ab516eed0f3ef75cf3791a",
+      "translation": "b2548636f02421de877c4d9529669f090be25f36"
     },
     "tasknotes.relationships.blocks": {
       "source": "f7d5b2b95861daea9933ef0a243f733bbc79235e",
@@ -5911,8 +7975,8 @@
       "translation": "fe62319a0ad4fff0fe56607e3a4c9232921b08a6"
     },
     "modal.preservePositions.description": {
-      "source": "4a70addb3cb30a12a488bed407561b96691cc9d9",
-      "translation": "1acbb126feedf86dddf1cf412f64cb55245cebb9"
+      "source": "8d4dc77a9baaffd0251d451574986fa97e201bc4",
+      "translation": "d43218c3b0617252bd6690402e460558ab5a4efe"
     },
     "modal.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -5933,6 +7997,10 @@
     "view.toolbar.addGroup": {
       "source": "2fca464f9c8925cc89e35205360e2f82ff3ec122",
       "translation": "cf911c2d5e935e7f6e0f306502eea6452858d1ae"
+    },
+    "view.toolbar.addZone": {
+      "source": "0279d7313189283e312b36e83d146afe76680db9",
+      "translation": "39b1a67f14272e11a4e99bdb382138329d72b1b5"
     },
     "view.toolbar.createCanvas": {
       "source": "ceaa8d22da19e4d9376ccc7e2f9ee91cb2177ef1",
@@ -5978,6 +8046,18 @@
       "source": "97a4c03fcf8ded4ca4a69c0e1872812f851df8b4",
       "translation": "78a98ea5b79602b518018a1cb307dc1dddadd120"
     },
+    "view.card.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "8ef4886033563ed64e136bb380e5179d05dc0af1"
+    },
+    "view.card.noteColor": {
+      "source": "a5dad58668b83243fa855c04a906abfe710e0e45",
+      "translation": "b389337edeee42056de6f33edbc094eca77f6de5"
+    },
+    "view.card.cardColor": {
+      "source": "2e1a93636a6096741d5aa40a98132acfbd75228a",
+      "translation": "e180d649aab2a15eba3cc008264cb5418ee6fde1"
+    },
     "view.card.editCard": {
       "source": "2077c3c7a6d79624a6ca217d30e63e1e6a54f0ce",
       "translation": "ba25d3036c6a42bf1ddb2d0eebaa68b8623d2eae"
@@ -5990,6 +8070,178 @@
       "source": "205081ba5c86bd07bc3e316c24129cfff9e163aa",
       "translation": "48b356e907807589ee484a4633dcd0c413824790"
     },
+    "view.linkDrag.releaseToLink": {
+      "source": "30af734941bdbde5e74a5d1adf918177098219d7",
+      "translation": "59c150553fa8ce10577a83f531c101814860a9dc"
+    },
+    "view.linkDrag.dragToCard": {
+      "source": "088156c3eaba8c07599a1843e385a4f41fa2ef47",
+      "translation": "33663054af727de4bd33bdc56cd9245b9a971f41"
+    },
+    "view.linkDrag.cannotLinkHere": {
+      "source": "e0ce0f06b21166f101163697a47707264e78c650",
+      "translation": "08da454f1b0b6e974ba2c70fe419db3bda9be671"
+    },
+    "view.group.active": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "17fc93c9cdbb4eddbcd6e63e3a938768906643b9"
+    },
+    "view.group.activeTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "012ab468922d48beb478ccabbed602ea7e9a7ddc"
+    },
+    "view.group.zoneTitle": {
+      "source": "b54abf69f0ab7ee3a19b2e594daa3db86fa29519",
+      "translation": "012ab468922d48beb478ccabbed602ea7e9a7ddc"
+    },
+    "view.group.label": {
+      "source": "74341e3c271df3c784e595b804b1f90be0f80429",
+      "translation": "ae0a7afecee1e83d27e322e287cb9bf351ea0018"
+    },
+    "view.group.action": {
+      "source": "f4e4cb8146eebbf05fc00860419e8d9b9f1b67c2",
+      "translation": "e69b1caa308355a670205741da4f90d019824b7c"
+    },
+    "view.group.actionSetProperty": {
+      "source": "0072a167d4fee18c3b8d259bada3014dff641371",
+      "translation": "ced141b23d426b96017dc83857699d5cc688dc58"
+    },
+    "view.group.actionCompleteTask": {
+      "source": "af20ec58720a70b4d05fb78d3500c7af26fd37b8",
+      "translation": "a545b0ae00e2c1460727b606d24829d81b8337d9"
+    },
+    "view.group.actionUncompleteTask": {
+      "source": "79d6acda2f4e9574ebfeaee4447459b59683d2b3",
+      "translation": "c90a3f8a0a369363859b9e83151ec36b865f54d0"
+    },
+    "view.group.actionArchiveTask": {
+      "source": "03d82ba7907ae1c9c34b442b8de36b436a13fc99",
+      "translation": "27e0430c3fa27588c890279d4d67ad19fd2739e4"
+    },
+    "view.group.actionUnarchiveTask": {
+      "source": "bcd2c2d3ea900f171fe4e4babedbcd5826838fb2",
+      "translation": "683ec14be3c549a5da05bf7cab89f39e3ff3cb26"
+    },
+    "view.group.actionStartTimeTracking": {
+      "source": "7151516a05b9f16fd6d876ce009551328cdfeff2",
+      "translation": "df45ee7a3e28b1ca7625b0c2a13d890c668ea0cb"
+    },
+    "view.group.actionStopTimeTracking": {
+      "source": "d830f5133dafe2f2c8325d37811c4901efa364a8",
+      "translation": "ec022927de349f4cf9e878fd93540459190d0b12"
+    },
+    "view.group.actionStartPomodoro": {
+      "source": "b5924c20fa7da66235c95fdded5c9529a11a4a73",
+      "translation": "25d787121d2f9bfe0d8825779aa3979bef3b0403"
+    },
+    "view.group.actionAssignPomodoro": {
+      "source": "5ed2c0b7fa74e11f2bb31db18d7c967fe7afa527",
+      "translation": "6fd379ee2b99215f336a2d7354df4ac3a3963fd0"
+    },
+    "view.group.actionCompleteRecurring": {
+      "source": "eb2125c7238d7f8f35434a16a3be08a912794eb4",
+      "translation": "4ec9a26a0be3a5a47079e15599af34bd7bf094fa"
+    },
+    "view.group.actionSkipRecurring": {
+      "source": "9648841dc8789017f672c117b1bc754d5cc08b29",
+      "translation": "a80763128e9bfddad6e582a2cca3e2e38a99f4df"
+    },
+    "view.group.property": {
+      "source": "9ae33a7d0ecb82cae8f04aafab20bf90425b7b8c",
+      "translation": "7d3c35c29be1de8ba8a6f6264e192a7af157dc29"
+    },
+    "view.group.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "321b9558401af330d73e93000b3531dce683f5d7"
+    },
+    "view.group.updateMode": {
+      "source": "9fac6527645ba5d4025a166d382ef4f52305083e",
+      "translation": "67f2e08bf1828a174995aae3df68187a8f995fa0"
+    },
+    "view.group.valueType": {
+      "source": "a956485e60c24642bdc24465480775891fba80d6",
+      "translation": "5d6dd202102dd4e81bca03ed7bad17fafbe6f3d7"
+    },
+    "view.group.updateModeReplace": {
+      "source": "a7cf7b25a703b308887c7f1d100c4326ef20ac46",
+      "translation": "855241c2854e257828275be60d63bad5bd4d8391"
+    },
+    "view.group.updateModeAppend": {
+      "source": "6b3a602280be24f5c0e41945a5a73a105b0c54c4",
+      "translation": "aec344de806dc4871614deaf704480590f1381f4"
+    },
+    "view.group.updateModeAppendUnique": {
+      "source": "2cc8d9f9c0ab46208ea57f674730cb6e4bd8a49f",
+      "translation": "ca9a61a583c297f2b6dab9f4b4a53d5bb88b4d5d"
+    },
+    "view.group.updateModeRemove": {
+      "source": "e963907dac5cd5c017869b4c96c18021c9bd058b",
+      "translation": "2f752c005ec521940cd977683a49c605583b1cad"
+    },
+    "view.group.updateModeClear": {
+      "source": "719ea396ad92e01b4757ec2b93bb1e5f270f771d",
+      "translation": "7b15e5e8e7bda5ece3f82851b01a16b714249b79"
+    },
+    "view.group.valueTypeAuto": {
+      "source": "c614ba7c453cdcd4d21b20e8286c6266c891e0c6",
+      "translation": "4afad877551a683ce4f3f12055e4df6ac5c40e59"
+    },
+    "view.group.valueTypeString": {
+      "source": "c3328c39b0e29f78e9ff45db674248b1d245887d",
+      "translation": "f1926e9b33650893f6e5a2d320cd14aed889746c"
+    },
+    "view.group.valueTypeNumber": {
+      "source": "b7baa1d40c4ea29afc9098732bffee2a861a6c44",
+      "translation": "7a4dc8253fd420cee852eed179e0e64c0c9bc767"
+    },
+    "view.group.valueTypeBoolean": {
+      "source": "b76ff4906f33c2dd97ddd929b9662ba8cac6174c",
+      "translation": "642a2c8a3469b4ffdce55c5a4f6fc9de65a81b86"
+    },
+    "view.group.valueTypeDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "b6fed9af8313ea3fab6a53f69e71c08f17dd4d3e"
+    },
+    "view.group.valueTypeList": {
+      "source": "a1fffaaafb7cc996685bceb829c053cc4f7de43d",
+      "translation": "d46f82fdf0737a98342dd7ecacdf6d14e30ac868"
+    },
+    "view.group.color": {
+      "source": "1d0c8304baedcf8e3a78982c2e7c0b04622bf2a0",
+      "translation": "8ef4886033563ed64e136bb380e5179d05dc0af1"
+    },
+    "view.group.writeRule": {
+      "source": "e42f054b2974ad83a5bca96ea87112514fc83db3",
+      "translation": "beb3d7a063ee6240846abf37987e62c49a21dc93"
+    },
+    "view.group.groupRuleLocked": {
+      "source": "7c7a4212647e7154812f9a90ce62b149d303f8f0",
+      "translation": "8e139daf68bd9fa18fe236dcb822ade44bb8ee6e"
+    },
+    "view.group.dropResult": {
+      "source": "d8a8bf37c90d50fa26abe4b297b441f27d0daf28",
+      "translation": "0449690a82644d52b50301e39029a418622f8184"
+    },
+    "view.group.previewWrite": {
+      "source": "c077f564847fdb1c70258590955e163d391893ba",
+      "translation": "c077f564847fdb1c70258590955e163d391893ba"
+    },
+    "view.group.previewClear": {
+      "source": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868",
+      "translation": "57cd3937e5bf2b88ca9dec0f75b6fdb6ad346868"
+    },
+    "view.group.previewAction": {
+      "source": "34c09447a51c35c7878c0c125d9d874bf088c266",
+      "translation": "34c09447a51c35c7878c0c125d9d874bf088c266"
+    },
+    "view.group.emptyValue": {
+      "source": "2464254a17a92aba20f96b8a0216d88b9ef8c15e",
+      "translation": "f152f11965b985860ca22f4de6a2f76d69310103"
+    },
+    "view.group.propertyRequired": {
+      "source": "6dbff942a005991d025fe9fe4223de5ef4c1d778",
+      "translation": "0dc932934675a6530cdf17ae2142efd7ba82c8f0"
+    },
     "view.group.createTitle": {
       "source": "5a0b1c170fd55ab07e5656625be963d20baa107a",
       "translation": "23639dcfbd052391e82ddaf0a0dfece2c1fbd8ff"
@@ -5998,9 +8250,17 @@
       "source": "171a0606f7c74580fd3982cf57c49d604104120a",
       "translation": "97d8a6c05b4c5c7d73d223d4d72b4356c21437bc"
     },
+    "view.group.defaultZoneName": {
+      "source": "03efccb49f3ff5f0055a644eae98835dda00b789",
+      "translation": "17fc93c9cdbb4eddbcd6e63e3a938768906643b9"
+    },
     "view.group.create": {
       "source": "6e157c5da4410b7e9de85f5c93026b9176e69064",
       "translation": "fcbd0932929ec7e69950f1e10d6a420ce61c89f5"
+    },
+    "view.group.createZone": {
+      "source": "5ae01175f207c3086ef197de15b6774a80b7d9d2",
+      "translation": "bb0d0956447adcc9adafa1eac03d31b0b40f0724"
     },
     "view.group.renameTitle": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -6009,6 +8269,10 @@
     "view.group.rename": {
       "source": "d3f4cb898fbe0c7a7ac4f721438c4c26ad1a2513",
       "translation": "1cd80fd7a8b3284ae2b931b08c4dbe1cf3d53eba"
+    },
+    "view.group.saveActiveGroup": {
+      "source": "59d37aff09d7712a8992f239782c3701a39202da",
+      "translation": "fcde0d06e1608eb185322eb39660687957d538ea"
     },
     "view.tooltips.dragGroup": {
       "source": "065496384324625b4929926e7d4fea9a68c0f996",
@@ -6062,6 +8326,14 @@
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "b44ad0c86e07b0a68d93b5945847043c747048e6"
     },
+    "view.menu.setCardColor": {
+      "source": "f5b3969bb8b4d7f0704d9023076541ca1942fefe",
+      "translation": "23fa4142361be70a7349534773f19834d2b96d36"
+    },
+    "view.menu.clearCardColor": {
+      "source": "5519c8e0cba7397fb5b70018b49243e44d81e08b",
+      "translation": "7a4defe30aca9b2380d8ae86184544610771d0be"
+    },
     "view.menu.addPinnedNote": {
       "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
       "translation": "d48f478057fb4bd73a13e05d2bffcf9784a33b4d"
@@ -6069,6 +8341,18 @@
     "view.menu.addCard": {
       "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
       "translation": "ab89692a677dbd474342fbe1e458a8284ddf49f1"
+    },
+    "view.menu.activateGroup": {
+      "source": "a0a89785e4181d8466357a8e797aa78a19bd4a7d",
+      "translation": "ad4c02a722c51de5447e91df06f15595a9956064"
+    },
+    "view.menu.configureActiveGroup": {
+      "source": "73ff54e48b0bc7121621fefd6089e39256211683",
+      "translation": "c26f9378810b6147393d20eef0814130453ece97"
+    },
+    "view.menu.deactivateActiveGroup": {
+      "source": "cb837ab369794b8a7f98fbcc5fc901718d2d9dbf",
+      "translation": "b0116185406aea5b82af156356d68a4958e79e41"
     },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -6078,9 +8362,17 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "35c6d23953b12af592bd10f7d58e7138e8b94ddc"
     },
+    "view.menu.fitGroupToCards": {
+      "source": "ed58a1c5ccee1fba89ebae6845be5f32d6c733c9",
+      "translation": "0b9a74f3012eb66dd0e10c96b7bbd7639cabe18a"
+    },
     "view.menu.createGroupFromSelection": {
       "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
       "translation": "61135f27780bf3918806f86d30789efeaa68f39a"
+    },
+    "view.menu.createZoneFromSelection": {
+      "source": "807de5535ed0ad5a5d983eacb9ff3716d878dc4e",
+      "translation": "028852f0fa9a4269cce82bbbf9ea67bc4e9f55e8"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
@@ -6097,6 +8389,18 @@
     "view.menu.sourceSubtaskOfTarget": {
       "source": "a4be670929e3ad0c0348d40116096509101e0f9f",
       "translation": "ce513fd30b1aaa0d3776f9280a5ecf9672b7ee88"
+    },
+    "view.menu.dependencyLinks": {
+      "source": "0562f32dc56f5c702810cbe010068ddd38dbd69a",
+      "translation": "babc4d11ca05f2cbe37d61bb84684afbfbbbae30"
+    },
+    "view.menu.subtaskLinks": {
+      "source": "173312c6e2592de729610a4d319877c9aa8d8b67",
+      "translation": "2a8ce33ff0aaf399d3c99a0b98d76068189bb0c5"
+    },
+    "view.menu.propertyLinks": {
+      "source": "235564256eba212f50846f34e52c0761104dcc03",
+      "translation": "df602226b387265452e801990d841ac51749e648"
     },
     "view.menu.addPropertyLink": {
       "source": "6e295d7b5fe877b5551b4e808062b916dd717df5",

@@ -3,7 +3,7 @@ import type { EmbeddableMarkdownEditor } from "./EmbeddableMarkdownEditor";
 
 type Nullable<T> = T | null;
 
-export interface BaseboardInlineMarkdownEditor {
+export interface CanvasBasesInlineMarkdownEditor {
 	getValue(): string;
 	setValue(value: string): void;
 	focus(): void;
@@ -11,7 +11,7 @@ export interface BaseboardInlineMarkdownEditor {
 	destroy(): void;
 }
 
-export interface BaseboardInlineMarkdownEditorOptions {
+export interface CanvasBasesInlineMarkdownEditorOptions {
 	value: string;
 	placeholder: string;
 	file?: Nullable<TFile>;
@@ -21,16 +21,16 @@ export interface BaseboardInlineMarkdownEditorOptions {
 	onBlur: () => void;
 }
 
-export async function createBaseboardInlineMarkdownEditor(
+export async function createCanvasBasesInlineMarkdownEditor(
 	app: App,
 	container: HTMLElement,
-	options: BaseboardInlineMarkdownEditorOptions
-): Promise<BaseboardInlineMarkdownEditor> {
+	options: CanvasBasesInlineMarkdownEditorOptions
+): Promise<CanvasBasesInlineMarkdownEditor> {
 	const { EmbeddableMarkdownEditor } = await import("./EmbeddableMarkdownEditor");
 	const editor = new EmbeddableMarkdownEditor(app, container, {
 		value: options.value,
 		placeholder: options.placeholder,
-		cls: "baseboard-canvas-file__markdown-editor-view",
+		cls: "canvas-bases-canvas-file__markdown-editor-view",
 		file: options.file ?? null,
 		onChange: options.onChange,
 		onSubmit: () => options.onSubmit(),
@@ -38,10 +38,10 @@ export async function createBaseboardInlineMarkdownEditor(
 		onBlur: () => options.onBlur(),
 	});
 
-	return new BaseboardMarkdownEditorHandle(editor);
+	return new CanvasBasesMarkdownEditorHandle(editor);
 }
 
-class BaseboardMarkdownEditorHandle implements BaseboardInlineMarkdownEditor {
+class CanvasBasesMarkdownEditorHandle implements CanvasBasesInlineMarkdownEditor {
 	constructor(private readonly editor: EmbeddableMarkdownEditor) {}
 
 	getValue(): string {

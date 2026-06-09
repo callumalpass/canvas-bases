@@ -127,7 +127,7 @@ function resolveEditorPrototype(app: App): Constructor<ScrollableMarkdownEditor>
 		throw new Error("Cannot resolve markdown editor prototype without a markdown file.");
 	}
 
-	// @ts-expect-error - Baseboard intentionally uses Obsidian's internal markdown embed editor.
+	// @ts-expect-error - Canvas Bases intentionally uses Obsidian's internal markdown embed editor.
 	const widgetEditorView = app.embedRegistry.embedByExtension.md(
 		{ app, containerEl: getEditorDocument().createElement("div") },
 		prototypeFile,

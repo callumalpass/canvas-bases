@@ -16,25 +16,36 @@ import type {
 	App,
 	BasesAllOptions,
 	BasesViewConfig,
+	DropdownComponent,
 	QueryController,
+	TextComponent,
 } from "obsidian";
-import type BaseboardPlugin from "../plugin";
-import { BASEBOARD_VIEW_TYPE, VIEW_CONFIG_KEYS } from "../constants";
+import type CanvasBasesPlugin from "../plugin";
+import { CANVAS_BASES_VIEW_TYPE, VIEW_CONFIG_KEYS } from "../constants";
 import type {
-	BaseboardEntryPropertySnapshot,
-	BaseboardEntrySnapshot,
-	BaseboardManualGroupSnapshot,
-	BaseboardNodePosition,
-	BaseboardNodePositionMap,
-	BaseboardRelationship,
-	BaseboardTextCardSnapshot,
-	BaseboardViewSnapshot,
+	CanvasBasesEntryPropertySnapshot,
+	CanvasBasesEntrySnapshot,
+	CanvasBasesGroupSnapshot,
+	CanvasBasesManualGroupSnapshot,
+	CanvasBasesNodePosition,
+	CanvasBasesNodePositionMap,
+	CanvasBasesRelationship,
+	CanvasBasesTextCardSnapshot,
+	CanvasBasesViewSnapshot,
+	CanvasBasesZoneAction,
+	CanvasBasesZoneConfig,
+	CanvasBasesZoneUpdateMode,
+	CanvasBasesZoneValueType,
 	MaterializeOptions,
 } from "../types";
-import { buildBaseboardSnapshot } from "./snapshot";
+import { buildCanvasBasesSnapshot } from "./snapshot";
 import type { BasesViewAction } from "./actions";
 import {
-	buildBaseboardCanvas,
+	getCanvasNodeCssColor,
+	normalizeCanvasNodeColor,
+} from "../canvas/colors";
+import {
+	buildCanvasBasesCanvas,
 	getFileNodeId,
 	getManualGroupNodeId,
 	getRelationshipEdgeId,
@@ -49,7 +60,7 @@ import type {
 	CanvasTextNode,
 } from "../canvas/jsonCanvas";
 import { collectRelationships } from "../canvas/relationships";
-import { buildBaseboardEdgeGeometry } from "./edgeGeometry";
+import { buildCanvasBasesEdgeGeometry } from "./edgeGeometry";
 import {
 	applyManualViewItems,
 	createDefaultManualGroup,
@@ -60,6 +71,25 @@ import {
 	setManualNotePaths,
 	setTextCards,
 } from "./manualItems";
+import {
+	DEFAULT_ZONE_LABEL,
+	DEFAULT_ZONE_ACTION,
+	DEFAULT_ZONE_UPDATE_MODE,
+	DEFAULT_ZONE_VALUE_TYPE,
+	ZONE_ACTIONS,
+	ZONE_UPDATE_MODES,
+	ZONE_VALUE_TYPES,
+	getZoneKey,
+	normalizeZoneColor,
+	normalizeZoneAction,
+	normalizeZoneProperty,
+	normalizeZoneUpdateMode,
+	normalizeZoneValueType,
+	normalizeZones,
+	setZones,
+} from "./zones";
+import { applyActiveGroupUpdate } from "./activeGroupUpdates";
+import { getPlanePointFromClient } from "./coordinates";
 import {
 	getSnapshotEntriesByPath,
 	getSnapshotPaths,
@@ -81,11 +111,11 @@ import {
 	normalizeTaskNotesRelationshipMode,
 	splitPropertyList,
 } from "../settings/defaults";
-import type { BaseboardTaskCard, BaseboardTaskPropertyKind } from "../tasknotes/runtime";
+import type { CanvasBasesTaskCard, CanvasBasesTaskPropertyKind } from "../tasknotes/runtime";
 import type { InterpolationValues, TranslateFn } from "../i18n";
 import {
-	createBaseboardInlineMarkdownEditor,
-	type BaseboardInlineMarkdownEditor,
+	createCanvasBasesInlineMarkdownEditor,
+	type CanvasBasesInlineMarkdownEditor,
 } from "../editor/inlineMarkdownEditor";
 
 const MIN_CANVAS_WIDTH = 1200;
@@ -101,6 +131,8 @@ const MIN_TEXT_NODE_HEIGHT = 100;
 const GROUP_HEADER_HEIGHT = 42;
 const GROUP_PADDING = 18;
 const NODE_GAP = 16;
+const DEFAULT_ACTIVE_GROUP_COLOR = "#8b5cf6";
+const DEFAULT_CARD_COLOR = "#8b5cf6";
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 2;
 const ZOOM_STEP = 0.1;
@@ -109,15 +141,18 @@ const FRONT_CARD_Z_INDEX = "20";
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const INLINE_EDITOR_AUTOSAVE_DELAY_MS = 750;
 const INLINE_EDITOR_SAVED_STATUS_DELAY_MS = 1500;
+const LINK_PREVIEW_MIN_TENSION = 48;
+const LINK_PREVIEW_MAX_TENSION = 220;
 const RESIZE_HANDLE_DIRECTIONS = ["n", "ne", "e", "se", "s", "sw", "w", "nw"] as const;
 const SELECTION_DRAG_THRESHOLD = 4;
-const SELECTION_GROUP_PADDING = 24;
 
 type CanvasRenderableNode = CanvasFileNode | CanvasGroupNode | CanvasTextNode;
 type CanvasNodeKind = "file" | "group" | "text";
 type ResizeDirection = (typeof RESIZE_HANDLE_DIRECTIONS)[number];
+type LinkDragInvalidReason = "empty" | "none" | "self";
 
 let nextEdgeMarkerId = 0;
+let nextActiveGroupPropertyListId = 0;
 
 interface DragState {
 	pointerId: number;
@@ -126,8 +161,36 @@ interface DragState {
 	nodes: Array<{
 		id: string;
 		element: HTMLElement | null;
-		startPosition: BaseboardNodePosition;
+		startPosition: CanvasBasesNodePosition;
 	}>;
+}
+
+interface DroppedDragNode {
+	id: string;
+	position: CanvasBasesNodePosition;
+	sourceActiveGroup: ActiveGroupTarget | null;
+}
+
+interface ActiveGroupTarget {
+	id: string;
+	label: string;
+	action: CanvasBasesZoneAction;
+	property: string;
+	value: string;
+	updateMode: CanvasBasesZoneUpdateMode;
+	valueType: CanvasBasesZoneValueType;
+	color?: string;
+	customZoneId?: string;
+}
+
+interface CanvasBasesControllerViewConfig {
+	name?: string;
+	groupBy?: string | { property?: string };
+}
+
+interface CanvasBasesQueryController {
+	query?: { views?: CanvasBasesControllerViewConfig[] };
+	viewName?: string;
 }
 
 interface ResizeState {
@@ -137,7 +200,7 @@ interface ResizeState {
 	id: string;
 	direction: ResizeDirection;
 	element: HTMLElement;
-	startPosition: BaseboardNodePosition;
+	startPosition: CanvasBasesNodePosition;
 	minWidth: number;
 	minHeight: number;
 }
@@ -155,11 +218,12 @@ interface LinkDragState {
 	pointerId: number;
 	sourcePath: string;
 	sourceElement: HTMLElement;
-	sourcePoint: LinkPoint;
 	previewEl: SVGSVGElement;
 	previewPathEl: SVGPathElement;
+	hintEl: HTMLElement;
 	targetElement: HTMLElement | null;
 	targetPath: string | null;
+	invalidReason: LinkDragInvalidReason;
 }
 
 interface LinkPoint {
@@ -172,6 +236,7 @@ interface SelectionState {
 	startClientX: number;
 	startClientY: number;
 	startPoint: LinkPoint;
+	selectionRect: CanvasBasesNodePosition;
 	selectionEl: HTMLElement;
 	selectedNodeIds: Set<string>;
 	didMove: boolean;
@@ -182,7 +247,7 @@ interface CanvasViewportState {
 	scrollTop: number;
 }
 
-interface RenderedBaseboardEdge {
+interface RenderedCanvasBasesEdge {
 	edge: CanvasEdge;
 	groupEl: SVGGElement;
 	pathEl: SVGPathElement;
@@ -195,20 +260,26 @@ interface CanvasRenderState {
 	allNodes: CanvasRenderableNode[];
 	allEdges: CanvasEdge[];
 	groupEntries: Map<string, string[]>;
-	entriesByPath: Map<string, BaseboardEntrySnapshot>;
+	entriesByPath: Map<string, CanvasBasesEntrySnapshot>;
 	filePathsByNodeId: Map<string, string>;
-	manualGroupsByNodeId: Map<string, BaseboardManualGroupSnapshot>;
-	textCardsByNodeId: Map<string, BaseboardTextCardSnapshot>;
-	nodePositions: Map<string, BaseboardNodePosition>;
+	manualGroupsByNodeId: Map<string, CanvasBasesManualGroupSnapshot>;
+	groupsByNodeId: Map<string, CanvasBasesGroupSnapshot>;
+	textCardsByNodeId: Map<string, CanvasBasesTextCardSnapshot>;
+	nodePositions: Map<string, CanvasBasesNodePosition>;
 	planeEl: HTMLElement;
 	bounds: { width: number; height: number };
-	taskCards: Map<string, BaseboardTaskCard>;
-	edgeRelationships: Map<string, BaseboardRelationship>;
+	taskCards: Map<string, CanvasBasesTaskCard>;
+	edgeRelationships: Map<string, CanvasBasesRelationship>;
 }
+
+type ActivatableGroupSnapshot = CanvasBasesGroupSnapshot & {
+	property: string;
+	value: string;
+};
 
 interface InlineEditorState {
 	path: string;
-	editor: BaseboardInlineMarkdownEditor;
+	editor: CanvasBasesInlineMarkdownEditor;
 	shellEl: HTMLElement;
 	statusEl: HTMLElement;
 	original: string;
@@ -220,10 +291,11 @@ interface InlineEditorState {
 	externalConflict: boolean;
 }
 
-export class BaseboardView extends BasesView {
-	readonly type = BASEBOARD_VIEW_TYPE;
-	private readonly plugin: BaseboardPlugin;
-	private readonly edgeMarkerId = `baseboard-edge-arrow-${nextEdgeMarkerId++}`;
+export class CanvasBasesView extends BasesView {
+	readonly type = CANVAS_BASES_VIEW_TYPE;
+	private readonly plugin: CanvasBasesPlugin;
+	private readonly queryController: CanvasBasesQueryController;
+	private readonly edgeMarkerId = `canvas-bases-edge-arrow-${nextEdgeMarkerId++}`;
 	private readonly containerEl: HTMLElement;
 	private rootEl: HTMLElement | null = null;
 	private dragState: DragState | null = null;
@@ -238,15 +310,16 @@ export class BaseboardView extends BasesView {
 	private edgeLayerEl: SVGSVGElement | null = null;
 	private canvasNodeElements = new Map<string, HTMLElement>();
 	private inlineEditors = new Map<string, InlineEditorState>();
-	private renderedEdges: RenderedBaseboardEdge[] = [];
+	private renderedEdges: RenderedCanvasBasesEdge[] = [];
 	private frontCardEl: HTMLElement | null = null;
 	private selectedNodeIds = new Set<string>();
+	private activeGroupDropTargetIds = new Set<string>();
 	private canvasBounds: { width: number; height: number } | null = null;
 	private canvasRenderState: CanvasRenderState | null = null;
 	private taskEdgeCache: {
 		key: string;
 		edges: CanvasEdge[];
-		relationships: BaseboardRelationship[];
+		relationships: CanvasBasesRelationship[];
 	} | null = null;
 	private zoom = 1;
 	private renderFrame: number | null = null;
@@ -265,9 +338,10 @@ export class BaseboardView extends BasesView {
 	private deferredInlineEditorRender = false;
 	private renderToken = 0;
 
-	constructor(controller: QueryController, containerEl: HTMLElement, plugin: BaseboardPlugin) {
+	constructor(controller: QueryController, containerEl: HTMLElement, plugin: CanvasBasesPlugin) {
 		super(controller);
 		this.plugin = plugin;
+		this.queryController = controller as CanvasBasesQueryController;
 		this.containerEl = containerEl;
 	}
 
@@ -304,12 +378,17 @@ export class BaseboardView extends BasesView {
 	}
 
 	onDataUpdated(): void {
-		const renderSignature = this.getRenderSignature();
+		const snapshot = this.getSnapshot();
+		const renderSignature = snapshot ? this.getRenderSignature(snapshot) : null;
 		if (renderSignature && renderSignature === this.lastRenderSignature) {
 			return;
 		}
 
 		if (this.hasFocusedInlineEditor()) {
+			if (snapshot) {
+				this.refreshRenderedCardProperties(snapshot);
+				void this.refreshRenderedTaskCardsForPaths(getSnapshotPaths(snapshot));
+			}
 			this.deferredInlineEditorRender = true;
 			return;
 		}
@@ -319,6 +398,11 @@ export class BaseboardView extends BasesView {
 
 	private async handleVisibleFileChanged(path: string): Promise<void> {
 		await this.refreshInlineEditorsForPaths([path]);
+		const snapshot = this.getSnapshot();
+		if (snapshot) {
+			this.refreshRenderedCardProperties(snapshot, [path]);
+			void this.refreshRenderedTaskCardsForPaths([path]);
+		}
 		this.onDataUpdated();
 	}
 
@@ -336,11 +420,11 @@ export class BaseboardView extends BasesView {
 		this.rootEl.focus({ preventScroll: true });
 	}
 
-	getSnapshot(): BaseboardViewSnapshot | null {
+	getSnapshot(): CanvasBasesViewSnapshot | null {
 		if (!this.data || !this.config) return null;
 		const snapshot = applyManualViewItems(
 			this.app,
-			buildBaseboardSnapshot(this.data, this.config),
+			buildCanvasBasesSnapshot(this.data, this.config, this.getGroupByPropertyId()),
 			this.config
 		);
 		return applyStoredNodePositions(
@@ -349,7 +433,7 @@ export class BaseboardView extends BasesView {
 		);
 	}
 
-	getMaterializationSnapshot(): BaseboardViewSnapshot | null {
+	getMaterializationSnapshot(): CanvasBasesViewSnapshot | null {
 		const snapshot = this.getSnapshot();
 		if (!snapshot) return snapshot;
 
@@ -360,6 +444,374 @@ export class BaseboardView extends BasesView {
 				...Object.fromEntries(this.getRenderedNodePositions()),
 			}
 		);
+	}
+
+	private getGroupByPropertyId(): string | null {
+		const views = this.queryController.query?.views;
+		const viewName = this.queryController.viewName ?? this.config?.name;
+		if (!views || !viewName) return null;
+
+		const view = views.find((candidate) => candidate?.name === viewName);
+		return normalizeGroupByProperty(view?.groupBy);
+	}
+
+	private getZones(): CanvasBasesZoneConfig[] {
+		if (!this.config) return [];
+
+		return normalizeZones(this.config.get(VIEW_CONFIG_KEYS.zones));
+	}
+
+	private getDataZoneConfig(
+		group: CanvasBasesGroupSnapshot | undefined
+	): CanvasBasesZoneConfig | null {
+		if (!group?.property || typeof group.value !== "string") return null;
+
+		const key = getZoneKey("bases", group.property, group.value);
+		return (
+			this.getZones().find(
+				(zone) =>
+					zone.origin === "bases" &&
+					getZoneKey("bases", zone.property, zone.value) === key
+			) ?? null
+		);
+	}
+
+	private getCustomZoneConfig(
+		group: CanvasBasesManualGroupSnapshot | undefined
+	): CanvasBasesZoneConfig | null {
+		if (!group) return null;
+
+		return (
+			this.getZones().find((zone) => zone.origin === "custom" && zone.id === group.id) ?? null
+		);
+	}
+
+	private isActiveGroup(group: CanvasBasesGroupSnapshot | undefined): boolean {
+		return this.getDataZoneConfig(group) !== null;
+	}
+
+	private isManualGroupActive(group: CanvasBasesManualGroupSnapshot | undefined): boolean {
+		return this.getCustomZoneConfig(group) !== null;
+	}
+
+	private getActiveGroupTargetForDataGroup(
+		group: CanvasBasesGroupSnapshot | undefined
+	): ActiveGroupTarget | null {
+		const config = this.getDataZoneConfig(group);
+		if (!group?.property || typeof group.value !== "string" || !config) return null;
+
+			return {
+				id: group.id,
+				label: group.label,
+				action: DEFAULT_ZONE_ACTION,
+				property: group.property,
+				value: group.value,
+				updateMode: config.updateMode,
+			valueType: config.valueType,
+			color: config.color,
+		};
+	}
+
+	private getActiveGroupTargetForManualGroup(
+		group: CanvasBasesManualGroupSnapshot | undefined
+	): ActiveGroupTarget | null {
+		const config = this.getCustomZoneConfig(group);
+		if (!group || !config) return null;
+
+			return {
+				id: getManualGroupNodeId(group.id),
+				label: config.label ?? group.label,
+				action: config.action,
+				property: config.property,
+				value: config.value,
+				updateMode: config.updateMode,
+			valueType: config.valueType,
+			color: config.color,
+			customZoneId: group.id,
+		};
+	}
+
+	private canActivateGroup(
+		group: CanvasBasesGroupSnapshot | undefined
+	): group is ActivatableGroupSnapshot {
+		return Boolean(
+			group?.property &&
+				typeof group.value === "string" &&
+				isWritableActiveGroupProperty(group.property)
+		);
+	}
+
+	private activateGroup(group: CanvasBasesGroupSnapshot): void {
+		if (!this.config || !this.canActivateGroup(group)) return;
+
+		const key = getZoneKey("bases", group.property, group.value);
+		const zones = this.getZones();
+		if (
+			!zones.some(
+				(zone) =>
+					zone.origin === "bases" &&
+					getZoneKey("bases", zone.property, zone.value) === key
+			)
+		) {
+			setZones(this.config, [
+				...zones,
+						{
+							origin: "bases",
+							action: DEFAULT_ZONE_ACTION,
+							property: normalizeZoneProperty(group.property),
+							value: group.value,
+							updateMode: DEFAULT_ZONE_UPDATE_MODE,
+					valueType: DEFAULT_ZONE_VALUE_TYPE,
+				},
+			]);
+		}
+		this.scheduleRender();
+		new Notice(this.t("notices.activeGroupEnabled", { label: group.label }));
+	}
+
+	private deactivateGroup(group: CanvasBasesGroupSnapshot): void {
+		if (!this.config || !group.property || typeof group.value !== "string") return;
+
+		const key = getZoneKey("bases", group.property, group.value);
+		setZones(
+			this.config,
+			this.getZones().filter(
+				(zone) =>
+					zone.origin !== "bases" ||
+					getZoneKey("bases", zone.property, zone.value) !== key
+			)
+		);
+		this.scheduleRender();
+		new Notice(this.t("notices.activeGroupDisabled", { label: group.label }));
+	}
+
+	private configureDataActiveGroup(
+		group: CanvasBasesGroupSnapshot,
+		updateMode: CanvasBasesZoneUpdateMode,
+		valueType: CanvasBasesZoneValueType,
+		color: string
+	): void {
+		if (!this.config || !group.property || typeof group.value !== "string") return;
+
+		const key = getZoneKey("bases", group.property, group.value);
+		const zones = this.getZones();
+		const nextZones: CanvasBasesZoneConfig[] = zones.some(
+			(zone) =>
+				zone.origin === "bases" &&
+				getZoneKey("bases", zone.property, zone.value) === key
+		)
+			? zones.map((zone) =>
+					zone.origin === "bases" &&
+					getZoneKey("bases", zone.property, zone.value) === key
+						? { ...zone, updateMode, valueType, color }
+						: zone
+				)
+			: [
+					...zones,
+					{
+							origin: "bases" as const,
+							action: DEFAULT_ZONE_ACTION,
+							property: normalizeZoneProperty(group.property),
+							value: group.value,
+							updateMode,
+						valueType,
+						color,
+					},
+				];
+		setZones(this.config, nextZones);
+		this.scheduleRender();
+	}
+
+	private fitDataGroupToMembers(group: CanvasBasesGroupSnapshot): void {
+		if (!this.config || !this.canvasRenderState) return;
+
+		const memberPositions = this.getDataGroupMemberPositions(group);
+		const nextPosition = getBoundingGroupPosition(memberPositions);
+		if (!nextPosition) return;
+
+		const nodePositions = this.getNodePositions();
+		nodePositions[group.id] = nextPosition;
+		this.canvasRenderState.nodePositions.set(group.id, nextPosition);
+		this.setNodePositions(nodePositions);
+
+		const groupEl = this.canvasNodeElements.get(group.id);
+		if (groupEl) {
+			setNodeGeometry(groupEl, nextPosition);
+		}
+		this.updateEdgeLayerGeometry();
+		this.refreshGroupContainment();
+	}
+
+	private canFitDataGroupToMembers(group: CanvasBasesGroupSnapshot): boolean {
+		return this.getDataGroupMemberPositions(group).length > 0;
+	}
+
+	private getDataGroupMemberPositions(group: CanvasBasesGroupSnapshot): CanvasBasesNodePosition[] {
+		const state = this.canvasRenderState;
+		if (!state) return [];
+
+		return group.entries
+			.map((entry) => state.nodePositions.get(getFileNodeId(entry.path)))
+			.filter((position): position is CanvasBasesNodePosition => Boolean(position));
+	}
+
+	private configureManualActiveGroup(
+		group: CanvasBasesManualGroupSnapshot,
+		action: CanvasBasesZoneAction,
+		property: string,
+		value: string,
+		updateMode: CanvasBasesZoneUpdateMode,
+		valueType: CanvasBasesZoneValueType,
+		color: string
+	): void {
+		if (!this.config) return;
+
+		const normalizedAction = normalizeZoneAction(action);
+		const normalizedProperty = normalizedAction === DEFAULT_ZONE_ACTION
+			? normalizeZoneProperty(property)
+			: "";
+		if (
+			normalizedAction === DEFAULT_ZONE_ACTION &&
+			(!normalizedProperty || !isWritableActiveGroupProperty(normalizedProperty))
+		) {
+			new Notice(this.t("notices.activeGroupReadOnly"));
+			return;
+		}
+
+		setManualGroups(
+			this.config,
+			this.getManualGroups().map((manualGroup) =>
+				manualGroup.id === group.id ? { ...manualGroup, label: group.label } : manualGroup
+			)
+		);
+		setZones(this.config, [
+			...this.getZones().filter((zone) => zone.origin !== "custom" || zone.id !== group.id),
+				{
+					origin: "custom",
+					id: group.id,
+					label: group.label,
+					action: normalizedAction,
+					property: normalizedProperty,
+					value: normalizedAction === DEFAULT_ZONE_ACTION ? value : "",
+					updateMode,
+					valueType,
+					color,
+			},
+		]);
+		this.scheduleRender();
+		new Notice(this.t("notices.activeGroupEnabled", { label: group.label }));
+	}
+
+	private deactivateManualGroup(group: CanvasBasesManualGroupSnapshot): void {
+		if (!this.config) return;
+
+		setZones(
+			this.config,
+			this.getZones().filter(
+				(zone) => zone.origin !== "custom" || zone.id !== group.id
+			)
+		);
+		this.scheduleRender();
+		new Notice(this.t("notices.activeGroupDisabled", { label: group.label }));
+	}
+
+	private getActiveGroupPropertyOptions(): string[] {
+		const properties = new Set<string>();
+		const addProperty = (property: string | null | undefined) => {
+			if (!property) return;
+			const normalized = normalizeZoneProperty(property);
+			if (normalized && isWritableActiveGroupProperty(normalized)) {
+				properties.add(normalized);
+			}
+		};
+
+		for (const property of this.config?.getOrder() ?? []) addProperty(property);
+		for (const property of this.data?.properties ?? []) addProperty(property);
+		for (const property of this.allProperties ?? []) addProperty(property);
+		for (const property of this.getVaultPropertyOptions()) addProperty(property);
+		for (const property of this.plugin.taskNotes.getWritablePropertyIds()) {
+			addProperty(property);
+		}
+		for (const zone of this.getZones()) addProperty(zone.property);
+
+		const snapshot = this.getSnapshot();
+		for (const group of snapshot?.groups ?? []) {
+			addProperty(group.property);
+			for (const entry of group.entries) {
+				for (const property of entry.properties ?? []) {
+					addProperty(property.id);
+				}
+			}
+		}
+
+		return [...properties].sort((left, right) => left.localeCompare(right));
+	}
+
+	private getActiveGroupActionOptions(): Record<CanvasBasesZoneAction, string> {
+		const labels: Record<CanvasBasesZoneAction, string> = {
+			"set-property": this.t("view.group.actionSetProperty"),
+			"task.complete": this.t("view.group.actionCompleteTask"),
+			"task.uncomplete": this.t("view.group.actionUncompleteTask"),
+			"task.archive": this.t("view.group.actionArchiveTask"),
+			"task.unarchive": this.t("view.group.actionUnarchiveTask"),
+			"time.start": this.t("view.group.actionStartTimeTracking"),
+			"time.stop": this.t("view.group.actionStopTimeTracking"),
+			"pomodoro.start": this.t("view.group.actionStartPomodoro"),
+			"pomodoro.assign": this.t("view.group.actionAssignPomodoro"),
+			"recurring.complete": this.t("view.group.actionCompleteRecurring"),
+			"recurring.skip": this.t("view.group.actionSkipRecurring"),
+		};
+
+		return Object.fromEntries(
+			ZONE_ACTIONS.map((action) => [action, labels[action]])
+		) as Record<CanvasBasesZoneAction, string>;
+	}
+
+	private getActiveGroupUpdateModeOptions(): Record<CanvasBasesZoneUpdateMode, string> {
+		const labels: Record<CanvasBasesZoneUpdateMode, string> = {
+			replace: this.t("view.group.updateModeReplace"),
+			append: this.t("view.group.updateModeAppend"),
+			appendUnique: this.t("view.group.updateModeAppendUnique"),
+			remove: this.t("view.group.updateModeRemove"),
+			clear: this.t("view.group.updateModeClear"),
+		};
+
+		return Object.fromEntries(
+			ZONE_UPDATE_MODES.map((mode) => [mode, labels[mode]])
+		) as Record<CanvasBasesZoneUpdateMode, string>;
+	}
+
+	private getActiveGroupValueTypeOptions(): Record<CanvasBasesZoneValueType, string> {
+		const labels: Record<CanvasBasesZoneValueType, string> = {
+			auto: this.t("view.group.valueTypeAuto"),
+			string: this.t("view.group.valueTypeString"),
+			number: this.t("view.group.valueTypeNumber"),
+			boolean: this.t("view.group.valueTypeBoolean"),
+			date: this.t("view.group.valueTypeDate"),
+			list: this.t("view.group.valueTypeList"),
+		};
+
+		return Object.fromEntries(
+			ZONE_VALUE_TYPES.map((type) => [type, labels[type]])
+		) as Record<CanvasBasesZoneValueType, string>;
+	}
+
+	private getVaultPropertyOptions(): string[] {
+		const metadataCache = this.app.metadataCache as unknown as {
+			getAllPropertyInfos?: () => unknown;
+			propertyInfos?: unknown;
+		};
+		const propertyInfos = metadataCache.getAllPropertyInfos?.() ?? metadataCache.propertyInfos;
+		return getPropertyInfoNames(propertyInfos);
+	}
+
+	private getVaultPropertyType(propertyName: string): string | null {
+		const metadataCache = this.app.metadataCache as unknown as {
+			getAllPropertyInfos?: () => unknown;
+			propertyInfos?: unknown;
+		};
+		const propertyInfos = metadataCache.getAllPropertyInfos?.() ?? metadataCache.propertyInfos;
+		return getPropertyInfoType(propertyInfos, propertyName);
 	}
 
 	getMaterializeOptions(): MaterializeOptions {
@@ -463,11 +915,15 @@ export class BaseboardView extends BasesView {
 		const relationships = collectRelationships(this.app, snapshot, options);
 		return JSON.stringify({
 			options,
+			zones: this.getZones(),
 			viewName: snapshot.viewName,
 			totalEntries: snapshot.totalEntries,
 			groups: snapshot.groups.map((group) => ({
 				id: group.id,
 				label: group.label,
+				property: group.property,
+				value: group.value,
+				isImplicit: Boolean(group.isImplicit),
 				entries: group.entries.map((entry) => ({
 					path: entry.path,
 					name: entry.name,
@@ -531,7 +987,7 @@ export class BaseboardView extends BasesView {
 	private setupRoot(): void {
 		this.containerEl.empty();
 		this.rootEl = this.containerEl.createDiv({
-			cls: "baseboard-view",
+			cls: "canvas-bases-view",
 			attr: {
 				tabindex: "-1",
 			},
@@ -626,20 +1082,20 @@ export class BaseboardView extends BasesView {
 
 	private renderToolbar(
 		containerEl: HTMLElement,
-		snapshot: BaseboardViewSnapshot | null
+		snapshot: CanvasBasesViewSnapshot | null
 	): void {
-		const toolbarEl = containerEl.createDiv({ cls: "baseboard-view__toolbar" });
-		const summaryEl = toolbarEl.createDiv({ cls: "baseboard-view__summary" });
+		const toolbarEl = containerEl.createDiv({ cls: "canvas-bases-view__toolbar" });
+		const summaryEl = toolbarEl.createDiv({ cls: "canvas-bases-view__summary" });
 		summaryEl.createDiv({
-			cls: "baseboard-view__title",
+			cls: "canvas-bases-view__title",
 			text: snapshot?.viewName || this.t("common.appName"),
 		});
 		summaryEl.createDiv({
-			cls: "baseboard-view__meta",
+			cls: "canvas-bases-view__meta",
 			text: snapshot ? this.formatSnapshotMeta(snapshot) : this.t("view.waitingForBasesData"),
 		});
 
-		const actionsEl = toolbarEl.createDiv({ cls: "baseboard-view__actions" });
+		const actionsEl = toolbarEl.createDiv({ cls: "canvas-bases-view__actions" });
 		this.addToolbarButton(actionsEl, {
 			icon: "lucide-file-plus",
 			label: this.t("view.toolbar.pinNote"),
@@ -656,6 +1112,12 @@ export class BaseboardView extends BasesView {
 			icon: "lucide-box-select",
 			label: this.t("view.toolbar.addGroup"),
 			onClick: () => this.openCreateManualGroupModal(),
+			isPrimary: false,
+		});
+		this.addToolbarButton(actionsEl, {
+			icon: "lucide-zap",
+			label: this.t("view.toolbar.addZone"),
+			onClick: async () => this.openCreateCustomZoneModal(),
 			isPrimary: false,
 		});
 		this.addToolbarButton(actionsEl, {
@@ -700,34 +1162,34 @@ export class BaseboardView extends BasesView {
 	): void {
 		new ButtonComponent(containerEl)
 			.setButtonText(label)
-			.setClass(isPrimary ? "baseboard-view__button--primary" : "baseboard-view__button")
+			.setClass(isPrimary ? "canvas-bases-view__button--primary" : "canvas-bases-view__button")
 			.onClick((event) => {
 				if (Keymap.isModEvent(event)) return;
 				void onClick();
 			})
 			.then((button) => {
-				button.buttonEl.addClass("baseboard-view__button");
-				setIcon(button.buttonEl.createSpan({ cls: "baseboard-view__button-icon" }), icon);
+				button.buttonEl.addClass("canvas-bases-view__button");
+				setIcon(button.buttonEl.createSpan({ cls: "canvas-bases-view__button-icon" }), icon);
 				setTooltip(button.buttonEl, label);
 			});
 	}
 
 	private renderEmpty(containerEl: HTMLElement): void {
-		const emptyEl = containerEl.createDiv({ cls: "baseboard-view__empty" });
+		const emptyEl = containerEl.createDiv({ cls: "canvas-bases-view__empty" });
 		emptyEl.createDiv({
-			cls: "baseboard-view__empty-title",
+			cls: "canvas-bases-view__empty-title",
 			text: this.t("view.empty.title"),
 		});
 		emptyEl.createDiv({
-			cls: "baseboard-view__empty-text",
+			cls: "canvas-bases-view__empty-text",
 			text: this.t("view.empty.body"),
 		});
 	}
 
-	private formatSnapshotMeta(snapshot: BaseboardViewSnapshot): string {
+	private formatSnapshotMeta(snapshot: CanvasBasesViewSnapshot): string {
 		return [
 			this.tp("common.note", snapshot.totalEntries),
-			this.tp("common.group", snapshot.groups.length + snapshot.manualGroups.length),
+			this.tp("common.group", getVisibleGroupCount(snapshot)),
 			snapshot.textCards.length > 0
 				? this.tp("common.card", snapshot.textCards.length)
 				: null,
@@ -736,7 +1198,7 @@ export class BaseboardView extends BasesView {
 			.join(", ");
 	}
 
-	private async openManualNotePicker(position?: BaseboardNodePosition): Promise<void> {
+	private async openManualNotePicker(position?: CanvasBasesNodePosition): Promise<void> {
 		if (!this.config) return;
 
 		const pinnedPaths = this.getManualNotePaths();
@@ -764,7 +1226,42 @@ export class BaseboardView extends BasesView {
 		).open();
 	}
 
-	private openCreateManualGroupFromSelectionModal(nodeIds: string[]): void {
+	private openCreateCustomZoneModal(position?: CanvasBasesNodePosition): void {
+		if (!this.config) return;
+
+		new ActiveGroupSettingsModal(
+			this.app,
+			{
+					title: this.t("view.group.zoneTitle"),
+					t: (key, params) => this.t(key, params),
+					labelLabel: this.t("view.group.label"),
+					actionLabel: this.t("view.group.action"),
+					propertyLabel: this.t("view.group.property"),
+					valueLabel: this.t("view.group.value"),
+					updateModeLabel: this.t("view.group.updateMode"),
+					valueTypeLabel: this.t("view.group.valueType"),
+					colorLabel: this.t("view.group.color"),
+					initialLabel: this.t("view.group.defaultZoneName"),
+					initialAction: DEFAULT_ZONE_ACTION,
+					initialProperty: "note.status",
+					initialValue: "",
+					initialUpdateMode: DEFAULT_ZONE_UPDATE_MODE,
+					initialValueType: DEFAULT_ZONE_VALUE_TYPE,
+					initialColor: DEFAULT_ACTIVE_GROUP_COLOR,
+					actionOptions: this.getActiveGroupActionOptions(),
+					propertyOptions: this.getActiveGroupPropertyOptions(),
+					updateModeOptions: this.getActiveGroupUpdateModeOptions(),
+					valueTypeOptions: this.getActiveGroupValueTypeOptions(),
+				submitLabel: this.t("view.group.createZone"),
+				cancelLabel: this.t("common.cancel"),
+			},
+			(settings) => {
+				this.addCustomZone(settings, position);
+			}
+		).open();
+	}
+
+	private openCreateManualGroupFromSelectionModal(selectionRect: CanvasBasesNodePosition): void {
 		if (!this.config) return;
 
 		new ManualGroupNameModal(
@@ -776,19 +1273,19 @@ export class BaseboardView extends BasesView {
 				cancelLabel: this.t("common.cancel"),
 			},
 			(label) => {
-				this.addManualGroupAroundNodes(label, nodeIds);
+				this.addManualGroupAtRect(label, selectionRect);
 			}
 		).open();
 	}
 
-	private async addTextCard(position?: BaseboardNodePosition): Promise<void> {
+	private async addTextCard(position?: CanvasBasesNodePosition): Promise<void> {
 		if (!this.config) return;
 
 		const options = this.getMaterializeOptions();
 		const cardPosition =
 			position ??
 			this.getNewCardPosition(Math.max(220, options.nodeWidth), Math.max(120, options.nodeHeight));
-		const card: BaseboardTextCardSnapshot = {
+		const card: CanvasBasesTextCardSnapshot = {
 			id: createItemId(),
 			text: "",
 		};
@@ -801,10 +1298,10 @@ export class BaseboardView extends BasesView {
 		this.scheduleRender();
 	}
 
-	private addManualGroup(label: string, position?: BaseboardNodePosition): void {
+	private addManualGroup(label: string, position?: CanvasBasesNodePosition): void {
 		if (!this.config) return;
 
-		const group: BaseboardManualGroupSnapshot = {
+		const group: CanvasBasesManualGroupSnapshot = {
 			id: createItemId(),
 			label: label.trim() || this.t("view.group.defaultName"),
 		};
@@ -817,25 +1314,60 @@ export class BaseboardView extends BasesView {
 		this.scheduleRender();
 	}
 
-	private addManualGroupAroundNodes(label: string, nodeIds: string[]): void {
-		const bounds = this.getNodeBounds(nodeIds);
-		if (!bounds) return;
-
-		const x = clampCoordinate(bounds.x - SELECTION_GROUP_PADDING);
-		const y = clampCoordinate(bounds.y - GROUP_HEADER_HEIGHT - SELECTION_GROUP_PADDING);
+	private addManualGroupAtRect(label: string, rect: CanvasBasesNodePosition): void {
 		this.addManualGroup(label, {
-			x,
-			y,
-			width: Math.max(
-				MIN_GROUP_NODE_WIDTH,
-				Math.round(bounds.width + SELECTION_GROUP_PADDING * 2)
-			),
-			height: Math.max(
-				MIN_GROUP_NODE_HEIGHT,
-				Math.round(bounds.height + GROUP_HEADER_HEIGHT + SELECTION_GROUP_PADDING * 2)
-			),
+			x: clampCoordinate(rect.x),
+			y: clampCoordinate(rect.y),
+			width: Math.max(MIN_GROUP_NODE_WIDTH, Math.round(rect.width)),
+			height: Math.max(MIN_GROUP_NODE_HEIGHT, Math.round(rect.height)),
 		});
 		this.clearSelectedNodes();
+	}
+
+	private addCustomZone(
+		settings: ActiveGroupSettings,
+		position?: CanvasBasesNodePosition
+		): void {
+			if (!this.config) return;
+
+			const action = normalizeZoneAction(settings.action);
+			const property = action === DEFAULT_ZONE_ACTION
+				? normalizeZoneProperty(settings.property)
+				: "";
+			if (
+				action === DEFAULT_ZONE_ACTION &&
+				(!property || !isWritableActiveGroupProperty(property))
+			) {
+				new Notice(this.t("notices.activeGroupReadOnly"));
+				return;
+			}
+
+			const id = createItemId();
+			const label = settings.label?.trim() ||
+				(action === DEFAULT_ZONE_ACTION
+					? settings.value
+					: this.getActiveGroupActionOptions()[action]) ||
+				DEFAULT_ZONE_LABEL;
+			const positions = this.getNodePositions();
+			positions[getManualGroupNodeId(id)] = position ?? this.getNewCardPosition(360, 220);
+
+			setZones(this.config, [
+				...this.getZones(),
+				{
+					origin: "custom",
+					id,
+					label,
+					action,
+					property,
+					value: action === DEFAULT_ZONE_ACTION ? settings.value : "",
+					updateMode: settings.updateMode,
+					valueType: settings.valueType,
+					color: settings.color,
+				},
+			]);
+		this.setNodePositions(positions);
+		this.clearSelectedNodes();
+		this.scheduleRender();
 	}
 
 	private renameManualGroup(id: string, label: string): void {
@@ -850,6 +1382,12 @@ export class BaseboardView extends BasesView {
 				group.id === id ? { ...group, label: nextLabel } : group
 			)
 		);
+		setZones(
+			this.config,
+			this.getZones().map((zone) =>
+				zone.origin === "custom" && zone.id === id ? { ...zone, label: nextLabel } : zone
+			)
+		);
 		this.scheduleRender();
 	}
 
@@ -860,13 +1398,17 @@ export class BaseboardView extends BasesView {
 			this.config,
 			this.getManualGroups().filter((group) => group.id !== id)
 		);
+		setZones(
+			this.config,
+			this.getZones().filter((zone) => zone.origin !== "custom" || zone.id !== id)
+		);
 		const positions = this.getNodePositions();
 		delete positions[getManualGroupNodeId(id)];
 		this.setNodePositions(positions);
 		this.scheduleRender();
 	}
 
-	private pinNoteToDefaultGroup(path: string, position?: BaseboardNodePosition): void {
+	private pinNoteToDefaultGroup(path: string, position?: CanvasBasesNodePosition): void {
 		if (!this.config) return;
 
 		const group = this.ensureDefaultManualGroup();
@@ -893,7 +1435,7 @@ export class BaseboardView extends BasesView {
 		this.scheduleRender();
 	}
 
-	private getManualGroups(): BaseboardManualGroupSnapshot[] {
+	private getManualGroups(): CanvasBasesManualGroupSnapshot[] {
 		if (!this.config) return [];
 
 		const configuredGroups = this.config.get(VIEW_CONFIG_KEYS.manualGroups);
@@ -904,7 +1446,7 @@ export class BaseboardView extends BasesView {
 		return this.getManualNotePaths().length > 0 ? [createDefaultManualGroup()] : [];
 	}
 
-	private ensureDefaultManualGroup(): BaseboardManualGroupSnapshot {
+	private ensureDefaultManualGroup(): CanvasBasesManualGroupSnapshot {
 		if (!this.config) return createDefaultManualGroup();
 
 		const defaultGroup = createDefaultManualGroup();
@@ -925,7 +1467,7 @@ export class BaseboardView extends BasesView {
 		return group;
 	}
 
-	private getPositionInsideManualGroup(groupId: string): BaseboardNodePosition {
+	private getPositionInsideManualGroup(groupId: string): CanvasBasesNodePosition {
 		const options = this.getMaterializeOptions();
 		const groupNodeId = getManualGroupNodeId(groupId);
 		const groupPosition =
@@ -944,7 +1486,7 @@ export class BaseboardView extends BasesView {
 		};
 	}
 
-	private getCurrentNodePosition(nodeId: string): BaseboardNodePosition | null {
+	private getCurrentNodePosition(nodeId: string): CanvasBasesNodePosition | null {
 		const element = this.canvasNodeElements.get(nodeId);
 		const elementPosition = element ? getElementNodePosition(element) : null;
 		return (
@@ -986,7 +1528,7 @@ export class BaseboardView extends BasesView {
 		return normalizeManualNotePaths(this.config.get(VIEW_CONFIG_KEYS.manualNotePaths));
 	}
 
-	private getNewCardPosition(width: number, height: number): BaseboardNodePosition {
+	private getNewCardPosition(width: number, height: number): CanvasBasesNodePosition {
 		const viewportEl = this.canvasViewportEl;
 		if (!viewportEl) {
 			return { x: CANVAS_PADDING, y: CANVAS_PADDING, width, height };
@@ -1006,7 +1548,7 @@ export class BaseboardView extends BasesView {
 
 	private renderCanvas(
 		containerEl: HTMLElement,
-		snapshot: BaseboardViewSnapshot,
+		snapshot: CanvasBasesViewSnapshot,
 		initialViewportState: CanvasViewportState | null
 	): void {
 		this.edgeLayerEl = null;
@@ -1030,7 +1572,7 @@ export class BaseboardView extends BasesView {
 
 		const relationships = collectRelationships(this.app, snapshot, options);
 		const genericEdgeRelationships = buildEdgeRelationshipMap(relationships);
-		const canvas = buildBaseboardCanvas(
+		const canvas = buildCanvasBasesCanvas(
 			snapshot,
 			options,
 			relationships,
@@ -1061,6 +1603,7 @@ export class BaseboardView extends BasesView {
 		);
 		const groupEntries = buildGroupContainmentMap(nodes, nodePositions);
 		const entriesByPath = getSnapshotEntriesByPath(snapshot);
+		const groupsByNodeId = new Map(snapshot.groups.map((group) => [group.id, group] as const));
 		const manualGroupsByNodeId = new Map(
 			snapshot.manualGroups.map((group) => [getManualGroupNodeId(group.id), group] as const)
 		);
@@ -1074,9 +1617,9 @@ export class BaseboardView extends BasesView {
 		);
 
 		const bounds = getCanvasBounds(nodes);
-		const viewportEl = containerEl.createDiv({ cls: "baseboard-canvas-viewport" });
-		const worldEl = viewportEl.createDiv({ cls: "baseboard-canvas-world" });
-		const planeEl = worldEl.createDiv({ cls: "baseboard-canvas-plane" });
+		const viewportEl = containerEl.createDiv({ cls: "canvas-bases-canvas-viewport" });
+		const worldEl = viewportEl.createDiv({ cls: "canvas-bases-canvas-world" });
+		const planeEl = worldEl.createDiv({ cls: "canvas-bases-canvas-plane" });
 		this.canvasViewportEl = viewportEl;
 		this.canvasWorldEl = worldEl;
 		this.canvasPlaneEl = planeEl;
@@ -1091,6 +1634,7 @@ export class BaseboardView extends BasesView {
 			groupEntries,
 			entriesByPath,
 			filePathsByNodeId,
+			groupsByNodeId,
 			manualGroupsByNodeId,
 			textCardsByNodeId,
 			nodePositions,
@@ -1149,10 +1693,9 @@ export class BaseboardView extends BasesView {
 		for (const node of selection.nodes) {
 			const existingEl = this.canvasNodeElements.get(node.id);
 			if (existingEl) {
-				setNodeGeometry(
-					existingEl,
-					state.nodePositions.get(node.id) ?? getCanvasNodePosition(node)
-				);
+				const position = state.nodePositions.get(node.id) ?? getCanvasNodePosition(node);
+				setNodeGeometry(existingEl, position);
+				setNodeColor(existingEl, position.color ?? node.color);
 				existingEl.toggleClass("is-selected", this.selectedNodeIds.has(node.id));
 				continue;
 			}
@@ -1189,7 +1732,8 @@ export class BaseboardView extends BasesView {
 				containerEl,
 				node,
 				state.groupEntries.get(node.id) ?? [],
-				state.manualGroupsByNodeId.get(node.id)
+				state.manualGroupsByNodeId.get(node.id),
+				state.groupsByNodeId.get(node.id)
 			);
 		}
 
@@ -1221,11 +1765,11 @@ export class BaseboardView extends BasesView {
 
 		if (!kind) return;
 
-		for (const handleEl of element.querySelectorAll(".baseboard-canvas-resize-handle")) {
+		for (const handleEl of element.querySelectorAll(".canvas-bases-canvas-resize-handle")) {
 			if (!handleEl.instanceOf(HTMLElement)) continue;
 
 			const direction = getResizeDirection(
-				handleEl.getAttribute("data-baseboard-resize-direction")
+				handleEl.getAttribute("data-canvas-bases-resize-direction")
 			);
 			if (!direction) continue;
 
@@ -1300,7 +1844,7 @@ export class BaseboardView extends BasesView {
 			if (node.type !== "group") continue;
 
 			const groupEl = this.canvasNodeElements.get(node.id);
-			const countEl = groupEl?.querySelector(".baseboard-canvas-group__count");
+			const countEl = groupEl?.querySelector(".canvas-bases-canvas-group__count");
 			if (countEl instanceof HTMLElement) {
 				countEl.setText(String(this.canvasRenderState.groupEntries.get(node.id)?.length ?? 0));
 			}
@@ -1311,18 +1855,32 @@ export class BaseboardView extends BasesView {
 		containerEl: HTMLElement,
 		node: CanvasGroupNode,
 		childNodeIds: string[],
-		manualGroup: BaseboardManualGroupSnapshot | undefined
+		manualGroup: CanvasBasesManualGroupSnapshot | undefined,
+		dataGroup: CanvasBasesGroupSnapshot | undefined
 	): HTMLElement {
-		const groupEl = containerEl.createDiv({ cls: "baseboard-canvas-group" });
-		groupEl.setAttr("data-baseboard-node-id", node.id);
-		groupEl.setAttr("data-baseboard-node-kind", "group");
+		const activeTarget = manualGroup
+			? this.getActiveGroupTargetForManualGroup(manualGroup)
+			: this.getActiveGroupTargetForDataGroup(dataGroup);
+		const groupEl = containerEl.createDiv({ cls: "canvas-bases-canvas-group" });
+		groupEl.setAttr("data-canvas-bases-node-id", node.id);
+		groupEl.setAttr("data-canvas-bases-node-kind", "group");
 		groupEl.toggleClass("is-manual", Boolean(manualGroup));
+		groupEl.toggleClass("is-active-group", Boolean(activeTarget));
+		if (activeTarget?.color) {
+			groupEl.style.setProperty("--canvas-bases-active-group-color", activeTarget.color);
+		}
 		setNodeGeometry(groupEl, node);
 
-		const headerEl = groupEl.createDiv({ cls: "baseboard-canvas-group__header" });
-		const titleEl = headerEl.createDiv({ cls: "baseboard-canvas-group__title", text: node.label });
+		const headerEl = groupEl.createDiv({ cls: "canvas-bases-canvas-group__header" });
+		const titleEl = headerEl.createDiv({ cls: "canvas-bases-canvas-group__title", text: node.label });
+		if (activeTarget) {
+			headerEl.createDiv({
+				cls: "canvas-bases-canvas-group__active-badge",
+				text: this.t("view.group.active"),
+			});
+		}
 		headerEl.createDiv({
-			cls: "baseboard-canvas-group__count",
+			cls: "canvas-bases-canvas-group__count",
 			text: String(childNodeIds.length),
 		});
 		if (manualGroup) {
@@ -1340,6 +1898,16 @@ export class BaseboardView extends BasesView {
 				this.openGroupMenu(event, manualGroup);
 			});
 		}
+		if (dataGroup && !manualGroup) {
+			this.addElementEvent(groupEl, "contextmenu", (event) => {
+				event.preventDefault();
+				event.stopPropagation();
+				this.openDataGroupMenu(event, dataGroup);
+			});
+			this.renderCardActionButton(headerEl, this.t("view.card.groupActions"), (event) => {
+				this.openDataGroupMenu(event, dataGroup);
+			});
+		}
 		setTooltip(headerEl, this.t("view.tooltips.dragGroup"));
 		this.addResizeHandle(groupEl, this.t("view.tooltips.resizeGroup"));
 
@@ -1349,30 +1917,31 @@ export class BaseboardView extends BasesView {
 	private renderFileNode(
 		containerEl: HTMLElement,
 		node: CanvasFileNode,
-		entry: BaseboardEntrySnapshot | undefined
+		entry: CanvasBasesEntrySnapshot | undefined
 	): HTMLElement {
 		const fileEl = containerEl.createDiv({
-			cls: "baseboard-canvas-file",
+			cls: "canvas-bases-canvas-file",
 			attr: {
 				tabindex: "0",
 			},
 		});
-		fileEl.setAttr("data-baseboard-node-id", node.id);
-		fileEl.setAttr("data-baseboard-node-kind", "file");
+		fileEl.setAttr("data-canvas-bases-node-id", node.id);
+		fileEl.setAttr("data-canvas-bases-node-kind", "file");
 		setNodeGeometry(fileEl, node);
+		setNodeColor(fileEl, node.color);
 		setTooltip(fileEl, this.t("view.tooltips.dragNote"));
 		const showBodyEditor = this.getMaterializeOptions().showBodyEditor;
 		fileEl.toggleClass("is-body-editor-hidden", !showBodyEditor);
 
-		const headerEl = fileEl.createDiv({ cls: "baseboard-canvas-file__header" });
-		setIcon(headerEl.createSpan({ cls: "baseboard-canvas-file__icon" }), "lucide-file-text");
+		const headerEl = fileEl.createDiv({ cls: "canvas-bases-canvas-file__header" });
+		setIcon(headerEl.createSpan({ cls: "canvas-bases-canvas-file__icon" }), "lucide-file-text");
 		headerEl.createDiv({
-			cls: "baseboard-canvas-file__title",
+			cls: "canvas-bases-canvas-file__title",
 			text: node.file.split("/").pop()?.replace(/\.md$/u, "") || node.file,
 		});
 		if (entry?.isManual) {
 			headerEl.createDiv({
-				cls: "baseboard-canvas-file__manual-badge",
+				cls: "canvas-bases-canvas-file__manual-badge",
 				text: this.t("view.card.pinned"),
 			});
 		}
@@ -1381,7 +1950,7 @@ export class BaseboardView extends BasesView {
 			void this.openFileCardMenu(event, node.file, entry);
 		});
 		fileEl.createDiv({
-			cls: "baseboard-canvas-file__path",
+			cls: "canvas-bases-canvas-file__path",
 			text: node.file,
 		});
 		this.renderCardProperties(fileEl, entry);
@@ -1413,7 +1982,7 @@ export class BaseboardView extends BasesView {
 		cardEl: HTMLElement
 	): void {
 		const buttonEl = containerEl.createEl("button", {
-			cls: "baseboard-canvas-link-handle",
+			cls: "canvas-bases-canvas-link-handle",
 			attr: {
 				"aria-label": this.t("view.card.linkFromNote"),
 				type: "button",
@@ -1433,23 +2002,24 @@ export class BaseboardView extends BasesView {
 	private renderTextNode(
 		containerEl: HTMLElement,
 		node: CanvasTextNode,
-		card: BaseboardTextCardSnapshot | undefined
+		card: CanvasBasesTextCardSnapshot | undefined
 	): HTMLElement {
 		const textEl = containerEl.createDiv({
-			cls: "baseboard-canvas-text-card",
+			cls: "canvas-bases-canvas-text-card",
 			attr: {
 				tabindex: "0",
 			},
 		});
-		textEl.setAttr("data-baseboard-node-id", node.id);
-		textEl.setAttr("data-baseboard-node-kind", "text");
+		textEl.setAttr("data-canvas-bases-node-id", node.id);
+		textEl.setAttr("data-canvas-bases-node-kind", "text");
 		setNodeGeometry(textEl, node);
+		setNodeColor(textEl, node.color);
 		setTooltip(textEl, this.t("view.tooltips.dragCard"));
 
-		const headerEl = textEl.createDiv({ cls: "baseboard-canvas-text-card__header" });
-		setIcon(headerEl.createSpan({ cls: "baseboard-canvas-text-card__icon" }), "lucide-sticky-note");
+		const headerEl = textEl.createDiv({ cls: "canvas-bases-canvas-text-card__header" });
+		setIcon(headerEl.createSpan({ cls: "canvas-bases-canvas-text-card__icon" }), "lucide-sticky-note");
 		headerEl.createDiv({
-			cls: "baseboard-canvas-text-card__title",
+			cls: "canvas-bases-canvas-text-card__title",
 			text: this.t("view.card.textCardTitle"),
 		});
 		this.renderCardActionButton(headerEl, this.t("view.card.cardActions"), (event) => {
@@ -1457,7 +2027,7 @@ export class BaseboardView extends BasesView {
 		});
 
 		const editorEl = textEl.createEl("textarea", {
-			cls: "baseboard-canvas-text-card__editor",
+			cls: "canvas-bases-canvas-text-card__editor",
 			attr: {
 				"aria-label": this.t("view.card.editCard"),
 				placeholder: this.t("view.card.writeNote"),
@@ -1495,7 +2065,7 @@ export class BaseboardView extends BasesView {
 		onClick: (event: MouseEvent) => void
 	): void {
 		const buttonEl = containerEl.createEl("button", {
-			cls: "baseboard-canvas-card-action",
+			cls: "canvas-bases-canvas-card-action",
 			attr: {
 				"aria-label": label,
 				type: "button",
@@ -1516,7 +2086,7 @@ export class BaseboardView extends BasesView {
 	private async openFileCardMenu(
 		event: MouseEvent,
 		path: string,
-		entry: BaseboardEntrySnapshot | undefined
+		entry: CanvasBasesEntrySnapshot | undefined
 	): Promise<void> {
 		if (!(await this.flushInlineEditorsForPaths([path]))) {
 			new Notice(this.t("notices.resolveInlineEditorConflict"));
@@ -1550,6 +2120,14 @@ export class BaseboardView extends BasesView {
 					void this.app.workspace.openLinkText(path, "", Keymap.isModEvent(event));
 				});
 		});
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.setCardColor"))
+				.setIcon("lucide-palette")
+				.onClick(() => {
+					this.openCardColorModal(getFileNodeId(path), this.t("view.card.noteColor"));
+				});
+		});
 
 		if (entry?.isManual) {
 			menu.addSeparator();
@@ -1566,11 +2144,75 @@ export class BaseboardView extends BasesView {
 		menu.showAtMouseEvent(event);
 	}
 
+	private openCardColorModal(nodeId: string, title: string): void {
+		const color = this.getStoredNodeColor(nodeId);
+		new CardColorModal(
+			this.app,
+			{
+				title,
+				colorLabel: this.t("view.card.color"),
+				clearLabel: this.t("view.menu.clearCardColor"),
+				closeLabel: this.t("common.close"),
+				initialColor: color,
+			},
+			(nextColor) => {
+				this.setStoredNodeColor(nodeId, nextColor);
+			}
+		).open();
+	}
+
+	private getStoredNodeColor(nodeId: string): string | undefined {
+		return normalizeCanvasNodeColor(
+			this.getNodePositions()[nodeId]?.color ??
+				this.canvasRenderState?.nodePositions.get(nodeId)?.color
+		);
+	}
+
+	private setStoredNodeColor(nodeId: string, color: string | undefined): void {
+		const positions = this.getNodePositions();
+		const element = this.canvasNodeElements.get(nodeId) ?? null;
+		const currentPosition = getNodePositionWithElementGeometry(
+			element,
+			positions[nodeId] ?? this.canvasRenderState?.nodePositions.get(nodeId)
+		);
+		if (!currentPosition) return;
+
+		const nextColor = normalizeCanvasNodeColor(color);
+		const nextPosition: CanvasBasesNodePosition = { ...currentPosition };
+		if (nextColor) {
+			nextPosition.color = nextColor;
+		} else {
+			delete nextPosition.color;
+		}
+
+		positions[nodeId] = nextPosition;
+		this.canvasRenderState?.nodePositions.set(nodeId, nextPosition);
+		if (element) {
+			setNodeColor(element, nextColor);
+		}
+		this.setNodePositions(positions);
+	}
+
 	private openTextCardMenu(
 		event: MouseEvent,
-		card: BaseboardTextCardSnapshot | undefined
+		card: CanvasBasesTextCardSnapshot | undefined
 	): void {
 		const menu = new Menu();
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.setCardColor"))
+				.setIcon("lucide-palette")
+				.setDisabled(!card)
+				.onClick(() => {
+					if (card) {
+						this.openCardColorModal(
+							getTextCardNodeId(card.id),
+							this.t("view.card.cardColor")
+						);
+					}
+				});
+		});
+		menu.addSeparator();
 		menu.addItem((item) => {
 			item
 				.setTitle(this.t("view.menu.removeCard"))
@@ -1584,7 +2226,7 @@ export class BaseboardView extends BasesView {
 		menu.showAtMouseEvent(event);
 	}
 
-	private openRenameManualGroupModal(group: BaseboardManualGroupSnapshot): void {
+	private openRenameManualGroupModal(group: CanvasBasesManualGroupSnapshot): void {
 		new ManualGroupNameModal(
 			this.app,
 			{
@@ -1599,8 +2241,92 @@ export class BaseboardView extends BasesView {
 		).open();
 	}
 
-	private openGroupMenu(event: MouseEvent, group: BaseboardManualGroupSnapshot): void {
+	private openConfigureManualActiveGroupModal(group: CanvasBasesManualGroupSnapshot): void {
+		const zone = this.getCustomZoneConfig(group);
+		new ActiveGroupSettingsModal(
+			this.app,
+			{
+					title: this.t("view.group.activeTitle"),
+					t: (key, params) => this.t(key, params),
+					labelLabel: this.t("view.group.label"),
+					actionLabel: this.t("view.group.action"),
+					propertyLabel: this.t("view.group.property"),
+					valueLabel: this.t("view.group.value"),
+					updateModeLabel: this.t("view.group.updateMode"),
+					valueTypeLabel: this.t("view.group.valueType"),
+					colorLabel: this.t("view.group.color"),
+					initialLabel: zone?.label ?? group.label,
+					initialAction: zone?.action ?? DEFAULT_ZONE_ACTION,
+					initialProperty: zone?.property ?? "note.status",
+					initialValue: zone?.value ?? "",
+					initialUpdateMode: zone?.updateMode ?? DEFAULT_ZONE_UPDATE_MODE,
+					initialValueType: zone?.valueType ?? DEFAULT_ZONE_VALUE_TYPE,
+					initialColor: zone?.color ?? DEFAULT_ACTIVE_GROUP_COLOR,
+					actionOptions: this.getActiveGroupActionOptions(),
+					propertyOptions: this.getActiveGroupPropertyOptions(),
+					updateModeOptions: this.getActiveGroupUpdateModeOptions(),
+					valueTypeOptions: this.getActiveGroupValueTypeOptions(),
+				submitLabel: this.t("view.group.saveActiveGroup"),
+				cancelLabel: this.t("common.cancel"),
+			},
+			(settings) => {
+					this.configureManualActiveGroup(
+						{ ...group, label: settings.label?.trim() || group.label },
+						settings.action,
+						settings.property,
+						settings.value,
+						settings.updateMode,
+					settings.valueType,
+					settings.color
+				);
+			}
+		).open();
+	}
+
+	private openConfigureDataActiveGroupModal(group: CanvasBasesGroupSnapshot): void {
+		if (!group.property || typeof group.value !== "string") return;
+
+		const zone = this.getDataZoneConfig(group);
+		new ActiveGroupSettingsModal(
+			this.app,
+			{
+					title: this.t("view.group.activeTitle"),
+					t: (key, params) => this.t(key, params),
+					actionLabel: this.t("view.group.action"),
+					propertyLabel: this.t("view.group.property"),
+					valueLabel: this.t("view.group.value"),
+					updateModeLabel: this.t("view.group.updateMode"),
+					valueTypeLabel: this.t("view.group.valueType"),
+					colorLabel: this.t("view.group.color"),
+					initialAction: DEFAULT_ZONE_ACTION,
+					initialProperty: group.property,
+					initialValue: group.value,
+					initialUpdateMode: zone?.updateMode ?? DEFAULT_ZONE_UPDATE_MODE,
+					initialValueType: zone?.valueType ?? DEFAULT_ZONE_VALUE_TYPE,
+					initialColor: zone?.color ?? DEFAULT_ACTIVE_GROUP_COLOR,
+					actionOptions: this.getActiveGroupActionOptions(),
+					propertyOptions: this.getActiveGroupPropertyOptions(),
+					updateModeOptions: this.getActiveGroupUpdateModeOptions(),
+					valueTypeOptions: this.getActiveGroupValueTypeOptions(),
+				submitLabel: this.t("view.group.saveActiveGroup"),
+					cancelLabel: this.t("common.cancel"),
+					readOnlyPropertyAndValue: true,
+					readOnlyAction: true,
+				},
+			(settings) => {
+				this.configureDataActiveGroup(
+					group,
+					settings.updateMode,
+					settings.valueType,
+					settings.color
+				);
+			}
+		).open();
+	}
+
+	private openGroupMenu(event: MouseEvent, group: CanvasBasesManualGroupSnapshot): void {
 		const menu = new Menu();
+		const isActive = this.isManualGroupActive(group);
 		menu.addItem((item) => {
 			item
 				.setTitle(this.t("view.menu.renameGroup"))
@@ -1611,11 +2337,74 @@ export class BaseboardView extends BasesView {
 		});
 		menu.addItem((item) => {
 			item
+				.setTitle(this.t("view.menu.configureActiveGroup"))
+				.setIcon("lucide-zap")
+				.onClick(() => {
+					this.openConfigureManualActiveGroupModal(group);
+				});
+		});
+		if (isActive) {
+			menu.addItem((item) => {
+				item
+					.setTitle(this.t("view.menu.deactivateActiveGroup"))
+					.setIcon("lucide-zap-off")
+					.onClick(() => {
+						this.deactivateManualGroup(group);
+					});
+			});
+		}
+		menu.addSeparator();
+		menu.addItem((item) => {
+			item
 				.setTitle(this.t("view.menu.removeGroup"))
 				.setIcon("lucide-trash-2")
 				.setWarning(true)
 				.onClick(() => {
 					this.removeManualGroup(group.id);
+				});
+		});
+		menu.showAtMouseEvent(event);
+	}
+
+	private openDataGroupMenu(event: MouseEvent, group: CanvasBasesGroupSnapshot): void {
+		const menu = new Menu();
+		const isActive = this.isActiveGroup(group);
+
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.fitGroupToCards"))
+				.setIcon("lucide-maximize-2")
+				.setDisabled(!this.canFitDataGroupToMembers(group))
+				.onClick(() => {
+					this.fitDataGroupToMembers(group);
+				});
+		});
+		menu.addSeparator();
+		if (isActive) {
+			menu.addItem((item) => {
+				item
+					.setTitle(this.t("view.menu.configureActiveGroup"))
+					.setIcon("lucide-palette")
+					.onClick(() => {
+						this.openConfigureDataActiveGroupModal(group);
+					});
+			});
+		}
+		menu.addItem((item) => {
+			item
+				.setTitle(
+					isActive
+						? this.t("view.menu.deactivateActiveGroup")
+						: this.t("view.menu.activateGroup")
+				)
+				.setIcon(isActive ? "lucide-zap-off" : "lucide-zap")
+				.setDisabled(!isActive && !this.canActivateGroup(group))
+				.onClick(() => {
+					if (isActive) {
+						this.deactivateGroup(group);
+					} else {
+						this.activateGroup(group);
+					}
 				});
 		});
 		menu.showAtMouseEvent(event);
@@ -1631,6 +2420,11 @@ export class BaseboardView extends BasesView {
 		const menu = new Menu();
 
 		if (this.plugin.taskNotes.getTaskLinkingEnabled()) {
+			this.addMenuSectionLabel(
+				menu,
+				this.t("view.menu.dependencyLinks"),
+				"lucide-arrow-right-left"
+			);
 			const sourceBlocksTarget = this.t("view.menu.sourceBlocksTarget", {
 				source: sourceName,
 				target: targetName,
@@ -1672,6 +2466,7 @@ export class BaseboardView extends BasesView {
 					});
 			});
 			menu.addSeparator();
+			this.addMenuSectionLabel(menu, this.t("view.menu.subtaskLinks"), "lucide-git-branch");
 			menu.addItem((item) => {
 				item
 					.setTitle(targetSubtaskOfSource)
@@ -1699,6 +2494,7 @@ export class BaseboardView extends BasesView {
 			menu.addSeparator();
 		}
 
+		this.addMenuSectionLabel(menu, this.t("view.menu.propertyLinks"), "lucide-link");
 		for (const property of this.getConfiguredLinkProperties().slice(0, 6)) {
 			menu.addItem((item) => {
 				item
@@ -1725,7 +2521,16 @@ export class BaseboardView extends BasesView {
 		menu.showAtMouseEvent(event);
 	}
 
-	private openEdgeMenu(event: MouseEvent, relationship: BaseboardRelationship): void {
+	private addMenuSectionLabel(menu: Menu, title: string, icon: string): void {
+		menu.addItem((item) => {
+			item
+				.setTitle(title)
+				.setIcon(icon)
+				.setDisabled(true);
+		});
+	}
+
+	private openEdgeMenu(event: MouseEvent, relationship: CanvasBasesRelationship): void {
 		const menu = new Menu();
 		const sourceName = formatPathName(relationship.sourcePath);
 		const targetName = formatPathName(relationship.targetPath);
@@ -1889,7 +2694,7 @@ export class BaseboardView extends BasesView {
 	}
 
 	private removeRelationshipsFromLiveView(
-		matchesRelationship: (relationship: BaseboardRelationship) => boolean
+		matchesRelationship: (relationship: CanvasBasesRelationship) => boolean
 	): void {
 		const edgeIds = new Set<string>();
 		for (const relationship of this.taskEdgeCache?.relationships ?? []) {
@@ -2093,12 +2898,21 @@ export class BaseboardView extends BasesView {
 
 	private renderCardProperties(
 		containerEl: HTMLElement,
-		entry: BaseboardEntrySnapshot | undefined
+		entry: CanvasBasesEntrySnapshot | undefined
 	): void {
-		if (!entry || !entry.properties || entry.properties.length === 0) return;
+		const propertiesEl = this.createCardPropertiesElement(entry);
+		if (propertiesEl) {
+			containerEl.appendChild(propertiesEl);
+		}
+	}
 
-		const propertiesEl = containerEl.createDiv({
-			cls: "baseboard-canvas-file__properties",
+	private createCardPropertiesElement(
+		entry: CanvasBasesEntrySnapshot | undefined
+	): HTMLElement | null {
+		if (!entry || !entry.properties || entry.properties.length === 0) return null;
+
+		const propertiesEl = createDiv({
+			cls: "canvas-bases-canvas-file__properties",
 		});
 		this.addElementEvent(propertiesEl, "pointerdown", (event) => {
 			event.stopPropagation();
@@ -2110,29 +2924,31 @@ export class BaseboardView extends BasesView {
 		for (const property of entry.properties) {
 			const taskPropertyKind = this.plugin.taskNotes.getPropertyKind(property.id);
 			const propertyEl = propertiesEl.createDiv({
-				cls: "baseboard-canvas-file-property",
+				cls: "canvas-bases-canvas-file-property",
 			});
 			if (taskPropertyKind) {
 				propertyEl.addClass("is-tasknotes-property");
-				propertyEl.setAttr("data-baseboard-task-property-kind", taskPropertyKind);
+				propertyEl.setAttr("data-canvas-bases-task-property-kind", taskPropertyKind);
 			}
 			propertyEl.toggleClass("is-empty", property.isEmpty);
 			setTooltip(propertyEl, `${property.displayName}: ${property.text}`);
 			propertyEl.createDiv({
-				cls: "baseboard-canvas-file-property__label",
+				cls: "canvas-bases-canvas-file-property__label",
 				text: property.displayName,
 			});
 			const valueEl = propertyEl.createDiv({
-				cls: "baseboard-canvas-file-property__value",
+				cls: "canvas-bases-canvas-file-property__value",
 			});
 			valueEl.toggleClass("is-empty", property.isEmpty);
 			this.renderPropertyValue(valueEl, property);
 		}
+
+		return propertiesEl;
 	}
 
 	private renderPropertyValue(
 		containerEl: HTMLElement,
-		property: BaseboardEntryPropertySnapshot
+		property: CanvasBasesEntryPropertySnapshot
 	): void {
 		if (!property.value || property.isEmpty) {
 			containerEl.setText(property.text);
@@ -2153,7 +2969,7 @@ export class BaseboardView extends BasesView {
 		bounds: { width: number; height: number }
 	): void {
 		const svgEl = createSvgElement("svg");
-		svgEl.addClass("baseboard-canvas-edges");
+		svgEl.addClass("canvas-bases-canvas-edges");
 		setSvgAttributes(svgEl, {
 			"aria-hidden": "true",
 			focusable: "false",
@@ -2174,7 +2990,7 @@ export class BaseboardView extends BasesView {
 			markerUnits: "strokeWidth",
 		});
 		const markerPathEl = createSvgElement("path");
-		markerPathEl.addClass("baseboard-canvas-edge__arrow");
+		markerPathEl.addClass("canvas-bases-canvas-edge__arrow");
 		markerPathEl.setAttribute("d", "M 0 0 L 9 5 L 0 10 z");
 		markerEl.appendChild(markerPathEl);
 		defsEl.appendChild(markerEl);
@@ -2182,8 +2998,8 @@ export class BaseboardView extends BasesView {
 
 		for (const edge of edges) {
 			const groupEl = createSvgElement("g");
-			groupEl.addClass("baseboard-canvas-edge");
-			groupEl.setAttribute("data-baseboard-edge-id", edge.id);
+			groupEl.addClass("canvas-bases-canvas-edge");
+			groupEl.setAttribute("data-canvas-bases-edge-id", edge.id);
 			const relationship = this.canvasRenderState?.edgeRelationships.get(edge.id);
 			if (relationship && isRemovableRelationship(relationship)) {
 				groupEl.addClass("is-actionable");
@@ -2195,7 +3011,7 @@ export class BaseboardView extends BasesView {
 			}
 
 			const pathEl = createSvgElement("path");
-			pathEl.addClass("baseboard-canvas-edge__path");
+			pathEl.addClass("canvas-bases-canvas-edge__path");
 			pathEl.setAttribute("marker-end", `url(#${this.edgeMarkerId})`);
 			groupEl.appendChild(pathEl);
 
@@ -2204,11 +3020,11 @@ export class BaseboardView extends BasesView {
 			let labelTextEl: SVGTextElement | null = null;
 			if (edge.label) {
 				labelGroupEl = createSvgElement("g");
-				labelGroupEl.addClass("baseboard-canvas-edge-label");
+				labelGroupEl.addClass("canvas-bases-canvas-edge-label");
 				labelRectEl = createSvgElement("rect");
-				labelRectEl.addClass("baseboard-canvas-edge-label__background");
+				labelRectEl.addClass("canvas-bases-canvas-edge-label__background");
 				labelTextEl = createSvgElement("text");
-				labelTextEl.addClass("baseboard-canvas-edge-label__text");
+				labelTextEl.addClass("canvas-bases-canvas-edge-label__text");
 				labelTextEl.textContent = edge.label;
 				labelGroupEl.appendChild(labelRectEl);
 				labelGroupEl.appendChild(labelTextEl);
@@ -2235,7 +3051,7 @@ export class BaseboardView extends BasesView {
 
 		const nodePositions = this.getRenderedNodePositions();
 		for (const renderedEdge of this.renderedEdges) {
-			const geometry = buildBaseboardEdgeGeometry(renderedEdge.edge, nodePositions);
+			const geometry = buildCanvasBasesEdgeGeometry(renderedEdge.edge, nodePositions);
 			renderedEdge.groupEl.classList.toggle("is-hidden", geometry === null);
 			if (!geometry) continue;
 
@@ -2261,16 +3077,16 @@ export class BaseboardView extends BasesView {
 			} else {
 				renderedEdge.labelGroupEl?.classList.add("is-hidden");
 			}
-		}
+			}
 	}
 
 	private async hydrateTaskNotes(
-		snapshot: BaseboardViewSnapshot,
+		snapshot: CanvasBasesViewSnapshot,
 		options: MaterializeOptions,
 		renderToken: number,
 		planeEl: HTMLElement,
 		genericEdges: CanvasEdge[],
-		genericEdgeRelationships: Map<string, BaseboardRelationship>,
+		genericEdgeRelationships: Map<string, CanvasBasesRelationship>,
 		bounds: { width: number; height: number }
 	): Promise<void> {
 		if (options.taskNotesMode === "off") return;
@@ -2310,7 +3126,7 @@ export class BaseboardView extends BasesView {
 		);
 		if (!this.isCurrentRender(renderToken)) return;
 
-		const taskCanvas = buildBaseboardCanvas(snapshot, options, taskRelationships, {});
+		const taskCanvas = buildCanvasBasesCanvas(snapshot, options, taskRelationships, {});
 		const taskEdges = taskCanvas.edges ?? [];
 		const taskEdgeRelationships = buildEdgeRelationshipMap(taskRelationships);
 		this.taskEdgeCache = taskEdgeCacheKey
@@ -2331,9 +3147,79 @@ export class BaseboardView extends BasesView {
 		this.replaceEdgeLayer(planeEl, mergedEdges, bounds);
 	}
 
+	private refreshRenderedCardProperties(
+		snapshot: CanvasBasesViewSnapshot,
+		paths = getSnapshotPaths(snapshot)
+	): void {
+		const state = this.canvasRenderState;
+		if (!state) return;
+
+		const entriesByPath = getSnapshotEntriesByPath(snapshot);
+		for (const path of paths) {
+			const entry = entriesByPath.get(path);
+			if (!entry) continue;
+
+			state.entriesByPath.set(path, entry);
+			const cardEl = this.canvasNodeElements.get(getFileNodeId(path));
+			if (!cardEl) continue;
+
+			this.replaceCardProperties(cardEl, entry);
+			const taskCard = state.taskCards.get(path);
+			if (taskCard) {
+				this.applyTaskCard(taskCard, entry);
+			}
+		}
+	}
+
+	private replaceCardProperties(
+		cardEl: HTMLElement,
+		entry: CanvasBasesEntrySnapshot | undefined
+	): void {
+		const pathEl = cardEl.querySelector(".canvas-bases-canvas-file__path");
+		if (!(pathEl instanceof HTMLElement)) return;
+
+		cardEl.querySelector(".canvas-bases-canvas-file__properties")?.remove();
+		const propertiesEl = this.createCardPropertiesElement(entry);
+		if (propertiesEl) {
+			pathEl.insertAdjacentElement("afterend", propertiesEl);
+		}
+	}
+
+	private async refreshRenderedTaskCardsForPaths(paths: string[]): Promise<void> {
+		const state = this.canvasRenderState;
+		if (!state || paths.length === 0) return;
+
+		const options = this.getMaterializeOptions();
+		if (
+			options.taskNotesMode === "off" ||
+			!options.taskNotesShowBadges ||
+			!this.plugin.taskNotes.getTaskCardsEnabled()
+		) {
+			return;
+		}
+
+		const visiblePaths = new Set(state.filePathsByNodeId.values());
+		const pathsToRefresh = [...new Set(paths)].filter((path) => visiblePaths.has(path));
+		if (pathsToRefresh.length === 0) return;
+
+		const taskCards = await this.plugin.taskNotes.getTaskCards(pathsToRefresh);
+		if (this.canvasRenderState !== state) return;
+
+		for (const path of pathsToRefresh) {
+			const taskCard = taskCards.get(path);
+			if (taskCard) {
+				state.taskCards.set(path, taskCard);
+				this.applyTaskCard(taskCard, state.entriesByPath.get(path));
+			} else {
+				state.taskCards.delete(path);
+				this.clearTaskCard(path);
+			}
+		}
+	}
+
 	private applyTaskCard(
-		taskCard: BaseboardTaskCard,
-		entry: BaseboardEntrySnapshot | undefined
+		taskCard: CanvasBasesTaskCard,
+		entry: CanvasBasesEntrySnapshot | undefined
 	): void {
 		const cardEl = this.canvasNodeElements.get(getFileNodeId(taskCard.path));
 		if (!cardEl) return;
@@ -2344,22 +3230,25 @@ export class BaseboardView extends BasesView {
 		cardEl.toggleClass("is-tasknotes-archived", taskCard.isArchived);
 		cardEl.toggleClass("is-tasknotes-blocked", taskCard.isBlocked);
 		cardEl.toggleClass("is-tasknotes-blocking", taskCard.isBlocking);
+		cardEl.toggleClass("is-tasknotes-tracking", taskCard.isTracking);
 		if (taskCard.status.color) {
-			cardEl.style.setProperty("--baseboard-task-status-color", taskCard.status.color);
+			cardEl.style.setProperty("--canvas-bases-task-status-color", taskCard.status.color);
+		} else {
+			cardEl.style.removeProperty("--canvas-bases-task-status-color");
 		}
 
-		const titleEl = cardEl.querySelector(".baseboard-canvas-file__title");
+		const titleEl = cardEl.querySelector(".canvas-bases-canvas-file__title");
 		if (titleEl instanceof HTMLElement) {
 			titleEl.setText(taskCard.title);
 		}
 
-		cardEl.querySelector(".baseboard-canvas-task")?.remove();
-		const pathEl = cardEl.querySelector(".baseboard-canvas-file__path");
+		cardEl.querySelector(".canvas-bases-canvas-task")?.remove();
+		const pathEl = cardEl.querySelector(".canvas-bases-canvas-file__path");
 		if (!(pathEl instanceof HTMLElement)) return;
 
-		const taskEl = createDiv({ cls: "baseboard-canvas-task" });
-		const primaryEl = taskEl.createDiv({ cls: "baseboard-canvas-task__primary" });
-		const renderedKinds = new Set<BaseboardTaskPropertyKind>();
+		const taskEl = createDiv({ cls: "canvas-bases-canvas-task" });
+		const primaryEl = taskEl.createDiv({ cls: "canvas-bases-canvas-task__primary" });
+		const renderedKinds = new Set<CanvasBasesTaskPropertyKind>();
 
 		if (visibleKinds.has("status")) {
 			this.renderTaskBadge(primaryEl, taskCard.status, "status");
@@ -2370,9 +3259,11 @@ export class BaseboardView extends BasesView {
 			renderedKinds.add("priority");
 		}
 
-		const detailBadges = taskCard.badges.filter((badge) => visibleKinds.has(badge.kind));
+		const detailBadges = taskCard.badges.filter(
+			(badge) => badge.kind === "activeTimeTracking" || visibleKinds.has(badge.kind)
+		);
 		if (detailBadges.length > 0) {
-			const badgesEl = taskEl.createDiv({ cls: "baseboard-canvas-task__badges" });
+			const badgesEl = taskEl.createDiv({ cls: "canvas-bases-canvas-task__badges" });
 			for (const badge of detailBadges) {
 				this.renderTaskBadge(badgesEl, badge, "detail");
 				renderedKinds.add(badge.kind);
@@ -2385,38 +3276,54 @@ export class BaseboardView extends BasesView {
 		pathEl.insertAdjacentElement("afterend", taskEl);
 	}
 
+	private clearTaskCard(path: string): void {
+		const cardEl = this.canvasNodeElements.get(getFileNodeId(path));
+		if (!cardEl) return;
+
+		cardEl.classList.remove(
+			"is-tasknotes-task",
+			"is-tasknotes-completed",
+			"is-tasknotes-archived",
+			"is-tasknotes-blocked",
+			"is-tasknotes-blocking",
+			"is-tasknotes-tracking"
+		);
+		cardEl.style.removeProperty("--canvas-bases-task-status-color");
+		cardEl.querySelector(".canvas-bases-canvas-task")?.remove();
+	}
+
 	private renderTaskBadge(
 		containerEl: HTMLElement,
-		badge: BaseboardTaskCard["status"],
+		badge: CanvasBasesTaskCard["status"],
 		kind: "detail" | "priority" | "status"
 	): void {
 		const badgeEl = containerEl.createDiv({
-			cls: `baseboard-canvas-task-badge baseboard-canvas-task-badge--${kind}`,
+			cls: `canvas-bases-canvas-task-badge canvas-bases-canvas-task-badge--${kind}`,
 		});
-		badgeEl.setAttr("data-baseboard-task-property-kind", badge.kind);
+		badgeEl.setAttr("data-canvas-bases-task-property-kind", badge.kind);
 		if (badge.tone) {
 			badgeEl.addClass(`is-${badge.tone}`);
 		}
 		if (badge.color) {
-			badgeEl.style.setProperty("--baseboard-task-badge-color", badge.color);
+			badgeEl.style.setProperty("--canvas-bases-task-badge-color", badge.color);
 		}
 		setTooltip(badgeEl, `${badge.label}: ${badge.value}`);
 		badgeEl.createSpan({
-			cls: "baseboard-canvas-task-badge__label",
+			cls: "canvas-bases-canvas-task-badge__label",
 			text: badge.label,
 		});
 		if (badge.value !== badge.label) {
 			badgeEl.createSpan({
-				cls: "baseboard-canvas-task-badge__value",
+				cls: "canvas-bases-canvas-task-badge__value",
 				text: badge.value,
 			});
 		}
 	}
 
 	private getVisibleTaskPropertyKinds(
-		entry: BaseboardEntrySnapshot | undefined
-	): Set<BaseboardTaskPropertyKind> {
-		const kinds = new Set<BaseboardTaskPropertyKind>();
+		entry: CanvasBasesEntrySnapshot | undefined
+	): Set<CanvasBasesTaskPropertyKind> {
+		const kinds = new Set<CanvasBasesTaskPropertyKind>();
 		for (const property of entry?.properties ?? []) {
 			const kind = this.plugin.taskNotes.getPropertyKind(property.id);
 			if (kind) kinds.add(kind);
@@ -2427,22 +3334,22 @@ export class BaseboardView extends BasesView {
 
 	private removeGenericTaskProperties(
 		cardEl: HTMLElement,
-		kinds: Set<BaseboardTaskPropertyKind>
+		kinds: Set<CanvasBasesTaskPropertyKind>
 	): void {
-		const propertiesEl = cardEl.querySelector(".baseboard-canvas-file__properties");
+		const propertiesEl = cardEl.querySelector(".canvas-bases-canvas-file__properties");
 		if (!(propertiesEl instanceof HTMLElement)) return;
 
-		for (const propertyEl of propertiesEl.querySelectorAll(".baseboard-canvas-file-property")) {
+		for (const propertyEl of propertiesEl.querySelectorAll(".canvas-bases-canvas-file-property")) {
 			if (!propertyEl.instanceOf(HTMLElement)) continue;
-			const kind = propertyEl.dataset.baseboardTaskPropertyKind as
-				| BaseboardTaskPropertyKind
+			const kind = propertyEl.dataset.canvasBasesTaskPropertyKind as
+				| CanvasBasesTaskPropertyKind
 				| undefined;
 			if (kind && kinds.has(kind)) {
 				propertyEl.remove();
 			}
 		}
 
-		if (propertiesEl.querySelector(".baseboard-canvas-file-property") === null) {
+		if (propertiesEl.querySelector(".canvas-bases-canvas-file-property") === null) {
 			propertiesEl.remove();
 		}
 	}
@@ -2463,8 +3370,8 @@ export class BaseboardView extends BasesView {
 		return this.renderToken === renderToken && Boolean(this.rootEl?.isConnected);
 	}
 
-	private getRenderedNodePositions(): Map<string, BaseboardNodePosition> {
-		const positions = new Map<string, BaseboardNodePosition>();
+	private getRenderedNodePositions(): Map<string, CanvasBasesNodePosition> {
+		const positions = new Map<string, CanvasBasesNodePosition>();
 		for (const [nodeId, element] of this.canvasNodeElements) {
 			const position = getElementNodePosition(element);
 			if (position) positions.set(nodeId, position);
@@ -2517,8 +3424,8 @@ export class BaseboardView extends BasesView {
 			this.destroyInlineEditor(nodeId, true);
 		}
 
-		const editorShellEl = containerEl.createDiv({ cls: "baseboard-canvas-file__editor-shell" });
-		const statusEl = containerEl.createDiv({ cls: "baseboard-canvas-file__status" });
+		const editorShellEl = containerEl.createDiv({ cls: "canvas-bases-canvas-file__editor-shell" });
+		const statusEl = containerEl.createDiv({ cls: "canvas-bases-canvas-file__status" });
 
 		this.addElementEvent(editorShellEl, "pointerdown", (event) => {
 			event.stopPropagation();
@@ -2562,13 +3469,13 @@ export class BaseboardView extends BasesView {
 
 		try {
 			const editorContainerEl = containerEl.createDiv({
-				cls: "baseboard-canvas-file__markdown-editor",
+				cls: "canvas-bases-canvas-file__markdown-editor",
 				attr: {
 					"aria-label": this.t("view.editor.editPath", { path }),
 				},
 			});
 			let creationOriginal = content;
-			const editor = await createBaseboardInlineMarkdownEditor(this.app, editorContainerEl, {
+			const editor = await createCanvasBasesInlineMarkdownEditor(this.app, editorContainerEl, {
 				value: content,
 				placeholder: "",
 				file,
@@ -2653,14 +3560,14 @@ export class BaseboardView extends BasesView {
 		disabled = false
 	): HTMLTextAreaElement {
 		const editorEl = containerEl.createEl("textarea", {
-			cls: "baseboard-canvas-file__editor",
+			cls: "canvas-bases-canvas-file__editor",
 			attr: {
 				"aria-label": this.t("view.editor.editPath", { path }),
 				spellcheck: "false",
 			},
 		});
 		editorEl.value = value;
-		editorEl.dataset.baseboardOriginal = value;
+		editorEl.dataset.canvasBasesOriginal = value;
 		editorEl.disabled = disabled;
 		if (disabled) {
 			editorEl.setAttr("placeholder", this.t("view.editor.missingFile"));
@@ -2679,7 +3586,7 @@ export class BaseboardView extends BasesView {
 			void this.saveInlineEditor(path, editorEl, statusEl).then(() => {
 				if (!editorEl.isConnected || editorEl.disabled) return;
 
-				const original = editorEl.dataset.baseboardOriginal ?? "";
+				const original = editorEl.dataset.canvasBasesOriginal ?? "";
 				if (editorEl.value !== original) {
 					scheduleAutosave();
 				}
@@ -2705,7 +3612,7 @@ export class BaseboardView extends BasesView {
 			event.stopPropagation();
 		});
 		this.addElementEvent(editorEl, "input", () => {
-			const original = editorEl.dataset.baseboardOriginal ?? "";
+			const original = editorEl.dataset.canvasBasesOriginal ?? "";
 			const isDirty = editorEl.value !== original;
 			editorEl.toggleClass("is-dirty", isDirty);
 			containerEl.toggleClass("is-dirty", isDirty);
@@ -2726,7 +3633,7 @@ export class BaseboardView extends BasesView {
 			if (event.key === "Escape") {
 				event.preventDefault();
 				cancelAutosave();
-				editorEl.value = editorEl.dataset.baseboardOriginal ?? editorEl.value;
+				editorEl.value = editorEl.dataset.canvasBasesOriginal ?? editorEl.value;
 				editorEl.removeClass("is-dirty");
 				containerEl.removeClass("is-dirty");
 				statusEl.setText("");
@@ -2757,7 +3664,7 @@ export class BaseboardView extends BasesView {
 			const content = await this.app.vault.read(file);
 			if (!editorEl.isConnected) return;
 			editorEl.value = content;
-			editorEl.dataset.baseboardOriginal = content;
+			editorEl.dataset.canvasBasesOriginal = content;
 			editorEl.disabled = false;
 			editorEl.setAttr("placeholder", "");
 			statusEl.setText("");
@@ -2775,7 +3682,7 @@ export class BaseboardView extends BasesView {
 	): Promise<void> {
 		if (editorEl.disabled) return;
 
-		const original = editorEl.dataset.baseboardOriginal ?? "";
+		const original = editorEl.dataset.canvasBasesOriginal ?? "";
 		const value = editorEl.value;
 		if (value === original) return;
 
@@ -2787,7 +3694,7 @@ export class BaseboardView extends BasesView {
 
 		statusEl.setText(this.t("view.editor.saving"));
 		await this.app.vault.modify(file, value);
-		editorEl.dataset.baseboardOriginal = value;
+		editorEl.dataset.canvasBasesOriginal = value;
 		const isDirty = editorEl.value !== value;
 		editorEl.toggleClass("is-dirty", isDirty);
 		editorEl.parentElement?.toggleClass("is-dirty", isDirty);
@@ -2944,7 +3851,7 @@ export class BaseboardView extends BasesView {
 		if (this.inlineEditors.get(nodeId) !== state) return false;
 
 		const isDirty = state.editor.getValue() !== state.original;
-		const editorEl = state.shellEl.querySelector(".baseboard-canvas-file__markdown-editor");
+		const editorEl = state.shellEl.querySelector(".canvas-bases-canvas-file__markdown-editor");
 		if (editorEl instanceof HTMLElement) {
 			editorEl.toggleClass("is-dirty", isDirty);
 			editorEl.toggleClass("is-stale", state.externalConflict);
@@ -3109,11 +4016,11 @@ export class BaseboardView extends BasesView {
 	}
 
 	private renderCanvasControls(containerEl: HTMLElement): void {
-		const controlsEl = containerEl.createDiv({ cls: "baseboard-canvas-controls" });
+		const controlsEl = containerEl.createDiv({ cls: "canvas-bases-canvas-controls" });
 		this.addCanvasControlButton(controlsEl, "lucide-minus", this.t("view.tooltips.zoomOut"), () => {
 			this.setZoom(this.zoom - ZOOM_STEP);
 		});
-		this.zoomLabelEl = controlsEl.createDiv({ cls: "baseboard-canvas-zoom-label" });
+		this.zoomLabelEl = controlsEl.createDiv({ cls: "canvas-bases-canvas-zoom-label" });
 		this.addCanvasControlButton(controlsEl, "lucide-plus", this.t("view.tooltips.zoomIn"), () => {
 			this.setZoom(this.zoom + ZOOM_STEP);
 		});
@@ -3132,7 +4039,7 @@ export class BaseboardView extends BasesView {
 		onClick: () => void
 	): void {
 		const buttonEl = containerEl.createEl("button", {
-			cls: "baseboard-canvas-control-button",
+			cls: "canvas-bases-canvas-control-button",
 			attr: {
 				"aria-label": label,
 				type: "button",
@@ -3161,10 +4068,10 @@ export class BaseboardView extends BasesView {
 	private addResizeHandle(containerEl: HTMLElement, tooltip: string): void {
 		for (const direction of RESIZE_HANDLE_DIRECTIONS) {
 			const handleEl = containerEl.createDiv({
-				cls: `baseboard-canvas-resize-handle is-${direction}`,
+				cls: `canvas-bases-canvas-resize-handle is-${direction}`,
 				attr: {
 					"aria-label": tooltip,
-					"data-baseboard-resize-direction": direction,
+					"data-canvas-bases-resize-direction": direction,
 				},
 			});
 			setTooltip(handleEl, tooltip);
@@ -3174,38 +4081,41 @@ export class BaseboardView extends BasesView {
 	private startLinkDrag(event: PointerEvent, sourcePath: string, sourceElement: HTMLElement): void {
 		if (event.button !== 0 || !this.canvasPlaneEl || !this.canvasBounds) return;
 
-		const sourcePoint = getElementCenter(sourceElement);
-		if (!sourcePoint) return;
+		if (!getElementNodePosition(sourceElement)) return;
 
 		event.preventDefault();
 		event.stopPropagation();
 		this.clearDragListeners();
 
 		const previewEl = createSvgElement("svg");
-		previewEl.addClass("baseboard-canvas-link-preview");
+		previewEl.addClass("canvas-bases-canvas-link-preview");
 		setSvgAttributes(previewEl, {
 			width: String(this.canvasBounds.width),
 			height: String(this.canvasBounds.height),
 			viewBox: `0 0 ${this.canvasBounds.width} ${this.canvasBounds.height}`,
 		});
 		const previewPathEl = createSvgElement("path");
-		previewPathEl.addClass("baseboard-canvas-link-preview__path");
+		previewPathEl.addClass("canvas-bases-canvas-link-preview__path");
 		previewEl.appendChild(previewPathEl);
 		this.canvasPlaneEl.appendChild(previewEl);
+		const hintEl = this.canvasPlaneEl.createDiv({
+			cls: "canvas-bases-canvas-link-hint",
+		});
 
 		sourceElement.addClass("is-linking");
 		this.linkDragState = {
 			pointerId: event.pointerId,
 			sourcePath,
 			sourceElement,
-			sourcePoint,
 			previewEl,
 			previewPathEl,
+			hintEl,
 			targetElement: null,
 			targetPath: null,
+			invalidReason: "empty",
 		};
-		this.updateLinkPreview(event);
 		this.updateLinkDragTarget(event);
+		this.updateLinkPreview(event);
 
 		this.linkMoveHandler = (moveEvent) => this.handleLinkMove(moveEvent);
 		this.linkEndHandler = (endEvent) => this.handleLinkEnd(endEvent);
@@ -3218,8 +4128,8 @@ export class BaseboardView extends BasesView {
 		if (!this.linkDragState || event.pointerId !== this.linkDragState.pointerId) return;
 
 		event.preventDefault();
-		this.updateLinkPreview(event);
 		this.updateLinkDragTarget(event);
+		this.updateLinkPreview(event);
 	}
 
 	private handleLinkEnd(event: PointerEvent): void {
@@ -3238,24 +4148,62 @@ export class BaseboardView extends BasesView {
 	private updateLinkPreview(event: PointerEvent): void {
 		if (!this.linkDragState) return;
 
-		const targetPoint = this.getPlanePoint(event.clientX, event.clientY);
-		if (!targetPoint) return;
+		const pointerPoint = this.getPlanePoint(event.clientX, event.clientY);
+		if (!pointerPoint) return;
 
-		const source = this.linkDragState.sourcePoint;
-		const controlOffset = Math.max(48, Math.abs(targetPoint.x - source.x) * 0.4);
+		const sourcePosition = getElementNodePosition(this.linkDragState.sourceElement);
+		if (!sourcePosition) return;
+
+		const targetPosition = this.linkDragState.targetElement
+			? getElementNodePosition(this.linkDragState.targetElement)
+			: null;
+		const sourceCenter = getNodeCenter(sourcePosition);
+		const targetCenter = targetPosition ? getNodeCenter(targetPosition) : pointerPoint;
+		const sourcePoint = getNodeEdgeAnchor(sourcePosition, targetCenter);
+		const targetPoint = targetPosition
+			? getNodeEdgeAnchor(targetPosition, sourceCenter)
+			: pointerPoint;
+		const sourceVector = getNodeEdgeVector(sourcePosition, sourcePoint);
+		const targetVector = targetPosition
+			? getNodeEdgeVector(targetPosition, targetPoint)
+			: { x: -sourceVector.x, y: -sourceVector.y };
+		const distance = Math.hypot(targetPoint.x - sourcePoint.x, targetPoint.y - sourcePoint.y);
+		const tension = clampNumber(
+			distance * 0.36,
+			LINK_PREVIEW_MIN_TENSION,
+			LINK_PREVIEW_MAX_TENSION
+		);
+		const control1 = {
+			x: sourcePoint.x + sourceVector.x * tension,
+			y: sourcePoint.y + sourceVector.y * tension,
+		};
+		const control2 = {
+			x: targetPoint.x + targetVector.x * tension,
+			y: targetPoint.y + targetVector.y * tension,
+		};
+
 		this.linkDragState.previewPathEl.setAttribute(
 			"d",
-			`M ${source.x} ${source.y} C ${source.x + controlOffset} ${source.y}, ${
-				targetPoint.x - controlOffset
-			} ${targetPoint.y}, ${targetPoint.x} ${targetPoint.y}`
+			[
+				`M ${roundCoordinate(sourcePoint.x)} ${roundCoordinate(sourcePoint.y)}`,
+				`C ${roundCoordinate(control1.x)} ${roundCoordinate(control1.y)}`,
+				`${roundCoordinate(control2.x)} ${roundCoordinate(control2.y)}`,
+				`${roundCoordinate(targetPoint.x)} ${roundCoordinate(targetPoint.y)}`,
+			].join(" ")
 		);
+		this.updateLinkDragHint(targetPosition ? targetPoint : pointerPoint);
 	}
 
 	private updateLinkDragTarget(event: PointerEvent): void {
 		if (!this.linkDragState) return;
 
 		const target = this.getFileTargetAtPoint(event.clientX, event.clientY);
-		const targetPath = target?.path === this.linkDragState.sourcePath ? null : target?.path ?? null;
+		const invalidReason: LinkDragInvalidReason = !target
+			? "empty"
+			: target.path === this.linkDragState.sourcePath
+				? "self"
+				: "none";
+		const targetPath = invalidReason === "none" ? target?.path ?? null : null;
 		const targetElement = targetPath ? target?.element ?? null : null;
 
 		if (this.linkDragState.targetElement !== targetElement) {
@@ -3265,16 +4213,42 @@ export class BaseboardView extends BasesView {
 
 		this.linkDragState.targetElement = targetElement;
 		this.linkDragState.targetPath = targetPath;
+		this.linkDragState.invalidReason = invalidReason;
+		this.linkDragState.previewEl.classList.toggle("is-valid-target", Boolean(targetPath));
+		this.linkDragState.previewEl.classList.toggle("is-invalid-target", invalidReason === "self");
+		this.linkDragState.previewEl.classList.toggle("is-awaiting-target", invalidReason === "empty");
+	}
+
+	private updateLinkDragHint(point: LinkPoint): void {
+		if (!this.linkDragState) return;
+
+		const targetName = this.linkDragState.targetPath
+			? formatPathName(this.linkDragState.targetPath)
+			: null;
+		const isInvalid = !targetName && this.linkDragState.invalidReason === "self";
+		this.linkDragState.hintEl.setText(
+			targetName
+				? this.t("view.linkDrag.releaseToLink", { target: targetName })
+				: isInvalid
+					? this.t("view.linkDrag.cannotLinkHere")
+					: this.t("view.linkDrag.dragToCard")
+		);
+		this.linkDragState.hintEl.classList.toggle("is-valid-target", Boolean(targetName));
+		this.linkDragState.hintEl.classList.toggle("is-invalid-target", isInvalid);
+		this.linkDragState.hintEl.classList.toggle("is-awaiting-target", !targetName && !isInvalid);
+		this.linkDragState.hintEl.style.left = `${roundCoordinate(point.x)}px`;
+		this.linkDragState.hintEl.style.top = `${roundCoordinate(point.y)}px`;
 	}
 
 	private getPlanePoint(clientX: number, clientY: number): LinkPoint | null {
-		if (!this.canvasViewportEl) return null;
+		if (!this.canvasWorldEl) return null;
 
-		const rect = this.canvasViewportEl.getBoundingClientRect();
-		return {
-			x: (this.canvasViewportEl.scrollLeft + clientX - rect.left) / this.zoom,
-			y: (this.canvasViewportEl.scrollTop + clientY - rect.top) / this.zoom,
-		};
+		return getPlanePointFromClient(
+			clientX,
+			clientY,
+			this.canvasWorldEl.getBoundingClientRect(),
+			this.zoom
+		);
 	}
 
 	private getFileTargetAtPoint(
@@ -3283,11 +4257,11 @@ export class BaseboardView extends BasesView {
 	): { element: HTMLElement; path: string } | null {
 		const element = this.rootEl?.ownerDocument.elementFromPoint(clientX, clientY);
 		const fileEl = element instanceof HTMLElement
-			? element.closest(".baseboard-canvas-file")
+			? element.closest(".canvas-bases-canvas-file")
 			: null;
 		if (!(fileEl instanceof HTMLElement)) return null;
 
-		const nodeId = fileEl.getAttribute("data-baseboard-node-id");
+		const nodeId = fileEl.getAttribute("data-canvas-bases-node-id");
 		const path = nodeId ? this.canvasRenderState?.filePathsByNodeId.get(nodeId) : null;
 		return path ? { element: fileEl, path } : null;
 	}
@@ -3296,7 +4270,7 @@ export class BaseboardView extends BasesView {
 		event: PointerEvent,
 		nodeIds: string[],
 		nodeElements: Map<string, HTMLElement>,
-		nodePositions: Map<string, BaseboardNodePosition>
+		nodePositions: Map<string, CanvasBasesNodePosition>
 	): void {
 		if (event.button !== 0) return;
 		if (isNodeControlTarget(event.target)) return;
@@ -3312,9 +4286,10 @@ export class BaseboardView extends BasesView {
 		const nodes = [...new Set(dragNodeIds)]
 			.map((id) => {
 				const element = nodeElements.get(id) ?? null;
-				const startPosition = element
-					? getElementNodePosition(element) ?? nodePositions.get(id)
-					: nodePositions.get(id);
+				const startPosition = getNodePositionWithElementGeometry(
+					element,
+					nodePositions.get(id)
+				);
 				if (!startPosition) return null;
 				return { id, element, startPosition };
 			})
@@ -3348,11 +4323,14 @@ export class BaseboardView extends BasesView {
 		kind: CanvasNodeKind,
 		direction: ResizeDirection,
 		element: HTMLElement,
-		nodePositions: Map<string, BaseboardNodePosition>
+		nodePositions: Map<string, CanvasBasesNodePosition>
 	): void {
 		if (event.button !== 0) return;
 
-		const startPosition = getElementNodePosition(element) ?? nodePositions.get(nodeId);
+		const startPosition = getNodePositionWithElementGeometry(
+			element,
+			nodePositions.get(nodeId)
+		);
 		if (!startPosition) return;
 
 		event.preventDefault();
@@ -3467,7 +4445,7 @@ export class BaseboardView extends BasesView {
 		this.clearSelectedNodes();
 
 		const selectionEl = this.canvasPlaneEl.createDiv({
-			cls: "baseboard-canvas-selection-rect",
+			cls: "canvas-bases-canvas-selection-rect",
 		});
 		setNodeGeometry(selectionEl, {
 			x: startPoint.x,
@@ -3481,6 +4459,12 @@ export class BaseboardView extends BasesView {
 			startClientX: event.clientX,
 			startClientY: event.clientY,
 			startPoint,
+			selectionRect: {
+				x: startPoint.x,
+				y: startPoint.y,
+				width: 0,
+				height: 0,
+			},
 			selectionEl,
 			selectedNodeIds: new Set(),
 			didMove: false,
@@ -3501,16 +4485,26 @@ export class BaseboardView extends BasesView {
 			event.clientX - this.dragState.startClientX,
 			event.clientY - this.dragState.startClientY
 		);
+		const nextActiveDropTargetIds = new Set<string>();
+		const isDraggingGroup = this.isDraggingGroup();
 
 		for (const node of this.dragState.nodes) {
+			const nextPosition = {
+				...node.startPosition,
+				x: clampCoordinate(node.startPosition.x + delta.x),
+				y: clampCoordinate(node.startPosition.y + delta.y),
+			};
 			if (node.element) {
-				setNodeGeometry(node.element, {
-					...node.startPosition,
-					x: clampCoordinate(node.startPosition.x + delta.x),
-					y: clampCoordinate(node.startPosition.y + delta.y),
-				});
+				setNodeGeometry(node.element, nextPosition);
+			}
+			const targetGroup = this.getActiveGroupDropTargetForDragNode(node, nextPosition, {
+				isDraggingGroup,
+			});
+			if (targetGroup) {
+				nextActiveDropTargetIds.add(targetGroup.id);
 			}
 		}
+		this.setActiveGroupDropTargets(nextActiveDropTargetIds);
 		this.updateEdgeLayerGeometry();
 	}
 
@@ -3522,6 +4516,12 @@ export class BaseboardView extends BasesView {
 			event.clientY - this.dragState.startClientY
 		);
 		const nodePositions = this.getNodePositions();
+		const draggedGroup = this.dragState.nodes.some((node) =>
+			this.canvasRenderState?.allNodes.some(
+				(renderedNode) => renderedNode.id === node.id && renderedNode.type === "group"
+			)
+		);
+		const droppedNodes: DroppedDragNode[] = [];
 
 		for (const node of this.dragState.nodes) {
 			const nextPosition = {
@@ -3529,6 +4529,11 @@ export class BaseboardView extends BasesView {
 				x: clampCoordinate(node.startPosition.x + delta.x),
 				y: clampCoordinate(node.startPosition.y + delta.y),
 			};
+			droppedNodes.push({
+				id: node.id,
+				position: nextPosition,
+				sourceActiveGroup: this.getActiveGroupAtPosition(node.startPosition),
+			});
 			nodePositions[node.id] = nextPosition;
 			this.canvasRenderState?.nodePositions.set(node.id, nextPosition);
 			node.element?.removeClass("is-dragging");
@@ -3540,7 +4545,239 @@ export class BaseboardView extends BasesView {
 		this.setNodePositions(nodePositions);
 		this.updateEdgeLayerGeometry();
 		this.refreshGroupContainment();
+		this.setActiveGroupDropTargets(new Set());
 		this.clearDragListeners();
+		void this.handleActiveGroupDrop(droppedNodes, { draggedGroup });
+	}
+
+	private getActiveGroupDropTargetForDragNode(
+		node: DragState["nodes"][number],
+		position: CanvasBasesNodePosition,
+		{ isDraggingGroup }: { isDraggingGroup: boolean }
+	): ActiveGroupTarget | null {
+		const state = this.canvasRenderState;
+		if (isDraggingGroup || !state) return null;
+
+		const path = state.filePathsByNodeId.get(node.id);
+		if (!path) return null;
+
+		const targetGroup = this.getActiveGroupAtPosition(position);
+		if (!targetGroup) return null;
+
+		const sourceGroup =
+			this.getActiveGroupAtPosition(node.startPosition) ??
+			this.getSemanticActiveGroupForPath(path);
+		if (sourceGroup && activeGroupTargetsMatch(sourceGroup, targetGroup)) return null;
+
+		return targetGroup;
+	}
+
+	private isDraggingGroup(): boolean {
+		return Boolean(
+			this.dragState?.nodes.some((node) =>
+				this.canvasRenderState?.allNodes.some(
+					(renderedNode) => renderedNode.id === node.id && renderedNode.type === "group"
+				)
+			)
+		);
+	}
+
+	private setActiveGroupDropTargets(targetIds: Set<string>): void {
+		if (setsEqual(this.activeGroupDropTargetIds, targetIds)) return;
+
+		for (const id of this.activeGroupDropTargetIds) {
+			this.canvasNodeElements.get(id)?.removeClass("is-active-group-drop-target");
+		}
+		this.activeGroupDropTargetIds = new Set(targetIds);
+		for (const id of this.activeGroupDropTargetIds) {
+			this.canvasNodeElements.get(id)?.addClass("is-active-group-drop-target");
+		}
+	}
+
+	private async handleActiveGroupDrop(
+		droppedNodes: DroppedDragNode[],
+		{ draggedGroup }: { draggedGroup: boolean }
+	): Promise<void> {
+		const state = this.canvasRenderState;
+		if (draggedGroup || !state) return;
+
+		const fileDrops = droppedNodes
+			.map((node) => ({
+				...node,
+				path: state.filePathsByNodeId.get(node.id),
+			}))
+			.filter((node): node is DroppedDragNode & { path: string } => Boolean(node.path));
+		if (fileDrops.length === 0) return;
+
+		let dataChanged = false;
+
+		for (const node of fileDrops) {
+			const targetGroup = this.getActiveGroupAtPosition(node.position);
+			if (targetGroup) {
+				if (
+					node.sourceActiveGroup &&
+					activeGroupTargetsMatch(node.sourceActiveGroup, targetGroup)
+				) {
+					continue;
+				}
+				const changed = await this.updateActiveGroupValue(node.path, targetGroup);
+				dataChanged ||= changed;
+			}
+		}
+
+		if (dataChanged) {
+			this.taskEdgeCache = null;
+			this.scheduleRender();
+		}
+	}
+
+	private getActiveGroupAtPosition(position: CanvasBasesNodePosition): ActiveGroupTarget | null {
+		const state = this.canvasRenderState;
+		if (!state) return null;
+
+		const groups = [
+			...[...state.groupsByNodeId.values()]
+				.map((group) => this.getActiveGroupTargetForDataGroup(group))
+				.filter((group): group is ActiveGroupTarget => group !== null),
+			...[...state.manualGroupsByNodeId.values()]
+				.map((group) => this.getActiveGroupTargetForManualGroup(group))
+				.filter((group): group is ActiveGroupTarget => group !== null),
+		]
+			.map((group) => ({
+				group,
+				position: state.nodePositions.get(group.id),
+			}))
+			.filter(
+				(entry): entry is { group: ActiveGroupTarget; position: CanvasBasesNodePosition } =>
+					Boolean(entry.position)
+			)
+			.filter((entry) => positionCenterInside(position, entry.position))
+			.sort((left, right) => getPositionArea(left.position) - getPositionArea(right.position));
+
+		return groups[0]?.group ?? null;
+	}
+
+	private getSemanticActiveGroupForPath(path: string): ActiveGroupTarget | null {
+		const state = this.canvasRenderState;
+		if (!state) return null;
+
+		for (const group of state.groupsByNodeId.values()) {
+			const target = this.getActiveGroupTargetForDataGroup(group);
+			if (!target) continue;
+			if (group.entries.some((entry) => entry.path === path)) {
+				return target;
+			}
+		}
+
+		return null;
+	}
+
+	private async updateActiveGroupValue(
+		path: string,
+		group: ActiveGroupTarget,
+		options: { force?: boolean; label?: string; value?: string } = {}
+	): Promise<boolean> {
+		if (!options.force && this.getSemanticActiveGroupForPath(path)?.id === group.id) {
+			return false;
+		}
+
+		if (group.action !== DEFAULT_ZONE_ACTION) {
+			return this.runActiveGroupAction(path, group);
+		}
+
+		const propertyName = toWritableNotePropertyName(group.property);
+		const groupValue = options.value ?? group.value;
+		const valueLabel = options.label ?? group.label;
+
+		const file = this.app.vault.getAbstractFileByPath(path);
+		if (!(file instanceof TFile)) {
+			new Notice(this.t("notices.couldNotFind", { path }));
+			return false;
+		}
+
+		try {
+			if (!(await this.flushInlineEditorsForPaths([path]))) {
+				new Notice(this.t("notices.resolveInlineEditorConflict"));
+				return false;
+			}
+
+			const taskUpdate = await this.plugin.taskNotes.updateMappedProperty(
+				path,
+				group.property,
+				groupValue,
+				{
+					updateMode: group.updateMode,
+					valueType: group.valueType,
+				}
+			);
+			if (taskUpdate === "updated") {
+				await this.refreshInlineEditorsForPaths([path]);
+				new Notice(this.t("notices.activeGroupUpdated", {
+					property: propertyName ?? group.property,
+					value: valueLabel,
+				}));
+				return true;
+			}
+			if (taskUpdate === "unavailable") {
+				new Notice(this.t("notices.activeGroupTaskUpdateUnavailable"));
+				return false;
+			}
+			if (!propertyName) {
+				new Notice(this.t("notices.activeGroupReadOnly"));
+				return false;
+			}
+
+			const metadataType = this.getVaultPropertyType(propertyName);
+			await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+				const nextValue = applyActiveGroupUpdate(frontmatter[propertyName], groupValue, {
+					updateMode: group.updateMode,
+					valueType: group.valueType,
+					metadataType,
+				});
+				if (typeof nextValue === "undefined") {
+					delete frontmatter[propertyName];
+				} else {
+					frontmatter[propertyName] = nextValue;
+				}
+			});
+			await this.refreshInlineEditorsForPaths([path]);
+			new Notice(this.t("notices.activeGroupUpdated", {
+				property: propertyName,
+				value: valueLabel,
+			}));
+			return true;
+		} catch (error) {
+			new Notice(this.t("notices.couldNotUpdateActiveGroup", { message: getErrorMessage(error) }));
+			return false;
+		}
+	}
+
+	private async runActiveGroupAction(path: string, group: ActiveGroupTarget): Promise<boolean> {
+		try {
+			if (!(await this.flushInlineEditorsForPaths([path]))) {
+				new Notice(this.t("notices.resolveInlineEditorConflict"));
+				return false;
+			}
+
+			const result = await this.plugin.taskNotes.runZoneAction(path, group.action);
+			if (result === "updated") {
+				await this.refreshInlineEditorsForPaths([path]);
+				new Notice(this.t("notices.activeGroupActionRun", {
+					action: this.getActiveGroupActionOptions()[group.action],
+				}));
+				return true;
+			}
+			if (result === "not-task") {
+				new Notice(this.t("notices.activeGroupActionNotTask"));
+				return false;
+			}
+
+			new Notice(this.t("notices.activeGroupActionUnavailable"));
+			return false;
+		} catch (error) {
+			new Notice(this.t("notices.couldNotUpdateActiveGroup", { message: getErrorMessage(error) }));
+			return false;
+		}
 	}
 
 	private handleResizeMove(event: PointerEvent): void {
@@ -3575,9 +4812,9 @@ export class BaseboardView extends BasesView {
 		this.clearDragListeners();
 	}
 
-	private getResizedPosition(deltaX: number, deltaY: number): BaseboardNodePosition {
+	private getResizedPosition(deltaX: number, deltaY: number): CanvasBasesNodePosition {
 		if (!this.resizeState) {
-			throw new Error("Baseboard resize state is not active.");
+			throw new Error("Canvas Bases resize state is not active.");
 		}
 
 		const { direction, minWidth, minHeight, startPosition } = this.resizeState;
@@ -3643,6 +4880,7 @@ export class BaseboardView extends BasesView {
 		}
 
 		const selectionRect = getRectFromPoints(this.selectionState.startPoint, point);
+		this.selectionState.selectionRect = selectionRect;
 		setNodeGeometry(this.selectionState.selectionEl, selectionRect);
 		this.selectionState.selectionEl.toggleClass("is-active", this.selectionState.didMove);
 		this.updateSelection(selectionRect);
@@ -3652,22 +4890,22 @@ export class BaseboardView extends BasesView {
 		if (!this.selectionState || event.pointerId !== this.selectionState.pointerId) return;
 
 		event.preventDefault();
-		const selectedNodeIds = [...this.selectionState.selectedNodeIds];
+		const selectionRect = this.selectionState.selectionRect;
 		const didMove = this.selectionState.didMove;
 		this.selectionState.selectionEl.remove();
 		this.canvasViewportEl?.removeClass("is-selecting");
 		this.selectionState = null;
 		this.clearDragListeners();
 
-		if (!didMove || selectedNodeIds.length === 0) {
+		if (!didMove) {
 			this.clearSelectedNodes();
 			return;
 		}
 
-		this.openSelectionMenu(event, selectedNodeIds);
+		this.openSelectionMenu(event, selectionRect);
 	}
 
-	private updateSelection(selectionRect: BaseboardNodePosition): void {
+	private updateSelection(selectionRect: CanvasBasesNodePosition): void {
 		if (!this.canvasRenderState || !this.selectionState) return;
 
 		const nextSelectedNodeIds = new Set(
@@ -3700,44 +4938,33 @@ export class BaseboardView extends BasesView {
 		this.applySelectedNodeClasses();
 	}
 
-	private openSelectionMenu(event: MouseEvent, nodeIds: string[]): void {
+	private openSelectionMenu(event: MouseEvent, selectionRect: CanvasBasesNodePosition): void {
 		const menu = new Menu();
 		menu.addItem((item) => {
 			item
 				.setTitle(this.t("view.menu.createGroupFromSelection"))
 				.setIcon("lucide-group")
 				.onClick(() => {
-					this.openCreateManualGroupFromSelectionModal(nodeIds);
+					this.openCreateManualGroupFromSelectionModal(selectionRect);
+				});
+		});
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.createZoneFromSelection"))
+				.setIcon("lucide-zap")
+				.onClick(() => {
+					this.openCreateCustomZoneModal(selectionRect);
 				});
 		});
 		menu.showAtMouseEvent(event);
 	}
 
-	private getNodeBounds(nodeIds: string[]): BaseboardNodePosition | null {
-		const positions = nodeIds
-			.map((nodeId) => this.getCurrentNodePosition(nodeId))
-			.filter((position): position is BaseboardNodePosition => position !== null);
-		if (positions.length === 0) return null;
-
-		const left = Math.min(...positions.map((position) => position.x));
-		const top = Math.min(...positions.map((position) => position.y));
-		const right = Math.max(...positions.map((position) => position.x + position.width));
-		const bottom = Math.max(...positions.map((position) => position.y + position.height));
-
-		return {
-			x: left,
-			y: top,
-			width: right - left,
-			height: bottom - top,
-		};
-	}
-
-	private getFileCardPositionAtPoint(point: LinkPoint): BaseboardNodePosition {
+	private getFileCardPositionAtPoint(point: LinkPoint): CanvasBasesNodePosition {
 		const options = this.getMaterializeOptions();
 		return getNodePositionAtPoint(point, options.nodeWidth, options.nodeHeight);
 	}
 
-	private getTextCardPositionAtPoint(point: LinkPoint): BaseboardNodePosition {
+	private getTextCardPositionAtPoint(point: LinkPoint): CanvasBasesNodePosition {
 		const options = this.getMaterializeOptions();
 		return getNodePositionAtPoint(
 			point,
@@ -3811,7 +5038,7 @@ export class BaseboardView extends BasesView {
 		);
 		this.canvasWorldEl.style.setProperty(
 			"height",
-			`${Math.ceil(this.canvasBounds.height * this.zoom)}px`
+			`${Math.ceil(this.canvasBounds.height * Math.max(this.zoom, 1))}px`
 		);
 		this.canvasPlaneEl.style.setProperty("transform", `scale(${this.zoom})`);
 		this.zoomLabelEl?.setText(`${Math.round(this.zoom * 100)}%`);
@@ -3824,13 +5051,13 @@ export class BaseboardView extends BasesView {
 		this.scheduleRender();
 	}
 
-	private getNodePositions(): BaseboardNodePositionMap {
+	private getNodePositions(): CanvasBasesNodePositionMap {
 		if (!this.config) return {};
 
 		return normalizeNodePositions(this.config.get(VIEW_CONFIG_KEYS.nodePositions));
 	}
 
-	private setNodePositions(positions: BaseboardNodePositionMap): void {
+	private setNodePositions(positions: CanvasBasesNodePositionMap): void {
 		if (!this.config) return;
 
 		this.config.set(VIEW_CONFIG_KEYS.nodePositions, positions);
@@ -3844,6 +5071,7 @@ export class BaseboardView extends BasesView {
 	}
 
 	private clearDragListeners(): void {
+		this.setActiveGroupDropTargets(new Set());
 		if (this.dragMoveHandler) {
 			window.removeEventListener("pointermove", this.dragMoveHandler);
 			this.dragMoveHandler = null;
@@ -3900,6 +5128,7 @@ export class BaseboardView extends BasesView {
 		this.linkDragState?.sourceElement.removeClass("is-linking");
 		this.linkDragState?.targetElement?.removeClass("is-link-target");
 		this.linkDragState?.previewEl.remove();
+		this.linkDragState?.hintEl.remove();
 		this.selectionState?.selectionEl.remove();
 		this.canvasViewportEl?.removeClass("is-selecting");
 		this.dragState = null;
@@ -3910,7 +5139,7 @@ export class BaseboardView extends BasesView {
 	}
 
 	notifyUnavailable(): void {
-		new Notice(this.t("notices.openBaseboardViewFirst"));
+		new Notice(this.t("notices.openCanvasBasesViewFirst"));
 	}
 }
 
@@ -3968,6 +5197,518 @@ class ManualNoteSuggestModal extends FuzzySuggestModal<TFile> {
 	}
 }
 
+interface ActiveGroupSettings {
+	label?: string;
+	action: CanvasBasesZoneAction;
+	property: string;
+	value: string;
+	updateMode: CanvasBasesZoneUpdateMode;
+	valueType: CanvasBasesZoneValueType;
+	color: string;
+}
+
+interface ActiveGroupSettingsModalOptions {
+	title: string;
+	t: TranslateFn;
+	labelLabel?: string;
+	actionLabel: string;
+	propertyLabel: string;
+	valueLabel: string;
+	updateModeLabel: string;
+	valueTypeLabel: string;
+	colorLabel: string;
+	initialLabel?: string;
+	initialAction: CanvasBasesZoneAction;
+	initialProperty: string;
+	initialValue: string;
+	initialUpdateMode: CanvasBasesZoneUpdateMode;
+	initialValueType: CanvasBasesZoneValueType;
+	initialColor: string;
+	actionOptions: Record<CanvasBasesZoneAction, string>;
+	propertyOptions: string[];
+	updateModeOptions: Record<CanvasBasesZoneUpdateMode, string>;
+	valueTypeOptions: Record<CanvasBasesZoneValueType, string>;
+	submitLabel: string;
+	cancelLabel: string;
+	readOnlyAction?: boolean;
+	readOnlyPropertyAndValue?: boolean;
+}
+
+class ActiveGroupSettingsModal extends Modal {
+	private readonly options: ActiveGroupSettingsModalOptions;
+	private readonly onSubmit: (settings: ActiveGroupSettings) => void;
+	private label: string;
+	private action: CanvasBasesZoneAction;
+	private property: string;
+	private value: string;
+	private updateMode: CanvasBasesZoneUpdateMode;
+	private valueType: CanvasBasesZoneValueType;
+	private color: string;
+	private readonly propertyIdsByInput = new Map<string, string>();
+	private readonly propertyLabelsById = new Map<string, string>();
+	private propertyText: TextComponent | null = null;
+	private valueText: TextComponent | null = null;
+	private valueTypeDropdown: DropdownComponent | null = null;
+	private writeRuleEl: HTMLElement | null = null;
+	private valueSettingEl: HTMLElement | null = null;
+	private updateModeSettingEl: HTMLElement | null = null;
+	private valueTypeSettingEl: HTMLElement | null = null;
+	private propertyErrorEl: HTMLElement | null = null;
+	private previewEl: HTMLElement | null = null;
+	private previewTextEl: HTMLElement | null = null;
+	private previewSwatchEl: HTMLElement | null = null;
+	private submitButtonEl: HTMLButtonElement | null = null;
+
+	constructor(
+		app: App,
+		options: ActiveGroupSettingsModalOptions,
+		onSubmit: (settings: ActiveGroupSettings) => void
+	) {
+		super(app);
+		this.options = options;
+		this.label = options.initialLabel ?? "";
+		this.action = normalizeZoneAction(options.initialAction);
+		for (const option of getFriendlyZonePropertyOptions(
+			options.propertyOptions,
+			options.t("settings.tasknotes.heading")
+		)) {
+			this.propertyIdsByInput.set(option.label, option.id);
+			this.propertyIdsByInput.set(option.id, option.id);
+			this.propertyLabelsById.set(option.id, option.label);
+		}
+		this.property = this.formatPropertyForInput(options.initialProperty);
+		this.value = options.initialValue;
+		this.updateMode = normalizeZoneUpdateMode(options.initialUpdateMode);
+		this.valueType = normalizeZoneValueType(options.initialValueType);
+		this.color = normalizeZoneColor(options.initialColor) ?? DEFAULT_ACTIVE_GROUP_COLOR;
+		this.onSubmit = onSubmit;
+	}
+
+	onOpen(): void {
+		this.contentEl.empty();
+		this.contentEl.addClass("canvas-bases-modal");
+		this.contentEl.addClass("canvas-bases-zone-modal");
+		this.modalEl.addClass("canvas-bases-zone-modal-shell");
+		this.contentEl.addEventListener("keydown", this.handleKeydown);
+		this.contentEl.createEl("h2", { text: this.options.title });
+
+		const propertyListId = `canvas-bases-active-group-properties-${nextActiveGroupPropertyListId++}`;
+		const propertyListEl = this.contentEl.createEl("datalist", { attr: { id: propertyListId } });
+		for (const property of this.options.propertyOptions) {
+			const label = this.formatPropertyForInput(property);
+			propertyListEl.createEl("option", {
+				attr: {
+					value: label,
+					label: property,
+				},
+			});
+		}
+
+		this.renderPreview();
+
+		const detailsEl = this.createSection(this.options.t("view.group.active"));
+		if (this.options.labelLabel) {
+			new Setting(detailsEl)
+				.setName(this.options.labelLabel)
+				.addText((text) => {
+					text
+						.setValue(this.label)
+						.onChange((value) => {
+							this.label = value;
+							this.updatePreview();
+						});
+				});
+		}
+		new Setting(detailsEl)
+			.setName(this.options.actionLabel)
+			.addDropdown((dropdown) => {
+				dropdown
+					.addOptions(this.options.actionOptions)
+					.setValue(this.action)
+					.onChange((value) => {
+						this.action = normalizeZoneAction(value);
+						this.updateActionState();
+						this.updateValidation();
+						this.updatePreview();
+					});
+				dropdown.setDisabled(Boolean(this.options.readOnlyAction));
+			});
+		new Setting(detailsEl)
+			.setName(this.options.colorLabel)
+			.addColorPicker((color) => {
+				color
+					.setValue(this.color)
+					.onChange((value) => {
+						this.color = normalizeZoneColor(value) ?? DEFAULT_ACTIVE_GROUP_COLOR;
+						this.updatePreview();
+					});
+			});
+
+		const ruleEl = this.createSection(this.options.t("view.group.writeRule"));
+		this.writeRuleEl = ruleEl;
+		if (this.options.readOnlyPropertyAndValue) {
+			ruleEl.createDiv({
+				cls: "canvas-bases-zone-modal__locked-note",
+				text: this.options.t("view.group.groupRuleLocked"),
+			});
+		}
+		new Setting(ruleEl)
+			.setName(this.options.propertyLabel)
+			.addText((text) => {
+				this.propertyText = text;
+				text
+					.setValue(this.property)
+					.onChange((value) => {
+						this.property = value;
+						this.updateValidation();
+						this.updatePreview();
+					});
+				text.inputEl.disabled = Boolean(this.options.readOnlyPropertyAndValue);
+				text.inputEl.setAttribute("list", propertyListId);
+			});
+		this.propertyErrorEl = ruleEl.createDiv({ cls: "canvas-bases-zone-modal__error" });
+
+		const valueSetting = new Setting(ruleEl)
+			.setName(this.options.valueLabel)
+			.addText((text) => {
+				this.valueText = text;
+				text
+					.setValue(this.value)
+					.onChange((value) => {
+						this.value = value;
+						this.updatePreview();
+					});
+				text.inputEl.disabled = Boolean(this.options.readOnlyPropertyAndValue);
+			});
+		valueSetting.settingEl.addClass("canvas-bases-zone-modal__value-setting");
+		this.valueSettingEl = valueSetting.settingEl;
+		const updateModeSetting = new Setting(ruleEl)
+			.setName(this.options.updateModeLabel)
+			.addDropdown((dropdown) => {
+				dropdown
+					.addOptions(this.options.updateModeOptions)
+					.setValue(this.updateMode)
+					.onChange((value) => {
+						this.updateMode = normalizeZoneUpdateMode(value);
+						this.updateClearState();
+						this.updateValidation();
+						this.updatePreview();
+					});
+			});
+		updateModeSetting.settingEl.addClass("canvas-bases-zone-modal__update-mode-setting");
+		this.updateModeSettingEl = updateModeSetting.settingEl;
+		const valueTypeSetting = new Setting(ruleEl)
+			.setName(this.options.valueTypeLabel)
+			.addDropdown((dropdown) => {
+				this.valueTypeDropdown = dropdown;
+				dropdown
+					.addOptions(this.options.valueTypeOptions)
+					.setValue(this.valueType)
+					.onChange((value) => {
+						this.valueType = normalizeZoneValueType(value);
+						this.updatePreview();
+					});
+			});
+		valueTypeSetting.settingEl.addClass("canvas-bases-zone-modal__value-type-setting");
+		this.valueTypeSettingEl = valueTypeSetting.settingEl;
+
+		const actionsEl = this.contentEl.createDiv({ cls: "canvas-bases-modal__actions" });
+		actionsEl
+			.createEl("button", { text: this.options.cancelLabel })
+			.addEventListener("click", () => {
+				this.close();
+			});
+		const submitButton = actionsEl.createEl("button", {
+			text: this.options.submitLabel,
+			cls: "mod-cta",
+		});
+		this.submitButtonEl = submitButton;
+		submitButton.addEventListener("click", () => {
+			this.submit();
+		});
+		this.updateActionState();
+		this.updateValidation();
+		this.updatePreview();
+	}
+
+	onClose(): void {
+		this.contentEl.removeEventListener("keydown", this.handleKeydown);
+		this.contentEl.empty();
+	}
+
+	private readonly handleKeydown = (event: KeyboardEvent): void => {
+		if (event.key !== "Enter" || !(event.target instanceof HTMLInputElement)) return;
+		if (event.target.type === "color") return;
+
+		event.preventDefault();
+		this.submit();
+	};
+
+	private createSection(title: string): HTMLElement {
+		const sectionEl = this.contentEl.createDiv({ cls: "canvas-bases-zone-modal__section" });
+		sectionEl.createEl("h3", { cls: "canvas-bases-zone-modal__section-title", text: title });
+		return sectionEl;
+	}
+
+	private renderPreview(): void {
+		this.previewEl = this.contentEl.createDiv({
+			cls: "canvas-bases-zone-modal__preview",
+			attr: { "aria-live": "polite" },
+		});
+		this.previewSwatchEl = this.previewEl.createSpan({
+			cls: "canvas-bases-zone-modal__preview-swatch",
+			attr: { "aria-hidden": "true" },
+		});
+		const copyEl = this.previewEl.createDiv({ cls: "canvas-bases-zone-modal__preview-copy" });
+		copyEl.createDiv({
+			cls: "canvas-bases-zone-modal__preview-title",
+			text: this.options.t("view.group.dropResult"),
+		});
+		this.previewTextEl = copyEl.createDiv({ cls: "canvas-bases-zone-modal__preview-text" });
+	}
+
+	private updateClearState(): void {
+		const isClearMode = this.updateMode === "clear";
+		const isPropertyAction = this.action === DEFAULT_ZONE_ACTION;
+		this.valueText?.setDisabled(
+			!isPropertyAction || Boolean(this.options.readOnlyPropertyAndValue) || isClearMode
+		);
+		this.valueTypeDropdown?.setDisabled(!isPropertyAction || isClearMode);
+		this.valueSettingEl?.toggleClass("is-disabled-by-mode", isClearMode);
+		this.valueTypeSettingEl?.toggleClass("is-disabled-by-mode", isClearMode);
+	}
+
+	private updateActionState(): void {
+		const isPropertyAction = this.action === DEFAULT_ZONE_ACTION;
+		if (this.writeRuleEl) {
+			this.writeRuleEl.style.display = isPropertyAction ? "" : "none";
+		}
+		this.updateModeSettingEl?.toggleClass("is-disabled-by-mode", !isPropertyAction);
+		this.updateClearState();
+	}
+
+	private updateValidation(): void {
+		if (this.action !== DEFAULT_ZONE_ACTION) {
+			this.propertyErrorEl?.setText("");
+			this.propertyErrorEl?.removeClass("is-visible");
+			this.propertyText?.inputEl.removeClass("is-invalid");
+			this.propertyText?.inputEl.removeAttribute("aria-invalid");
+			this.submitButtonEl?.toggleAttribute("disabled", false);
+			return;
+		}
+
+		const property = this.property.trim();
+		const message = property ? "" : this.options.t("view.group.propertyRequired");
+		this.propertyErrorEl?.setText(message);
+		this.propertyErrorEl?.toggleClass("is-visible", Boolean(message));
+		this.propertyText?.inputEl.toggleClass("is-invalid", Boolean(message));
+		if (message) {
+			this.propertyText?.inputEl.setAttribute("aria-invalid", "true");
+		} else {
+			this.propertyText?.inputEl.removeAttribute("aria-invalid");
+		}
+		this.submitButtonEl?.toggleAttribute("disabled", !property);
+	}
+
+	private updatePreview(): void {
+		const text =
+			this.action === DEFAULT_ZONE_ACTION
+				? this.getPropertyPreviewText()
+				: this.options.t("view.group.previewAction", {
+						action: this.options.actionOptions[this.action],
+					});
+
+		if (this.previewEl) {
+			this.previewEl.style.setProperty("--canvas-bases-zone-modal-color", this.color);
+		}
+		if (this.previewSwatchEl) {
+			this.previewSwatchEl.style.backgroundColor = this.color;
+		}
+		this.previewTextEl?.setText(text);
+	}
+
+	private getPropertyPreviewText(): string {
+		const property = this.formatPropertyForPreview(this.property);
+		const value = this.value.trim() || this.options.t("view.group.emptyValue");
+		return this.updateMode === "clear"
+			? this.options.t("view.group.previewClear", {
+					mode: this.options.updateModeOptions[this.updateMode],
+					property,
+				})
+				: this.options.t("view.group.previewWrite", {
+						mode: this.options.updateModeOptions[this.updateMode],
+						property,
+						value,
+					});
+	}
+
+	private submit(): void {
+		const property =
+			this.action === DEFAULT_ZONE_ACTION ? this.resolvePropertyInput(this.property).trim() : "";
+		if (this.action === DEFAULT_ZONE_ACTION && !property) {
+			this.updateValidation();
+			this.propertyText?.inputEl.focus();
+			return;
+		}
+
+		this.onSubmit({
+			label: this.label.trim(),
+			action: normalizeZoneAction(this.action),
+			property,
+			value: this.action === DEFAULT_ZONE_ACTION ? this.value.trim() : "",
+			updateMode: normalizeZoneUpdateMode(this.updateMode),
+			valueType: normalizeZoneValueType(this.valueType),
+			color: normalizeZoneColor(this.color) ?? DEFAULT_ACTIVE_GROUP_COLOR,
+		});
+		this.close();
+	}
+
+	private formatPropertyForInput(property: string): string {
+		const normalized = normalizeZoneProperty(property);
+		return this.propertyLabelsById.get(normalized) ?? getFriendlyZonePropertyLabel(
+			normalized || property,
+			this.options.t("settings.tasknotes.heading")
+		);
+	}
+
+	private formatPropertyForPreview(property: string): string {
+		const resolved = this.resolvePropertyInput(property);
+		return resolved
+			? getFriendlyZonePropertyLabel(resolved, this.options.t("settings.tasknotes.heading"))
+			: this.options.propertyLabel;
+	}
+
+	private resolvePropertyInput(property: string): string {
+		const trimmed = property.trim();
+		const mapped = this.propertyIdsByInput.get(trimmed);
+		if (mapped) return mapped;
+
+		const taskProperty = getFriendlyTaskPropertyId(
+			trimmed,
+			this.options.t("settings.tasknotes.heading")
+		);
+		return taskProperty ?? normalizeZoneProperty(trimmed);
+	}
+}
+
+interface FriendlyZonePropertyOption {
+	id: string;
+	label: string;
+}
+
+function getFriendlyZonePropertyOptions(
+	propertyIds: string[],
+	taskPrefix: string
+): FriendlyZonePropertyOption[] {
+	const labelsById = new Map<string, string>();
+	const labelCounts = new Map<string, number>();
+
+	for (const propertyId of propertyIds) {
+		const label = getFriendlyZonePropertyLabel(propertyId, taskPrefix);
+		labelsById.set(propertyId, label);
+		labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1);
+	}
+
+	return propertyIds
+		.map((propertyId) => {
+			const label = labelsById.get(propertyId) ?? propertyId;
+			return {
+				id: propertyId,
+				label: labelCounts.get(label) === 1 ? label : `${label} (${propertyId})`,
+			};
+		})
+		.sort((left, right) => left.label.localeCompare(right.label));
+}
+
+function getFriendlyZonePropertyLabel(propertyId: string, taskPrefix: string): string {
+	const trimmed = propertyId.trim();
+	if (/^note\./iu.test(trimmed)) return trimmed.slice("note.".length);
+	if (/^task\./iu.test(trimmed)) return `${taskPrefix}: ${trimmed.slice("task.".length)}`;
+
+	return trimmed;
+}
+
+function getFriendlyTaskPropertyId(property: string, taskPrefix: string): string | null {
+	const prefix = `${taskPrefix}:`;
+	if (!property.toLocaleLowerCase().startsWith(prefix.toLocaleLowerCase())) return null;
+
+	const taskProperty = property.slice(prefix.length).trim();
+	return taskProperty ? `task.${taskProperty}` : null;
+}
+
+function getColorPickerValue(color: string | undefined): string {
+	return color?.startsWith("#") ? color : DEFAULT_CARD_COLOR;
+}
+
+class CardColorModal extends Modal {
+	private readonly options: {
+		title: string;
+		colorLabel: string;
+		clearLabel: string;
+		closeLabel: string;
+		initialColor?: string;
+	};
+	private readonly onChange: (color: string | undefined) => void;
+	private color: string;
+
+	constructor(
+		app: App,
+		options: {
+			title: string;
+			colorLabel: string;
+			clearLabel: string;
+			closeLabel: string;
+			initialColor?: string;
+		},
+		onChange: (color: string | undefined) => void
+	) {
+		super(app);
+		this.options = options;
+		this.onChange = onChange;
+		this.color = getColorPickerValue(options.initialColor);
+	}
+
+	onOpen(): void {
+		this.contentEl.empty();
+		this.contentEl.addClass("canvas-bases-modal", "canvas-bases-card-color-modal");
+		this.contentEl.createEl("h2", { text: this.options.title });
+
+		new Setting(this.contentEl)
+			.setName(this.options.colorLabel)
+			.addColorPicker((color) => {
+				color
+					.setValue(this.color)
+					.onChange((value) => {
+						const nextColor = normalizeCanvasNodeColor(value);
+						if (!nextColor) return;
+
+						this.color = nextColor;
+						this.onChange(nextColor);
+					});
+			});
+
+		const actionsEl = this.contentEl.createDiv({ cls: "canvas-bases-modal__actions" });
+		actionsEl
+			.createEl("button", { text: this.options.clearLabel })
+			.addEventListener("click", () => {
+				this.onChange(undefined);
+				this.close();
+			});
+		actionsEl
+			.createEl("button", {
+				text: this.options.closeLabel,
+				cls: "mod-cta",
+			})
+			.addEventListener("click", () => {
+				this.close();
+			});
+	}
+
+	onClose(): void {
+		this.contentEl.empty();
+	}
+}
+
 class ManualGroupNameModal extends Modal {
 	private readonly options: {
 		title: string;
@@ -3996,7 +5737,7 @@ class ManualGroupNameModal extends Modal {
 
 	onOpen(): void {
 		this.contentEl.empty();
-		this.contentEl.addClass("baseboard-modal");
+		this.contentEl.addClass("canvas-bases-modal");
 		this.contentEl.createEl("h2", { text: this.options.title });
 
 		new Setting(this.contentEl)
@@ -4016,7 +5757,7 @@ class ManualGroupNameModal extends Modal {
 				text.inputEl.select();
 		});
 
-		const actionsEl = this.contentEl.createDiv({ cls: "baseboard-modal__actions" });
+		const actionsEl = this.contentEl.createDiv({ cls: "canvas-bases-modal__actions" });
 		actionsEl
 			.createEl("button", { text: this.options.cancelLabel })
 			.addEventListener("click", () => {
@@ -4044,7 +5785,7 @@ class ManualGroupNameModal extends Modal {
 	}
 }
 
-export function buildBaseboardViewOptions(t: TranslateFn): BasesAllOptions[] {
+export function buildCanvasBasesViewOptions(t: TranslateFn): BasesAllOptions[] {
 	return [
 		{
 			type: "group",
@@ -4054,7 +5795,7 @@ export function buildBaseboardViewOptions(t: TranslateFn): BasesAllOptions[] {
 					type: "text",
 					key: VIEW_CONFIG_KEYS.canvasPath,
 					displayName: t("basesOptions.canvasPath"),
-					placeholder: "Baseboards/My View.canvas",
+					placeholder: "Canvas Bases/My View.canvas",
 					default: "",
 				},
 				{
@@ -4222,9 +5963,9 @@ function mergeCanvasEdges(...edgeGroups: CanvasEdge[][]): CanvasEdge[] {
 }
 
 function buildEdgeRelationshipMap(
-	relationships: BaseboardRelationship[]
-): Map<string, BaseboardRelationship> {
-	const map = new Map<string, BaseboardRelationship>();
+	relationships: CanvasBasesRelationship[]
+): Map<string, CanvasBasesRelationship> {
+	const map = new Map<string, CanvasBasesRelationship>();
 	for (const relationship of relationships) {
 		map.set(getRelationshipEdgeId(relationship), relationship);
 	}
@@ -4233,9 +5974,9 @@ function buildEdgeRelationshipMap(
 }
 
 function mergeEdgeRelationshipMaps(
-	...maps: Array<Map<string, BaseboardRelationship>>
-): Map<string, BaseboardRelationship> {
-	const merged = new Map<string, BaseboardRelationship>();
+	...maps: Array<Map<string, CanvasBasesRelationship>>
+): Map<string, CanvasBasesRelationship> {
+	const merged = new Map<string, CanvasBasesRelationship>();
 	for (const map of maps) {
 		for (const [edgeId, relationship] of map) {
 			merged.set(edgeId, relationship);
@@ -4245,7 +5986,7 @@ function mergeEdgeRelationshipMaps(
 	return merged;
 }
 
-function isRemovableRelationship(relationship: BaseboardRelationship): boolean {
+function isRemovableRelationship(relationship: CanvasBasesRelationship): boolean {
 	return (
 		relationship.metadata?.source === "property" ||
 		relationship.metadata?.source === "tasknotes"
@@ -4253,7 +5994,7 @@ function isRemovableRelationship(relationship: BaseboardRelationship): boolean {
 }
 
 function isTaskDependencyRelationship(
-	relationship: BaseboardRelationship,
+	relationship: CanvasBasesRelationship,
 	blockedPath: string,
 	dependencyUid: string
 ): boolean {
@@ -4266,7 +6007,7 @@ function isTaskDependencyRelationship(
 }
 
 function isTaskProjectRelationship(
-	relationship: BaseboardRelationship,
+	relationship: CanvasBasesRelationship,
 	childPath: string,
 	parentPath: string
 ): boolean {
@@ -4279,7 +6020,7 @@ function isTaskProjectRelationship(
 }
 
 function getTaskEdgeCacheKey(
-	snapshot: BaseboardViewSnapshot,
+	snapshot: CanvasBasesViewSnapshot,
 	options: MaterializeOptions
 ): string | null {
 	if (options.taskNotesMode === "off" || options.taskNotesRelationships === "none") {
@@ -4292,9 +6033,9 @@ function getTaskEdgeCacheKey(
 }
 
 function applyStoredNodePositions(
-	snapshot: BaseboardViewSnapshot,
-	positions: BaseboardNodePositionMap
-): BaseboardViewSnapshot {
+	snapshot: CanvasBasesViewSnapshot,
+	positions: CanvasBasesNodePositionMap
+): CanvasBasesViewSnapshot {
 	return {
 		...snapshot,
 		groups: snapshot.groups.map((group) => ({
@@ -4320,10 +6061,10 @@ function applyStoredNodePositions(
 	};
 }
 
-function normalizeNodePositions(value: unknown): BaseboardNodePositionMap {
+function normalizeNodePositions(value: unknown): CanvasBasesNodePositionMap {
 	if (!isRecord(value)) return {};
 
-	const positions: BaseboardNodePositionMap = {};
+	const positions: CanvasBasesNodePositionMap = {};
 	for (const [id, position] of Object.entries(value)) {
 		if (typeof id !== "string" || !isRecord(position)) continue;
 
@@ -4336,15 +6077,22 @@ function normalizeNodePositions(value: unknown): BaseboardNodePositionMap {
 	return positions;
 }
 
-function normalizeNodePosition(value: Record<string, unknown>): BaseboardNodePosition | null {
+function normalizeNodePosition(value: Record<string, unknown>): CanvasBasesNodePosition | null {
 	const x = normalizeCoordinate(value.x);
 	const y = normalizeCoordinate(value.y);
 	const width = normalizeSize(value.width);
 	const height = normalizeSize(value.height);
+	const color = normalizeCanvasNodeColor(value.color);
 
 	if (x === null || y === null || width === null || height === null) return null;
 
-	return { x, y, width, height };
+	return {
+		x,
+		y,
+		width,
+		height,
+		...(color ? { color } : {}),
+	};
 }
 
 function normalizeCoordinate(value: unknown): number | null {
@@ -4375,25 +6123,29 @@ function isSelectableCanvasNode(node: CanvasRenderableNode): node is CanvasFileN
 	return node.type === "file" || node.type === "text";
 }
 
-function getCanvasNodePosition(node: CanvasRenderableNode): BaseboardNodePosition {
+function getCanvasNodePosition(node: CanvasRenderableNode): CanvasBasesNodePosition {
+	const color = normalizeCanvasNodeColor(node.color);
 	return {
 		x: node.x,
 		y: node.y,
 		width: node.width,
 		height: node.height,
+		...(color ? { color } : {}),
 	};
 }
 
 function applyCanvasNodePosition<TNode extends CanvasRenderableNode>(
 	node: TNode,
-	position: BaseboardNodePosition | undefined
+	position: CanvasBasesNodePosition | undefined
 ): TNode {
-	return position ? { ...node, ...position } : node;
+	return position
+		? { ...node, ...position, color: normalizeCanvasNodeColor(position.color) }
+		: node;
 }
 
 function buildGroupContainmentMap(
 	nodes: CanvasRenderableNode[],
-	positions: Map<string, BaseboardNodePosition>
+	positions: Map<string, CanvasBasesNodePosition>
 ): Map<string, string[]> {
 	const positionedNodes = nodes.map((node) => ({
 		node,
@@ -4418,8 +6170,8 @@ function buildGroupContainmentMap(
 }
 
 function positionsOverlap(
-	first: BaseboardNodePosition,
-	second: BaseboardNodePosition
+	first: CanvasBasesNodePosition,
+	second: CanvasBasesNodePosition
 ): boolean {
 	return (
 		first.x < second.x + second.width &&
@@ -4429,7 +6181,43 @@ function positionsOverlap(
 	);
 }
 
-function getRectFromPoints(first: LinkPoint, second: LinkPoint): BaseboardNodePosition {
+function positionCenterInside(
+	position: CanvasBasesNodePosition,
+	container: CanvasBasesNodePosition
+): boolean {
+	const centerX = position.x + position.width / 2;
+	const centerY = position.y + position.height / 2;
+	return (
+		centerX >= container.x &&
+		centerX <= container.x + container.width &&
+		centerY >= container.y &&
+		centerY <= container.y + container.height
+	);
+}
+
+function getPositionArea(position: CanvasBasesNodePosition): number {
+	return position.width * position.height;
+}
+
+function getBoundingGroupPosition(
+	positions: CanvasBasesNodePosition[]
+): CanvasBasesNodePosition | null {
+	if (positions.length === 0) return null;
+
+	const left = Math.min(...positions.map((position) => position.x));
+	const top = Math.min(...positions.map((position) => position.y));
+	const right = Math.max(...positions.map((position) => position.x + position.width));
+	const bottom = Math.max(...positions.map((position) => position.y + position.height));
+
+	return {
+		x: clampCoordinate(left - GROUP_PADDING),
+		y: clampCoordinate(top - GROUP_HEADER_HEIGHT),
+		width: Math.max(MIN_GROUP_NODE_WIDTH, right - left + GROUP_PADDING * 2),
+		height: Math.max(MIN_GROUP_NODE_HEIGHT, bottom - top + GROUP_HEADER_HEIGHT + GROUP_PADDING),
+	};
+}
+
+function getRectFromPoints(first: LinkPoint, second: LinkPoint): CanvasBasesNodePosition {
 	const x = Math.min(first.x, second.x);
 	const y = Math.min(first.y, second.y);
 
@@ -4445,7 +6233,7 @@ function getNodePositionAtPoint(
 	point: LinkPoint,
 	width: number,
 	height: number
-): BaseboardNodePosition {
+): CanvasBasesNodePosition {
 	return {
 		x: clampCoordinate(point.x),
 		y: clampCoordinate(point.y),
@@ -4454,14 +6242,32 @@ function getNodePositionAtPoint(
 	};
 }
 
-function setNodeGeometry(element: HTMLElement, position: BaseboardNodePosition): void {
+function setNodeGeometry(element: HTMLElement, position: CanvasBasesNodePosition): void {
 	element.style.setProperty("left", `${position.x}px`);
 	element.style.setProperty("top", `${position.y}px`);
 	element.style.setProperty("width", `${position.width}px`);
 	element.style.setProperty("height", `${position.height}px`);
 }
 
-function getElementNodePosition(element: HTMLElement): BaseboardNodePosition | null {
+function setNodeColor(element: HTMLElement, color: string | undefined): void {
+	const cssColor = getCanvasNodeCssColor(color);
+	element.toggleClass("has-node-color", Boolean(cssColor));
+	if (cssColor) {
+		element.style.setProperty("--canvas-bases-node-color", cssColor);
+	} else {
+		element.style.removeProperty("--canvas-bases-node-color");
+	}
+}
+
+function getNodePositionWithElementGeometry(
+	element: HTMLElement | null,
+	fallback: CanvasBasesNodePosition | undefined
+): CanvasBasesNodePosition | undefined {
+	const elementPosition = element ? getElementNodePosition(element) : null;
+	return elementPosition ? { ...(fallback ?? {}), ...elementPosition } : fallback;
+}
+
+function getElementNodePosition(element: HTMLElement): CanvasBasesNodePosition | null {
 	const x = getElementPixelStyle(element, "left");
 	const y = getElementPixelStyle(element, "top");
 	const width = getElementPixelStyle(element, "width");
@@ -4469,16 +6275,6 @@ function getElementNodePosition(element: HTMLElement): BaseboardNodePosition | n
 	if (x === null || y === null || width === null || height === null) return null;
 
 	return { x, y, width, height };
-}
-
-function getElementCenter(element: HTMLElement): LinkPoint | null {
-	const position = getElementNodePosition(element);
-	if (!position) return null;
-
-	return {
-		x: position.x + position.width / 2,
-		y: position.y + position.height / 2,
-	};
 }
 
 function getElementPixelStyle(
@@ -4489,8 +6285,61 @@ function getElementPixelStyle(
 	return Number.isFinite(value) ? value : null;
 }
 
+function getNodeCenter(position: CanvasBasesNodePosition): LinkPoint {
+	return {
+		x: position.x + position.width / 2,
+		y: position.y + position.height / 2,
+	};
+}
+
+function getNodeEdgeAnchor(position: CanvasBasesNodePosition, toward: LinkPoint): LinkPoint {
+	const center = getNodeCenter(position);
+	const dx = toward.x - center.x;
+	const dy = toward.y - center.y;
+
+	if (dx === 0 && dy === 0) {
+		return {
+			x: position.x + position.width,
+			y: center.y,
+		};
+	}
+
+	const halfWidth = Math.max(position.width / 2, 1);
+	const halfHeight = Math.max(position.height / 2, 1);
+	const hitsHorizontalEdge = Math.abs(dx) / halfWidth > Math.abs(dy) / halfHeight;
+	const scale = hitsHorizontalEdge
+		? halfWidth / Math.abs(dx)
+		: halfHeight / Math.abs(dy);
+
+	return {
+		x: center.x + dx * scale,
+		y: center.y + dy * scale,
+	};
+}
+
+function getNodeEdgeVector(position: CanvasBasesNodePosition, point: LinkPoint): LinkPoint {
+	const edgeDistances = [
+		{ distance: Math.abs(point.x - position.x), vector: { x: -1, y: 0 } },
+		{ distance: Math.abs(point.x - (position.x + position.width)), vector: { x: 1, y: 0 } },
+		{ distance: Math.abs(point.y - position.y), vector: { x: 0, y: -1 } },
+		{ distance: Math.abs(point.y - (position.y + position.height)), vector: { x: 0, y: 1 } },
+	];
+
+	return edgeDistances.reduce((closest, candidate) =>
+		candidate.distance < closest.distance ? candidate : closest
+	).vector;
+}
+
+function clampNumber(value: number, min: number, max: number): number {
+	return Math.min(max, Math.max(min, value));
+}
+
+function roundCoordinate(value: number): number {
+	return Math.round(value * 100) / 100;
+}
+
 function getCanvasNodeKind(element: HTMLElement): CanvasNodeKind | null {
-	const kind = element.getAttribute("data-baseboard-node-kind");
+	const kind = element.getAttribute("data-canvas-bases-node-kind");
 	return kind === "file" || kind === "group" || kind === "text" ? kind : null;
 }
 
@@ -4533,11 +6382,111 @@ function createNoteWikiLink(path: string): string {
 	return `[[${path.replace(/\.md$/iu, "")}]]`;
 }
 
-function toFrontmatterPropertyName(propertyId: string): string | null {
+function normalizeGroupByProperty(groupBy: CanvasBasesControllerViewConfig["groupBy"]): string | null {
+	const property = typeof groupBy === "string" ? groupBy : groupBy?.property;
+	if (typeof property !== "string") return null;
+
+	const normalized = normalizeZoneProperty(property);
+	return normalized ? normalized : null;
+}
+
+function isWritableActiveGroupProperty(propertyId: string): boolean {
 	const property = propertyId.trim();
-	if (!property || property.startsWith("file.") || property.startsWith("task.")) return null;
+	return toWritableNotePropertyName(property) !== null || /^task\./iu.test(property);
+}
+
+function activeGroupTargetsMatch(left: ActiveGroupTarget, right: ActiveGroupTarget): boolean {
+	return left.id === right.id;
+}
+
+function getVisibleGroupCount(snapshot: CanvasBasesViewSnapshot): number {
+	return snapshot.groups.filter((group) => !group.isImplicit).length + snapshot.manualGroups.length;
+}
+
+function setsEqual<T>(left: Set<T>, right: Set<T>): boolean {
+	if (left.size !== right.size) return false;
+	for (const value of left) {
+		if (!right.has(value)) return false;
+	}
+	return true;
+}
+
+function toWritableNotePropertyName(propertyId: string): string | null {
+	const property = propertyId.trim();
+	if (
+		!property ||
+		/^(file|formula|task)\./iu.test(property)
+	) {
+		return null;
+	}
 
 	return property.replace(/^(note\.|properties\.)/iu, "");
+}
+
+function getPropertyInfoNames(value: unknown): string[] {
+	const properties = new Set<string>();
+	const addName = (name: unknown) => {
+		if (typeof name === "string" && name.trim()) properties.add(name.trim());
+	};
+	const addInfo = (info: unknown) => {
+		if (typeof info === "string") {
+			addName(info);
+			return;
+		}
+		if (!isRecord(info)) return;
+		addName(info.name);
+		addName(info.id);
+		addName(info.key);
+	};
+
+	if (Array.isArray(value)) {
+		for (const info of value) addInfo(info);
+		return [...properties];
+	}
+	if (!isRecord(value)) return [];
+
+	for (const [key, info] of Object.entries(value)) {
+		addName(key);
+		addInfo(info);
+	}
+	return [...properties];
+}
+
+function getPropertyInfoType(value: unknown, propertyName: string): string | null {
+	const normalizedPropertyName = propertyName.trim().toLowerCase();
+	if (!normalizedPropertyName) return null;
+
+	const readType = (info: unknown): string | null => {
+		if (!isRecord(info)) return null;
+		const type = [info.type, info.widget, info.kind].find(
+			(candidate) => typeof candidate === "string" && candidate.trim()
+		);
+		return typeof type === "string" ? type.trim() : null;
+	};
+	const matchesProperty = (info: unknown): boolean => {
+		if (!isRecord(info)) return false;
+		return [info.name, info.id, info.key].some(
+			(candidate) =>
+				typeof candidate === "string" &&
+				candidate.trim().toLowerCase() === normalizedPropertyName
+		);
+	};
+
+	if (Array.isArray(value)) {
+		return readType(value.find(matchesProperty)) ?? null;
+	}
+	if (!isRecord(value)) return null;
+
+	for (const [key, info] of Object.entries(value)) {
+		if (key.trim().toLowerCase() === normalizedPropertyName || matchesProperty(info)) {
+			return readType(info);
+		}
+	}
+	return null;
+}
+
+function toFrontmatterPropertyName(propertyId: string): string | null {
+	return toWritableNotePropertyName(propertyId);
 }
 
 function appendPropertyLinkValue(
@@ -4613,12 +6562,12 @@ function isNodeControlTarget(target: EventTarget | null): boolean {
 		Boolean(
 			target.closest(
 				[
-					".baseboard-canvas-control-button",
-					".baseboard-canvas-resize-handle",
-					".baseboard-canvas-card-action",
-					".baseboard-canvas-link-handle",
-					".baseboard-canvas-file__editor",
-					".baseboard-canvas-text-card__editor",
+					".canvas-bases-canvas-control-button",
+					".canvas-bases-canvas-resize-handle",
+					".canvas-bases-canvas-card-action",
+					".canvas-bases-canvas-link-handle",
+					".canvas-bases-canvas-file__editor",
+					".canvas-bases-canvas-text-card__editor",
 				].join(", ")
 			)
 		)
@@ -4631,10 +6580,10 @@ function isBoardInteractiveTarget(target: EventTarget | null): boolean {
 		Boolean(
 			target.closest(
 				[
-					".baseboard-canvas-file",
-					".baseboard-canvas-group",
-					".baseboard-canvas-text-card",
-					".baseboard-canvas-control-button",
+					".canvas-bases-canvas-file",
+					".canvas-bases-canvas-group",
+					".canvas-bases-canvas-text-card",
+					".canvas-bases-canvas-control-button",
 				].join(", ")
 			)
 		)

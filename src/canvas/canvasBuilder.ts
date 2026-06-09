@@ -1,12 +1,13 @@
 import type {
-	BaseboardNodePosition,
-	BaseboardNodePositionMap,
-	BaseboardRelationship,
-	BaseboardViewSnapshot,
+	CanvasBasesNodePosition,
+	CanvasBasesNodePositionMap,
+	CanvasBasesRelationship,
+	CanvasBasesViewSnapshot,
 	MaterializeOptions,
 } from "../types";
-import { stableBaseboardId } from "../utils/hash";
+import { stableCanvasBasesId } from "../utils/hash";
 import { getSnapshotEntries } from "../bases/snapshotEntries";
+import { normalizeCanvasNodeColor } from "./colors";
 import { getEdgeAttachmentSides } from "./edgeRouting";
 import type {
 	CanvasEdge,
@@ -22,7 +23,7 @@ const GROUP_PADDING = 18;
 const NODE_GAP = 16;
 const GROUP_GAP = 48;
 const GRID_COLUMNS = 4;
-const BASEBOARD_ID_PREFIX = "bb-";
+const CANVAS_BASES_ID_PREFIX = "canvas-bases-";
 
 type PositionedGroup = {
 	groupNode: CanvasGroupNode | null;
@@ -30,21 +31,21 @@ type PositionedGroup = {
 };
 
 export interface InitializedTextCardPositions {
-	snapshot: BaseboardViewSnapshot;
-	positions: BaseboardNodePositionMap;
+	snapshot: CanvasBasesViewSnapshot;
+	positions: CanvasBasesNodePositionMap;
 	changed: boolean;
 }
 
-export function buildBaseboardCanvas(
-	snapshot: BaseboardViewSnapshot,
+export function buildCanvasBasesCanvas(
+	snapshot: CanvasBasesViewSnapshot,
 	options: MaterializeOptions,
-	relationships: BaseboardRelationship[] = [],
+	relationships: CanvasBasesRelationship[] = [],
 	existingCanvas: JsonCanvas = {}
 ): JsonCanvas {
 	const existingNodes = new Map((existingCanvas.nodes ?? []).map((node) => [node.id, node]));
 	const generatedGroups =
-		options.layout === "grid"
-		? [layoutUngroupedGrid(snapshot, options, existingNodes)]
+		options.layout === "grid" || hasOnlyImplicitGroups(snapshot)
+		? [layoutUngrouped(snapshot, options, existingNodes)]
 		: snapshot.groups.map((group, groupIndex) =>
 					layoutGroup(snapshot, group, groupIndex, options, existingNodes)
 				);
@@ -82,13 +83,13 @@ export function buildBaseboardCanvas(
 	const generatedEdgeIds = new Set(generatedEdges.map((edge) => edge.id));
 
 	const preservedNodes = (existingCanvas.nodes ?? []).filter((node) => {
-		if (!isBaseboardId(node.id)) return true;
+		if (!isCanvasBasesId(node.id)) return true;
 		if (generatedNodeIds.has(node.id)) return false;
 		return !options.removeMissingNodes;
 	});
 
 	const preservedEdges = (existingCanvas.edges ?? []).filter((edge) => {
-		if (!isBaseboardId(edge.id)) return true;
+		if (!isCanvasBasesId(edge.id)) return true;
 		if (generatedEdgeIds.has(edge.id)) return false;
 		return !options.removeMissingNodes;
 	});
@@ -100,9 +101,9 @@ export function buildBaseboardCanvas(
 }
 
 export function initializeTextCardPositions(
-	snapshot: BaseboardViewSnapshot,
+	snapshot: CanvasBasesViewSnapshot,
 	options: MaterializeOptions,
-	positions: BaseboardNodePositionMap
+	positions: CanvasBasesNodePositionMap
 ): InitializedTextCardPositions {
 	const missingCardNodeIds = snapshot.textCards
 		.map((card) => getTextCardNodeId(card.id))
@@ -113,7 +114,7 @@ export function initializeTextCardPositions(
 	}
 
 	const missingIds = new Set(missingCardNodeIds);
-	const canvas = buildBaseboardCanvas(snapshot, options);
+	const canvas = buildCanvasBasesCanvas(snapshot, options);
 	const nextPositions = { ...positions };
 	let changed = false;
 
@@ -142,31 +143,31 @@ export function initializeTextCardPositions(
 }
 
 export function getFileNodeId(path: string): string {
-	return stableBaseboardId("file", path);
+	return stableCanvasBasesId("file", path);
 }
 
 export function getTextCardNodeId(id: string): string {
-	return stableBaseboardId("text", id);
+	return stableCanvasBasesId("text", id);
 }
 
 export function getManualGroupNodeId(id: string): string {
-	return stableBaseboardId("manual-group", id);
+	return stableCanvasBasesId("manual-group", id);
 }
 
 export function getGroupNodeId(viewName: string, label: string): string {
-	return stableBaseboardId("group", `${viewName}:${label}`);
+	return stableCanvasBasesId("group", `${viewName}:${label}`);
 }
 
-export function getRelationshipEdgeId(relationship: BaseboardRelationship): string {
-	return stableBaseboardId(
+export function getRelationshipEdgeId(relationship: CanvasBasesRelationship): string {
+	return stableCanvasBasesId(
 		"edge",
 		`${relationship.sourcePath}->${relationship.targetPath}:${relationship.label ?? ""}`
 	);
 }
 
 function layoutGroup(
-	snapshot: BaseboardViewSnapshot,
-	group: BaseboardViewSnapshot["groups"][number],
+	snapshot: CanvasBasesViewSnapshot,
+	group: CanvasBasesViewSnapshot["groups"][number],
 	groupIndex: number,
 	options: MaterializeOptions,
 	existingNodes: Map<string, CanvasNode>
@@ -178,7 +179,6 @@ function layoutGroup(
 	const groupY = options.layout === "rows" ? calculateStackedGroupY(snapshot, groupIndex, options) : 0;
 	const columns = options.layout === "rows" ? Math.min(GRID_COLUMNS, Math.max(1, group.entries.length)) : 1;
 	const groupId = group.id || getGroupNodeId(snapshot.viewName, group.label);
-	const hasExistingGroupPosition = existingNodes.has(groupId);
 
 	const fileNodes = group.entries.map((entry, entryIndex) => {
 		const row = Math.floor(entryIndex / columns);
@@ -208,13 +208,6 @@ function layoutGroup(
 		y: groupY,
 		fileNodes,
 		options,
-		useBoundingGroupNode:
-			options.preservePositions &&
-			!group.position &&
-			!hasExistingGroupPosition &&
-			group.entries.some(
-				(entry) => entry.position || existingNodes.has(getFileNodeId(entry.path))
-			),
 	});
 
 	const positionedGroupNode = applyExistingNodePosition(
@@ -227,13 +220,13 @@ function layoutGroup(
 	return { groupNode: positionedGroupNode, fileNodes };
 }
 
-function layoutUngroupedGrid(
-	snapshot: BaseboardViewSnapshot,
+function layoutUngrouped(
+	snapshot: CanvasBasesViewSnapshot,
 	options: MaterializeOptions,
 	existingNodes: Map<string, CanvasNode>
 ): PositionedGroup {
 	const entries = getSnapshotEntries(snapshot);
-	const columns = Math.min(GRID_COLUMNS, Math.max(1, Math.ceil(Math.sqrt(entries.length))));
+	const columns = getUngroupedColumnCount(entries.length, options.layout);
 	const fileNodes = entries.map((entry, index) => {
 		const row = Math.floor(index / columns);
 		const column = index % columns;
@@ -254,8 +247,19 @@ function layoutUngroupedGrid(
 	return { groupNode: null, fileNodes };
 }
 
+function hasOnlyImplicitGroups(snapshot: CanvasBasesViewSnapshot): boolean {
+	return snapshot.groups.length > 0 && snapshot.groups.every((group) => group.isImplicit);
+}
+
+function getUngroupedColumnCount(entryCount: number, layout: MaterializeOptions["layout"]): number {
+	if (layout === "columns") return 1;
+	if (layout === "rows") return Math.min(GRID_COLUMNS, Math.max(1, entryCount));
+
+	return Math.min(GRID_COLUMNS, Math.max(1, Math.ceil(Math.sqrt(entryCount))));
+}
+
 function layoutManualGroups(
-	snapshot: BaseboardViewSnapshot,
+	snapshot: CanvasBasesViewSnapshot,
 	options: MaterializeOptions,
 	existingNodes: Map<string, CanvasNode>,
 	generatedDataNodes: CanvasNode[]
@@ -283,7 +287,7 @@ function layoutManualGroups(
 }
 
 function layoutManualEntries(
-	snapshot: BaseboardViewSnapshot,
+	snapshot: CanvasBasesViewSnapshot,
 	options: MaterializeOptions,
 	existingNodes: Map<string, CanvasNode>,
 	generatedDataNodes: CanvasNode[],
@@ -325,7 +329,7 @@ function getManualEntryOrigin(
 }
 
 function layoutTextCards(
-	snapshot: BaseboardViewSnapshot,
+	snapshot: CanvasBasesViewSnapshot,
 	options: MaterializeOptions,
 	existingNodes: Map<string, CanvasNode>,
 	generatedNodes: CanvasNode[]
@@ -364,12 +368,14 @@ function getTextCardOrigin(generatedNodes: CanvasNode[]): { x: number; y: number
 	};
 }
 
-function getCanvasNodePosition(node: CanvasNode): BaseboardNodePosition {
+function getCanvasNodePosition(node: CanvasNode): CanvasBasesNodePosition {
+	const color = normalizeCanvasNodeColor(node.color);
 	return {
 		x: node.x,
 		y: node.y,
 		width: node.width,
 		height: node.height,
+		...(color ? { color } : {}),
 	};
 }
 
@@ -380,7 +386,6 @@ function buildGroupNode({
 	y,
 	fileNodes,
 	options,
-	useBoundingGroupNode,
 }: {
 	id: string;
 	label: string;
@@ -388,12 +393,7 @@ function buildGroupNode({
 	y: number;
 	fileNodes: CanvasFileNode[];
 	options: MaterializeOptions;
-	useBoundingGroupNode: boolean;
 }): CanvasGroupNode {
-	if (useBoundingGroupNode && fileNodes.length > 0) {
-		return buildBoundingGroupNode(id, label, fileNodes);
-	}
-
 	const rows =
 		options.layout === "rows"
 			? Math.ceil(fileNodes.length / Math.min(GRID_COLUMNS, Math.max(1, fileNodes.length)))
@@ -416,27 +416,6 @@ function buildGroupNode({
 	};
 }
 
-function buildBoundingGroupNode(
-	id: string,
-	label: string,
-	fileNodes: CanvasFileNode[]
-): CanvasGroupNode {
-	const left = Math.min(...fileNodes.map((node) => node.x));
-	const top = Math.min(...fileNodes.map((node) => node.y));
-	const right = Math.max(...fileNodes.map((node) => node.x + node.width));
-	const bottom = Math.max(...fileNodes.map((node) => node.y + node.height));
-
-	return {
-		id,
-		type: "group",
-		label,
-		x: left - GROUP_PADDING,
-		y: top - GROUP_HEADER_HEIGHT,
-		width: right - left + GROUP_PADDING * 2,
-		height: bottom - top + GROUP_HEADER_HEIGHT + GROUP_PADDING,
-	};
-}
-
 function applyExistingNodePosition<T extends CanvasNode>(
 	generatedNode: T,
 	existingNodes: Map<string, CanvasNode>,
@@ -454,12 +433,13 @@ function applyExistingNodePosition<T extends CanvasNode>(
 		y: existingNode.y,
 		width: existingNode.width,
 		height: existingNode.height,
+		color: normalizeCanvasNodeColor(existingNode.color),
 	};
 }
 
 function applySnapshotPosition<T extends CanvasNode>(
 	generatedNode: T,
-	position: BaseboardNodePosition | undefined
+	position: CanvasBasesNodePosition | undefined
 ): T {
 	if (!position) return generatedNode;
 
@@ -469,11 +449,12 @@ function applySnapshotPosition<T extends CanvasNode>(
 		y: position.y,
 		width: position.width,
 		height: position.height,
+		color: normalizeCanvasNodeColor(position.color),
 	};
 }
 
 function calculateStackedGroupY(
-	snapshot: BaseboardViewSnapshot,
+	snapshot: CanvasBasesViewSnapshot,
 	groupIndex: number,
 	options: MaterializeOptions
 ): number {
@@ -497,8 +478,8 @@ function calculateGroupHeight(entryCount: number, nodeHeight: number): number {
 }
 
 function buildRelationshipEdges(
-	snapshot: BaseboardViewSnapshot,
-	relationships: BaseboardRelationship[],
+	snapshot: CanvasBasesViewSnapshot,
+	relationships: CanvasBasesRelationship[],
 	generatedNodes: CanvasNode[]
 ): CanvasEdge[] {
 	const visiblePaths = new Set(getSnapshotEntries(snapshot).map((entry) => entry.path));
@@ -540,6 +521,6 @@ function buildRelationshipEdges(
 	return [...deduped.values()];
 }
 
-function isBaseboardId(id: string): boolean {
-	return id.startsWith(BASEBOARD_ID_PREFIX);
+function isCanvasBasesId(id: string): boolean {
+	return id.startsWith(CANVAS_BASES_ID_PREFIX);
 }

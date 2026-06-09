@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-	buildBaseboardCanvas,
+	buildCanvasBasesCanvas,
 	getFileNodeId,
 	getGroupNodeId,
 	getManualGroupNodeId,
@@ -8,10 +8,10 @@ import {
 	initializeTextCardPositions,
 } from "../src/canvas/canvasBuilder";
 import type { CanvasEdge, CanvasGroupNode, JsonCanvas } from "../src/canvas/jsonCanvas";
-import type { BaseboardViewSnapshot, MaterializeOptions } from "../src/types";
+import type { CanvasBasesViewSnapshot, MaterializeOptions } from "../src/types";
 
 const baseOptions: MaterializeOptions = {
-	canvasPath: "Baseboards/Test.canvas",
+	canvasPath: "Canvas Bases/Test.canvas",
 	layout: "columns",
 	edgeMode: "wikilinks",
 	edgeProperties: [],
@@ -26,7 +26,7 @@ const baseOptions: MaterializeOptions = {
 	nodeHeight: 110,
 };
 
-const snapshot: BaseboardViewSnapshot = {
+const snapshot: CanvasBasesViewSnapshot = {
 	viewName: "Planning",
 	totalEntries: 3,
 	textCards: [],
@@ -47,9 +47,9 @@ const snapshot: BaseboardViewSnapshot = {
 	],
 };
 
-describe("buildBaseboardCanvas", () => {
+describe("buildCanvasBasesCanvas", () => {
 	it("materializes groups, file nodes, and scoped edges", () => {
-		const canvas = buildBaseboardCanvas(snapshot, baseOptions, [
+		const canvas = buildCanvasBasesCanvas(snapshot, baseOptions, [
 			{ sourcePath: "Tasks/A.md", targetPath: "Tasks/B.md" },
 			{ sourcePath: "Tasks/A.md", targetPath: "Outside.md" },
 		]);
@@ -71,7 +71,7 @@ describe("buildBaseboardCanvas", () => {
 	});
 
 	it("lays out grouped columns side by side", () => {
-		const canvas = buildBaseboardCanvas(snapshot, {
+		const canvas = buildCanvasBasesCanvas(snapshot, {
 			...baseOptions,
 			layout: "columns",
 			preservePositions: false,
@@ -88,7 +88,7 @@ describe("buildBaseboardCanvas", () => {
 	});
 
 	it("chooses exported edge sides from generated node geometry", () => {
-		const canvas = buildBaseboardCanvas(
+		const canvas = buildCanvasBasesCanvas(
 			snapshot,
 			{
 				...baseOptions,
@@ -114,7 +114,7 @@ describe("buildBaseboardCanvas", () => {
 	});
 
 	it("lays out grouped rows in a vertical stack using cumulative group heights", () => {
-		const variedSnapshot: BaseboardViewSnapshot = {
+		const variedSnapshot: CanvasBasesViewSnapshot = {
 			viewName: "Planning",
 			totalEntries: 8,
 			textCards: [],
@@ -145,7 +145,7 @@ describe("buildBaseboardCanvas", () => {
 				},
 			],
 		};
-		const canvas = buildBaseboardCanvas(variedSnapshot, {
+		const canvas = buildCanvasBasesCanvas(variedSnapshot, {
 			...baseOptions,
 			layout: "rows",
 			preservePositions: false,
@@ -160,7 +160,7 @@ describe("buildBaseboardCanvas", () => {
 		expect(thirdGroup.y).toBeGreaterThan(secondGroup.y + secondGroup.height);
 	});
 
-	it("preserves existing Baseboard node positions and manual nodes", () => {
+	it("preserves existing Canvas Bases node positions and manual nodes", () => {
 		const existing: JsonCanvas = {
 			nodes: [
 				{
@@ -171,6 +171,7 @@ describe("buildBaseboardCanvas", () => {
 					y: 700,
 					width: 300,
 					height: 120,
+					color: "4",
 				},
 				{
 					id: "manual-note",
@@ -191,7 +192,7 @@ describe("buildBaseboardCanvas", () => {
 			],
 		};
 
-		const canvas = buildBaseboardCanvas(snapshot, baseOptions, [], existing);
+		const canvas = buildCanvasBasesCanvas(snapshot, baseOptions, [], existing);
 		const preservedNode = canvas.nodes?.find((node) => node.id === getFileNodeId("Tasks/A.md"));
 
 		expect(preservedNode).toMatchObject({
@@ -199,13 +200,60 @@ describe("buildBaseboardCanvas", () => {
 			y: 700,
 			width: 300,
 			height: 120,
+			color: "4",
 		});
 		expect(canvas.nodes?.some((node) => node.id === "manual-note")).toBe(true);
 		expect(canvas.edges?.some((edge) => edge.id === "manual-edge")).toBe(true);
 	});
 
+	it("writes stored node colors into generated canvas nodes", () => {
+		const positionedSnapshot: CanvasBasesViewSnapshot = {
+			...snapshot,
+			textCards: [
+				{
+					id: "planning-note",
+					text: "Check dependencies before scheduling.",
+					position: {
+						x: 420,
+						y: 180,
+						width: 260,
+						height: 120,
+						color: "4",
+					},
+				},
+			],
+			groups: [
+				{
+					...snapshot.groups[0],
+					entries: [
+						{
+							...snapshot.groups[0].entries[0],
+							position: {
+								x: 140,
+								y: 190,
+								width: 280,
+								height: 120,
+								color: "#D946EF",
+							},
+						},
+						snapshot.groups[0].entries[1],
+					],
+				},
+				snapshot.groups[1],
+			],
+		};
+		const canvas = buildCanvasBasesCanvas(positionedSnapshot, baseOptions);
+
+		expect(canvas.nodes?.find((node) => node.id === getFileNodeId("Tasks/A.md"))).toMatchObject({
+			color: "#d946ef",
+		});
+		expect(canvas.nodes?.find((node) => node.id === getTextCardNodeId("planning-note"))).toMatchObject({
+			color: "4",
+		});
+	});
+
 	it("uses snapshot positions before existing canvas positions", () => {
-		const positionedSnapshot: BaseboardViewSnapshot = {
+		const positionedSnapshot: CanvasBasesViewSnapshot = {
 			...snapshot,
 			groups: [
 				{
@@ -254,7 +302,7 @@ describe("buildBaseboardCanvas", () => {
 				},
 			],
 		};
-		const canvas = buildBaseboardCanvas(positionedSnapshot, baseOptions, [], existing);
+		const canvas = buildCanvasBasesCanvas(positionedSnapshot, baseOptions, [], existing);
 
 		expect(canvas.nodes?.find((node) => node.id === getFileNodeId("Tasks/A.md"))).toMatchObject({
 			x: 140,
@@ -270,15 +318,81 @@ describe("buildBaseboardCanvas", () => {
 		});
 	});
 
+	it("keeps generated groups in their default layout when member cards move", () => {
+		const positionedSnapshot: CanvasBasesViewSnapshot = {
+			...snapshot,
+			groups: [
+				{
+					...snapshot.groups[0],
+					entries: [
+						snapshot.groups[0].entries[0],
+						{
+							...snapshot.groups[0].entries[1],
+							position: {
+								x: 18,
+								y: 900,
+								width: 260,
+								height: 110,
+							},
+						},
+					],
+				},
+				snapshot.groups[1],
+			],
+		};
+		const canvas = buildCanvasBasesCanvas(positionedSnapshot, baseOptions);
+
+		expect(getGroupNode(canvas, "Active")).toMatchObject({
+			x: 0,
+			y: 0,
+			width: 296,
+			height: 314,
+		});
+		expect(canvas.nodes?.find((node) => node.id === getFileNodeId("Tasks/B.md"))).toMatchObject({
+			x: 18,
+			y: 900,
+		});
+	});
+
 	it("can generate a flat grid without group nodes", () => {
-		const canvas = buildBaseboardCanvas(snapshot, { ...baseOptions, layout: "grid" });
+		const canvas = buildCanvasBasesCanvas(snapshot, { ...baseOptions, layout: "grid" });
 
 		expect(canvas.nodes?.every((node) => node.type === "file")).toBe(true);
 		expect(canvas.nodes).toHaveLength(3);
 	});
 
-	it("materializes Baseboard text cards as native canvas text nodes", () => {
-		const canvas = buildBaseboardCanvas({
+	it("does not materialize the implicit All notes group", () => {
+		const implicitSnapshot: CanvasBasesViewSnapshot = {
+			...snapshot,
+			groups: [
+				{
+					id: getGroupNodeId("Planning", "All notes"),
+					label: "All notes",
+					isImplicit: true,
+					entries: snapshot.groups.flatMap((group) => group.entries),
+				},
+			],
+		};
+		const canvas = buildCanvasBasesCanvas(implicitSnapshot, {
+			...baseOptions,
+			layout: "columns",
+			preservePositions: false,
+		});
+
+		expect(canvas.nodes?.some((node) => node.type === "group")).toBe(false);
+		expect(canvas.nodes?.filter((node) => node.type === "file")).toHaveLength(3);
+		expect(canvas.nodes?.find((node) => node.id === getFileNodeId("Tasks/A.md"))).toMatchObject({
+			x: 0,
+			y: 0,
+		});
+		expect(canvas.nodes?.find((node) => node.id === getFileNodeId("Tasks/B.md"))).toMatchObject({
+			x: 0,
+			y: 126,
+		});
+	});
+
+	it("materializes Canvas Bases text cards as native canvas text nodes", () => {
+		const canvas = buildCanvasBasesCanvas({
 			...snapshot,
 			textCards: [
 				{
@@ -300,7 +414,7 @@ describe("buildBaseboardCanvas", () => {
 	});
 
 	it("materializes manual group frames separately from manual note cards", () => {
-		const canvas = buildBaseboardCanvas({
+		const canvas = buildCanvasBasesCanvas({
 			...snapshot,
 			manualEntries: [
 				{
@@ -336,7 +450,7 @@ describe("buildBaseboardCanvas", () => {
 	});
 
 	it("initializes text card positions once so later note moves do not reflow them", () => {
-		const snapshotWithCard: BaseboardViewSnapshot = {
+		const snapshotWithCard: CanvasBasesViewSnapshot = {
 			...snapshot,
 			textCards: [
 				{
@@ -356,7 +470,7 @@ describe("buildBaseboardCanvas", () => {
 			height: 120,
 		});
 
-		const movedSnapshot: BaseboardViewSnapshot = {
+		const movedSnapshot: CanvasBasesViewSnapshot = {
 			...initialized.snapshot,
 			groups: initialized.snapshot.groups.map((group) => ({
 				...group,

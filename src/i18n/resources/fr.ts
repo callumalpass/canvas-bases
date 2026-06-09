@@ -2,9 +2,10 @@ import type { TranslationTree } from "../types";
 
 export const fr: TranslationTree = {
 	common: {
-		appName: "Baseboard",
+		appName: "Canvas Bases",
 		automatic: "Automatique",
 		cancel: "Annuler",
+		close: "Fermer",
 		card: {
 			one: "{count} carte",
 			other: "{count} cartes"
@@ -34,17 +35,26 @@ export const fr: TranslationTree = {
 		addedDependency: "Dépendance ajoutée : {label}.",
 		addedProjectRelationship: "Relation de projet ajoutée : {label}.",
 		addedPropertyLink: "{property} ajouté : {source} -> {target}.",
-		baseboardWaitingForBasesData: "Baseboard attend les données de bases.",
+		activeGroupDisabled: "Zone supprimée : {label}.",
+		activeGroupEnabled: "Zone activée : {label}.",
+		activeGroupReadOnly: "Cette zone ne peut pas mettre à jour une propriété de note modifiable.",
+		activeGroupTaskUpdateUnavailable: "TaskNotes ne peut pas mettre à jour cette propriété de tâche depuis Canvas Bases.",
+		activeGroupUpdated: "{property} mis à jour vers {value}.",
+		activeGroupActionRun: "Action de zone exécutée : {action}.",
+		activeGroupActionNotTask: "Cette action de zone fonctionne uniquement avec les tâches TaskNotes.",
+		activeGroupActionUnavailable: "Cette action de zone TaskNotes n’est pas disponible.",
+		canvasBasesWaitingForBasesData: "Canvas Bases attend les données de bases.",
 		couldNotAddPropertyLink: "Impossible d'ajouter le lien de propriété : {message}",
 		couldNotFind: "Impossible de trouver {path}.",
 		couldNotRemovePropertyLink: "Impossible de supprimer le lien de propriété : {message}",
+		couldNotUpdateActiveGroup: "Impossible de mettre à jour la valeur de la zone : {message}",
 		couldNotUpdateLink: "Impossible de mettre à jour le lien : {message}",
 		languageChanged: "Langue changée en {language}.",
 		linkActionUnavailable: "Cette action de lien n'est pas disponible pour ces notes.",
 		noLinkedCanvas: "{source} n'a pas encore de canevas lié.",
 		noVisibleLinkProperties: "Aucune propriété de note visible n'est disponible pour les liens.",
-		obsidianVersionRequired: "Baseboard nécessite Obsidian 1.10.1 ou plus récent.",
-		openBaseboardViewFirst: "Ouvrez d'abord une vue baseboard.",
+		obsidianVersionRequired: "Canvas Bases nécessite Obsidian 1.10.1 ou plus récent.",
+		openCanvasBasesViewFirst: "Ouvrez d'abord une vue Canvas Bases.",
 		openBasesViewFirst: "Ouvrez d'abord une vue de bases.",
 		resolveInlineEditorConflict: "Résolvez le conflit de l'éditeur intégré avant de modifier les liens.",
 		removedDependency: "Dépendance supprimée.",
@@ -53,7 +63,7 @@ export const fr: TranslationTree = {
 		chooseCanvasPath: "Choisissez un chemin de canevas.",
 		chooseLinkProperty: "Choisissez une propriété de note pour ce lien.",
 		starterFilesBlocked: "Impossible de créer les fichiers de démarrage, car un chemin de démarrage est déjà utilisé par un autre fichier ou dossier.",
-		starterFilesReady: "Les fichiers de démarrage sont prêts dans Baseboard/.",
+		starterFilesReady: "Les fichiers de démarrage sont prêts dans Canvas Bases/.",
 		updatedCanvas: "{path} mis à jour : {nodes} nœuds, {edges} arêtes."
 	},
 	settings: {
@@ -61,7 +71,7 @@ export const fr: TranslationTree = {
 			heading: "Valeurs par défaut",
 			canvasFolder: {
 				name: "Dossier de canevas par défaut",
-				description: "Dossier utilisé lorsqu'une vue baseboard n'a pas encore de chemin de canevas."
+				description: "Dossier utilisé lorsqu'une vue Canvas Bases n'a pas encore de chemin de canevas."
 			},
 			layout: {
 				name: "Disposition par défaut",
@@ -77,14 +87,14 @@ export const fr: TranslationTree = {
 			},
 			bodyEditor: {
 				name: "Afficher l'éditeur de corps",
-				description: "Afficher par défaut le texte modifiable du corps de la note sur les cartes baseboard en direct."
+				description: "Afficher par défaut le texte modifiable du corps de la note sur les cartes Canvas Bases en direct."
 			}
 		},
 		tasknotes: {
 			heading: "TaskNotes",
 			integration: {
 				name: "Intégration TaskNotes",
-				description: "Comportement TaskNotes par défaut pour les nouvelles vues baseboard."
+				description: "Comportement TaskNotes par défaut pour les nouvelles vues Canvas Bases."
 			},
 			badges: {
 				name: "Afficher les badges de tâche",
@@ -103,11 +113,11 @@ export const fr: TranslationTree = {
 			heading: "Règles de mise à jour",
 			preservePositions: {
 				name: "Conserver les positions",
-				description: "Conserver les positions existantes des nœuds baseboard lors de la mise à jour d'un canevas."
+				description: "Conserver les positions existantes des nœuds Canvas Bases lors de la mise à jour d'un canevas."
 			},
 			removeMissingNotes: {
 				name: "Supprimer les notes manquantes",
-				description: "Supprimer les nœuds baseboard qui n'apparaissent plus dans le résultat de base actuel."
+				description: "Supprimer les nœuds Canvas Bases qui n'apparaissent plus dans le résultat de base actuel."
 			},
 			nodeWidth: {
 				name: "Largeur du nœud",
@@ -120,9 +130,9 @@ export const fr: TranslationTree = {
 		},
 		language: {
 			heading: "Langue de l'interface",
-			description: "Changer la langue des commandes, paramètres, notifications et vues de Baseboard.",
+			description: "Changer la langue des commandes, paramètres, notifications et vues de Canvas Bases.",
 			name: "Langue de l'interface",
-			dropdownDescription: "Sélectionnez la langue utilisée pour le texte de l'interface Baseboard."
+			dropdownDescription: "Sélectionnez la langue utilisée pour le texte de l'interface Canvas Bases."
 		}
 	},
 	options: {
@@ -151,7 +161,9 @@ export const fr: TranslationTree = {
 			blocking: "Bloquant",
 			subtasks: "Sous-tâches",
 			estimate: "Estimation",
-			tracked: "Suivi"
+			tracked: "Suivi",
+			tracking: "Suivi actif",
+			active: "Actif"
 		},
 		relationships: {
 			blocks: "bloque",
@@ -188,7 +200,7 @@ export const fr: TranslationTree = {
 			description: "Ajouter les arêtes de relation entre tâches au canevas généré."
 		},
 		preservePositions: {
-			description: "Conserver les positions des nœuds baseboard déjà présents dans le canevas."
+			description: "Conserver les positions des nœuds Canvas Bases déjà présents dans le canevas."
 		},
 		createCanvas: "Créer un canevas"
 	},
@@ -198,6 +210,7 @@ export const fr: TranslationTree = {
 			pinNote: "Épingler la note",
 			addCard: "Ajouter une carte",
 			addGroup: "Ajouter un groupe",
+			addZone: "Ajouter une zone",
 			createCanvas: "Créer un canevas",
 			updateCanvas: "Mettre à jour le canevas",
 			openCanvas: "Ouvrir le canevas",
@@ -213,16 +226,67 @@ export const fr: TranslationTree = {
 			textCardTitle: "Carte",
 			cardActions: "Actions de la carte",
 			groupActions: "Actions du groupe",
+			color: "Couleur",
+			noteColor: "Couleur de la note",
+			cardColor: "Couleur de la carte",
 			editCard: "Modifier la carte",
 			writeNote: "Écrire une note",
 			linkFromNote: "Lier depuis cette note"
 		},
+		linkDrag: {
+			releaseToLink: "Relâchez pour lier à {target}",
+			dragToCard: "Déposez sur une autre carte de note",
+			cannotLinkHere: "Lien impossible ici"
+		},
 		group: {
+			active: "Zone",
+			activeTitle: "Zone d’affectation",
+			zoneTitle: "Zone d’affectation",
+			label: "Libellé",
+			action: "Action au dépôt",
+			actionSetProperty: "Mettre à jour la propriété",
+			actionCompleteTask: "Terminer la tâche",
+			actionUncompleteTask: "Marquer la tâche comme incomplète",
+			actionArchiveTask: "Archiver la tâche",
+			actionUnarchiveTask: "Désarchiver la tâche",
+			actionStartTimeTracking: "Démarrer le suivi du temps",
+			actionStopTimeTracking: "Arrêter le suivi du temps",
+			actionStartPomodoro: "Démarrer le Pomodoro",
+			actionAssignPomodoro: "Attribuer au Pomodoro en cours",
+			actionCompleteRecurring: "Terminer l’occurrence récurrente",
+			actionSkipRecurring: "Ignorer l’occurrence récurrente",
+			property: "Propriété",
+			value: "Valeur",
+			updateMode: "Mode de mise à jour",
+			valueType: "Type de valeur",
+			updateModeReplace: "Remplacer",
+			updateModeAppend: "Ajouter",
+			updateModeAppendUnique: "Ajouter si absent",
+			updateModeRemove: "Retirer",
+			updateModeClear: "Effacer",
+			valueTypeAuto: "Automatique",
+			valueTypeString: "Texte",
+			valueTypeNumber: "Nombre",
+			valueTypeBoolean: "Booléen",
+			valueTypeDate: "Date",
+			valueTypeList: "Liste",
+			color: "Couleur",
+			writeRule: "Règle d’écriture",
+			groupRuleLocked: "Cette zone suit le groupe Base actuel. Utilisez une zone personnalisée pour écrire une autre propriété.",
+			dropResult: "Résultat du dépôt",
+			previewWrite: "{mode}: {property} -> {value}.",
+			previewClear: "{mode}: {property}.",
+			previewAction: "{action}.",
+			emptyValue: "valeur vide",
+			propertyRequired: "Choisissez une propriété avant d’enregistrer.",
 			createTitle: "Créer un groupe",
 			defaultName: "Groupe",
+			defaultZoneName: "Zone",
 			create: "Créer",
+			createZone: "Créer une zone",
 			renameTitle: "Renommer le groupe",
-			rename: "Renommer"
+			rename: "Renommer",
+			saveActiveGroup: "Enregistrer la zone"
 		},
 		tooltips: {
 			dragGroup: "Déplacer le groupe",
@@ -240,15 +304,25 @@ export const fr: TranslationTree = {
 			openNote: "Ouvrir la note",
 			unpinFromBoard: "Désépingler du tableau",
 			removeCard: "Supprimer la carte",
+			setCardColor: "Définir la couleur",
+			clearCardColor: "Effacer la couleur",
 			addPinnedNote: "Ajouter une note épinglée",
 			addCard: "Ajouter une carte",
+			activateGroup: "Utiliser comme zone d’affectation",
+			configureActiveGroup: "Configurer la zone",
+			deactivateActiveGroup: "Supprimer la zone",
 			renameGroup: "Renommer le groupe",
 			removeGroup: "Supprimer le groupe",
+			fitGroupToCards: "Ajuster le groupe aux cartes",
 			createGroupFromSelection: "Créer un groupe à partir de la sélection",
+			createZoneFromSelection: "Créer une zone à partir de la sélection",
 			sourceBlocksTarget: "{source} bloque {target}",
 			targetBlocksSource: "{target} bloque {source}",
 			targetSubtaskOfSource: "{target} est une sous-tâche de {source}",
 			sourceSubtaskOfTarget: "{source} est une sous-tâche de {target}",
+			dependencyLinks: "Dépendances",
+			subtaskLinks: "Sous-tâches",
+			propertyLinks: "Liens de propriété",
 			addPropertyLink: "Ajouter {property} : {source} -> {target}",
 			chooseProperty: "Choisir une propriété...",
 			openPath: "Ouvrir {name}",
