@@ -46,6 +46,7 @@ export const ko: TranslationTree = {
 		obsidianVersionRequired: "Baseboard는 Obsidian 1.10.1 이상이 필요합니다.",
 		openBaseboardViewFirst: "먼저 baseboard 보기를 여세요.",
 		openBasesViewFirst: "먼저 베이스 보기를 여세요.",
+		resolveInlineEditorConflict: "링크를 변경하기 전에 인라인 편집기 충돌을 해결하세요.",
 		removedDependency: "종속성이 제거되었습니다.",
 		removedProjectRelationship: "프로젝트 관계가 제거되었습니다.",
 		removedPropertyLink: "{property} 링크가 제거되었습니다.",
@@ -264,7 +265,8 @@ export const ko: TranslationTree = {
 			unableToLoad: "불러올 수 없음",
 			error: "오류",
 			saving: "저장 중",
-			saved: "저장됨"
+			saved: "저장됨",
+			fileChanged: "파일이 디스크에서 변경되었습니다. 저장하면 덮어쓰고 Esc는 다시 불러옵니다."
 		},
 		suggest: {
 			propertyPlaceholder: "링크에 사용할 노트 속성을 선택하세요",

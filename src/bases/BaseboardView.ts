@@ -214,8 +214,10 @@ interface InlineEditorState {
 	original: string;
 	autosaveTimer: number | null;
 	pendingSaveValue: string | null;
-	savePromise: Promise<void> | null;
+	pendingSaveAllowConflictOverwrite: boolean;
+	savePromise: Promise<boolean> | null;
 	savedStatusTimer: number | null;
+	externalConflict: boolean;
 }
 
 export class BaseboardView extends BasesView {
@@ -282,11 +284,13 @@ export class BaseboardView extends BasesView {
 		this.setupRoot();
 		const refreshFromMetadata = debounce((file: TFile) => {
 			if (this.hasVisibleFile(file.path)) {
-				this.onDataUpdated();
+				void this.handleVisibleFileChanged(file.path);
 			}
 		}, 150, true);
 		this.registerEvent(this.app.metadataCache.on("changed", refreshFromMetadata));
-		for (const eventRef of this.plugin.taskNotes.registerTaskEvents(() => this.scheduleRender())) {
+		for (const eventRef of this.plugin.taskNotes.registerTaskEvents(() => {
+			void this.handleTaskNotesDataUpdated();
+		})) {
 			this.registerEvent(eventRef);
 		}
 		this.scheduleRender();
@@ -310,6 +314,16 @@ export class BaseboardView extends BasesView {
 			return;
 		}
 
+		this.scheduleRender();
+	}
+
+	private async handleVisibleFileChanged(path: string): Promise<void> {
+		await this.refreshInlineEditorsForPaths([path]);
+		this.onDataUpdated();
+	}
+
+	private async handleTaskNotesDataUpdated(): Promise<void> {
+		await this.refreshAllInlineEditorsFromDisk();
 		this.scheduleRender();
 	}
 
@@ -1504,17 +1518,23 @@ export class BaseboardView extends BasesView {
 		path: string,
 		entry: BaseboardEntrySnapshot | undefined
 	): Promise<void> {
+		if (!(await this.flushInlineEditorsForPaths([path]))) {
+			new Notice(this.t("notices.resolveInlineEditorConflict"));
+			return;
+		}
+
 		const menu = new Menu();
 		const options = this.getMaterializeOptions();
+		const onTaskMenuUpdate = () => {
+			void this.refreshInlineEditorsForPaths([path]).finally(() => {
+				this.scheduleRender();
+			});
+		};
 		let taskActionsAdded = false;
 		if (options.taskNotesMode !== "off" && options.taskNotesShowActions) {
-			taskActionsAdded = await this.plugin.taskNotes.populateTaskMenu(menu, path, () =>
-				this.scheduleRender()
-			);
+			taskActionsAdded = await this.plugin.taskNotes.populateTaskMenu(menu, path, onTaskMenuUpdate);
 			if (!taskActionsAdded) {
-				const shown = await this.plugin.taskNotes.showTaskMenu(path, event, () =>
-					this.scheduleRender()
-				);
+				const shown = await this.plugin.taskNotes.showTaskMenu(path, event, onTaskMenuUpdate);
 				if (shown) return;
 			}
 		}
@@ -1793,7 +1813,8 @@ export class BaseboardView extends BasesView {
 		await this.runLinkMutation(
 			async () => this.plugin.taskNotes.addDependency(blockedPath, blockingPath),
 			this.t("notices.addedDependency", { label }),
-			() => this.ensureTaskRelationshipRendering("dependency")
+			() => this.ensureTaskRelationshipRendering("dependency"),
+			[blockedPath]
 		);
 	}
 
@@ -1808,7 +1829,8 @@ export class BaseboardView extends BasesView {
 				this.removeRelationshipsFromLiveView((relationship) =>
 					isTaskDependencyRelationship(relationship, blockedPath, dependencyUid)
 				);
-			}
+			},
+			[blockedPath]
 		);
 	}
 
@@ -1820,7 +1842,8 @@ export class BaseboardView extends BasesView {
 		await this.runLinkMutation(
 			async () => this.plugin.taskNotes.addProject(childPath, parentPath),
 			this.t("notices.addedProjectRelationship", { label }),
-			() => this.ensureTaskRelationshipRendering("project")
+			() => this.ensureTaskRelationshipRendering("project"),
+			[childPath]
 		);
 	}
 
@@ -1832,16 +1855,23 @@ export class BaseboardView extends BasesView {
 				this.removeRelationshipsFromLiveView((relationship) =>
 					isTaskProjectRelationship(relationship, childPath, parentPath)
 				);
-			}
+			},
+			[childPath]
 		);
 	}
 
 	private async runLinkMutation(
 		mutation: () => Promise<boolean>,
 		successMessage: string,
-		onSuccess?: () => void
+		onSuccess?: () => void,
+		affectedPaths: string[] = []
 	): Promise<void> {
 		try {
+			if (!(await this.flushInlineEditorsForPaths(affectedPaths))) {
+				new Notice(this.t("notices.resolveInlineEditorConflict"));
+				return;
+			}
+
 			const changed = await mutation();
 			if (!changed) {
 				new Notice(this.t("notices.linkActionUnavailable"));
@@ -1850,6 +1880,7 @@ export class BaseboardView extends BasesView {
 
 			onSuccess?.();
 			this.taskEdgeCache = null;
+			await this.refreshInlineEditorsForPaths(affectedPaths);
 			this.scheduleRender();
 			new Notice(successMessage);
 		} catch (error) {
@@ -1945,6 +1976,11 @@ export class BaseboardView extends BasesView {
 		}
 
 		try {
+			if (!(await this.flushInlineEditorsForPaths([sourcePath]))) {
+				new Notice(this.t("notices.resolveInlineEditorConflict"));
+				return;
+			}
+
 			const link = createNoteWikiLink(targetPath);
 			await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 				frontmatter[propertyName] = appendPropertyLinkValue(
@@ -1954,6 +1990,7 @@ export class BaseboardView extends BasesView {
 				);
 			});
 			this.ensurePropertyEdgeRendering(propertyName);
+			await this.refreshInlineEditorsForPaths([sourcePath]);
 			this.scheduleRender();
 			new Notice(this.t("notices.addedPropertyLink", {
 				property: propertyName,
@@ -1977,6 +2014,11 @@ export class BaseboardView extends BasesView {
 		}
 
 		try {
+			if (!(await this.flushInlineEditorsForPaths([sourcePath]))) {
+				new Notice(this.t("notices.resolveInlineEditorConflict"));
+				return;
+			}
+
 			await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 				const nextValue = removePropertyLinkValue(
 					frontmatter[property],
@@ -1988,6 +2030,7 @@ export class BaseboardView extends BasesView {
 					frontmatter[property] = nextValue;
 				}
 			});
+			await this.refreshInlineEditorsForPaths([sourcePath]);
 			this.scheduleRender();
 			new Notice(this.t("notices.removedPropertyLink", { property }));
 		} catch (error) {
@@ -2535,6 +2578,11 @@ export class BaseboardView extends BasesView {
 					const isDirty = value !== original;
 					editorContainerEl.toggleClass("is-dirty", isDirty);
 					containerEl.toggleClass("is-dirty", isDirty);
+					if (state?.externalConflict) {
+						this.cancelInlineEditorAutosave(state);
+						this.markInlineEditorExternalConflict(nodeId, state);
+						return;
+					}
 					statusEl.setText(isDirty ? this.t("view.editor.unsaved") : "");
 					if (state) {
 						this.clearInlineEditorSavedStatusTimer(state);
@@ -2546,15 +2594,23 @@ export class BaseboardView extends BasesView {
 					}
 				},
 				onSubmit: () => {
-					void this.saveInlineEditorState(nodeId);
+					void this.saveInlineEditorState(nodeId, {
+						allowConflictOverwrite: true,
+					});
 				},
 				onEscape: () => {
 					const state = this.inlineEditors.get(nodeId);
 					if (!state) return;
 					this.cancelInlineEditorAutosave(state);
+					this.clearInlineEditorSavedStatusTimer(state);
+					state.externalConflict = false;
+					state.pendingSaveValue = null;
+					state.pendingSaveAllowConflictOverwrite = false;
 					state.editor.setValue(state.original);
 					editorContainerEl.removeClass("is-dirty");
+					editorContainerEl.removeClass("is-stale");
 					containerEl.removeClass("is-dirty");
+					containerEl.removeClass("is-stale");
 					statusEl.setText("");
 					state.editor.blur();
 				},
@@ -2574,8 +2630,10 @@ export class BaseboardView extends BasesView {
 				original: content,
 				autosaveTimer: null,
 				pendingSaveValue: null,
+				pendingSaveAllowConflictOverwrite: false,
 				savePromise: null,
 				savedStatusTimer: null,
+				externalConflict: false,
 			});
 			statusEl.setText("");
 		} catch {
@@ -2743,13 +2801,20 @@ export class BaseboardView extends BasesView {
 		}, INLINE_EDITOR_SAVED_STATUS_DELAY_MS);
 	}
 
-	private saveInlineEditorState(nodeId: string): Promise<void> {
-		return this.flushInlineEditorAutosave(nodeId);
+	private saveInlineEditorState(
+		nodeId: string,
+		options: { allowConflictOverwrite?: boolean } = {}
+	): Promise<boolean> {
+		return this.flushInlineEditorAutosave(nodeId, options);
 	}
 
 	private scheduleInlineEditorAutosave(nodeId: string): void {
 		const state = this.inlineEditors.get(nodeId);
 		if (!state) return;
+		if (state.externalConflict) {
+			this.markInlineEditorExternalConflict(nodeId, state);
+			return;
+		}
 
 		this.cancelInlineEditorAutosave(state);
 		state.autosaveTimer = window.setTimeout(() => {
@@ -2758,12 +2823,15 @@ export class BaseboardView extends BasesView {
 		}, INLINE_EDITOR_AUTOSAVE_DELAY_MS);
 	}
 
-	private flushInlineEditorAutosave(nodeId: string): Promise<void> {
+	private flushInlineEditorAutosave(
+		nodeId: string,
+		options: { allowConflictOverwrite?: boolean } = {}
+	): Promise<boolean> {
 		const state = this.inlineEditors.get(nodeId);
-		if (!state) return Promise.resolve();
+		if (!state) return Promise.resolve(true);
 
 		this.cancelInlineEditorAutosave(state);
-		return this.saveInlineEditorValue(nodeId, state, state.editor.getValue());
+		return this.saveInlineEditorValue(nodeId, state, state.editor.getValue(), options);
 	}
 
 	private cancelInlineEditorAutosave(state: InlineEditorState): void {
@@ -2776,14 +2844,25 @@ export class BaseboardView extends BasesView {
 	private saveInlineEditorValue(
 		nodeId: string,
 		state: InlineEditorState,
-		value: string
-	): Promise<void> {
+		value: string,
+		options: { allowConflictOverwrite?: boolean } = {}
+	): Promise<boolean> {
 		if (value === state.original && state.savePromise === null) {
+			state.externalConflict = false;
 			state.pendingSaveValue = null;
-			return Promise.resolve();
+			state.pendingSaveAllowConflictOverwrite = false;
+			this.syncInlineEditorDirtyState(nodeId, state);
+			state.statusEl.setText("");
+			return Promise.resolve(true);
+		}
+
+		if (state.externalConflict && !options.allowConflictOverwrite) {
+			this.markInlineEditorExternalConflict(nodeId, state);
+			return Promise.resolve(false);
 		}
 
 		state.pendingSaveValue = value;
+		state.pendingSaveAllowConflictOverwrite = Boolean(options.allowConflictOverwrite);
 		if (state.savePromise === null) {
 			state.savePromise = this.runInlineEditorSaveQueue(nodeId, state);
 		}
@@ -2794,48 +2873,71 @@ export class BaseboardView extends BasesView {
 	private async runInlineEditorSaveQueue(
 		nodeId: string,
 		state: InlineEditorState
-	): Promise<void> {
+	): Promise<boolean> {
+		let saved = true;
 		try {
 			while (state.pendingSaveValue !== null) {
 				const value = state.pendingSaveValue;
+				const allowConflictOverwrite = state.pendingSaveAllowConflictOverwrite;
 				state.pendingSaveValue = null;
+				state.pendingSaveAllowConflictOverwrite = false;
 				if (value === state.original) {
+					state.externalConflict = false;
 					this.syncInlineEditorDirtyState(nodeId, state);
 					continue;
 				}
 
-				await this.persistInlineEditorValue(nodeId, state, value);
+				const didSave = await this.persistInlineEditorValue(
+					nodeId,
+					state,
+					value,
+					{ allowConflictOverwrite }
+				);
+				if (!didSave) {
+					saved = false;
+					break;
+				}
 			}
 		} finally {
 			state.savePromise = null;
 		}
+
+		return saved;
 	}
 
 	private async persistInlineEditorValue(
 		nodeId: string,
 		state: InlineEditorState,
-		value: string
-	): Promise<void> {
+		value: string,
+		options: { allowConflictOverwrite?: boolean } = {}
+	): Promise<boolean> {
+		if (state.externalConflict && !options.allowConflictOverwrite) {
+			this.markInlineEditorExternalConflict(nodeId, state);
+			return false;
+		}
+
 		const file = this.app.vault.getAbstractFileByPath(state.path);
 		if (!(file instanceof TFile)) {
 			state.statusEl.setText(this.t("view.editor.missing"));
-			return;
+			return false;
 		}
 
 		this.clearInlineEditorSavedStatusTimer(state);
 		state.statusEl.setText(this.t("view.editor.saving"));
 		await this.app.vault.modify(file, value);
 		state.original = value;
+		state.externalConflict = false;
 		const isDirty = this.syncInlineEditorDirtyState(nodeId, state);
 		state.statusEl.setText(isDirty ? this.t("view.editor.unsaved") : this.t("view.editor.saved"));
 		if (isDirty) {
 			if (this.inlineEditors.get(nodeId) === state && state.pendingSaveValue === null) {
 				this.scheduleInlineEditorAutosave(nodeId);
 			}
-			return;
+			return true;
 		}
 
 		this.scheduleInlineEditorSavedStatusClear(state);
+		return true;
 	}
 
 	private syncInlineEditorDirtyState(nodeId: string, state: InlineEditorState): boolean {
@@ -2845,8 +2947,10 @@ export class BaseboardView extends BasesView {
 		const editorEl = state.shellEl.querySelector(".baseboard-canvas-file__markdown-editor");
 		if (editorEl instanceof HTMLElement) {
 			editorEl.toggleClass("is-dirty", isDirty);
+			editorEl.toggleClass("is-stale", state.externalConflict);
 		}
 		state.shellEl.toggleClass("is-dirty", isDirty);
+		state.shellEl.toggleClass("is-stale", state.externalConflict);
 		return isDirty;
 	}
 
@@ -2865,6 +2969,96 @@ export class BaseboardView extends BasesView {
 				state.statusEl.setText("");
 			}
 		}, INLINE_EDITOR_SAVED_STATUS_DELAY_MS);
+	}
+
+	private getInlineEditorEntriesForPaths(
+		paths: string[]
+	): Array<[string, InlineEditorState]> {
+		const pathSet = new Set(paths);
+		return [...this.inlineEditors.entries()].filter(([, state]) => pathSet.has(state.path));
+	}
+
+	private async flushInlineEditorsForPaths(paths: string[]): Promise<boolean> {
+		const results = await Promise.all(
+			this.getInlineEditorEntriesForPaths(paths).map(([nodeId]) =>
+				this.flushInlineEditorAutosave(nodeId)
+			)
+		);
+		return results.every(Boolean);
+	}
+
+	private async refreshAllInlineEditorsFromDisk(): Promise<void> {
+		await Promise.all(
+			[...this.inlineEditors.entries()].map(([nodeId, state]) =>
+				this.refreshInlineEditorFromDisk(nodeId, state)
+			)
+		);
+	}
+
+	private async refreshInlineEditorsForPaths(paths: string[]): Promise<void> {
+		await Promise.all(
+			this.getInlineEditorEntriesForPaths(paths).map(([nodeId, state]) =>
+				this.refreshInlineEditorFromDisk(nodeId, state)
+			)
+		);
+	}
+
+	private async refreshInlineEditorFromDisk(
+		nodeId: string,
+		state: InlineEditorState
+	): Promise<void> {
+		if (state.savePromise) {
+			await state.savePromise;
+		}
+		if (this.inlineEditors.get(nodeId) !== state) return;
+
+		const file = this.app.vault.getAbstractFileByPath(state.path);
+		if (!(file instanceof TFile)) {
+			state.statusEl.setText(this.t("view.editor.missing"));
+			return;
+		}
+
+		const diskValue = await this.app.vault.read(file);
+		if (this.inlineEditors.get(nodeId) !== state) return;
+		if (diskValue === state.original && !state.externalConflict) return;
+
+		const editorValue = state.editor.getValue();
+		const isDirty =
+			editorValue !== state.original ||
+			state.pendingSaveValue !== null ||
+			state.externalConflict;
+		if (isDirty && editorValue !== diskValue) {
+			this.cancelInlineEditorAutosave(state);
+			this.clearInlineEditorSavedStatusTimer(state);
+			state.original = diskValue;
+			state.externalConflict = true;
+			this.markInlineEditorExternalConflict(nodeId, state);
+			return;
+		}
+
+		const wasFocused = this.isInlineEditorFocused(state);
+		this.cancelInlineEditorAutosave(state);
+		this.clearInlineEditorSavedStatusTimer(state);
+		state.original = diskValue;
+		state.pendingSaveValue = null;
+		state.pendingSaveAllowConflictOverwrite = false;
+		state.externalConflict = false;
+		state.editor.setValue(diskValue);
+		this.syncInlineEditorDirtyState(nodeId, state);
+		state.statusEl.setText("");
+		if (wasFocused) {
+			state.editor.focus();
+		}
+	}
+
+	private markInlineEditorExternalConflict(nodeId: string, state: InlineEditorState): void {
+		this.syncInlineEditorDirtyState(nodeId, state);
+		state.statusEl.setText(this.t("view.editor.fileChanged"));
+	}
+
+	private isInlineEditorFocused(state: InlineEditorState): boolean {
+		const activeElement = this.rootEl?.ownerDocument.activeElement;
+		return activeElement?.instanceOf(HTMLElement) === true && state.shellEl.contains(activeElement);
 	}
 
 	private hasFocusedInlineEditor(): boolean {

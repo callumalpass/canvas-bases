@@ -46,6 +46,7 @@ export const en: TranslationTree = {
 		obsidianVersionRequired: "Baseboard requires Obsidian 1.10.1 or newer.",
 		openBaseboardViewFirst: "Open a baseboard view first.",
 		openBasesViewFirst: "Open a bases view first.",
+		resolveInlineEditorConflict: "Resolve the inline editor conflict before changing links.",
 		removedDependency: "Removed dependency.",
 		removedProjectRelationship: "Removed project relationship.",
 		removedPropertyLink: "Removed {property} link.",
@@ -265,6 +266,7 @@ export const en: TranslationTree = {
 			error: "Error",
 			saving: "Saving",
 			saved: "Saved",
+			fileChanged: "File changed on disk. Save overwrites; Esc reloads.",
 		},
 		suggest: {
 			propertyPlaceholder: "Choose a note property for the link",

@@ -875,6 +875,10 @@
 	border-color: var(--text-accent);
 }
 
+.baseboard-canvas-file__editor-shell.is-stale {
+	border-color: var(--text-warning, var(--text-accent));
+}
+
 .baseboard-canvas-file__status {
 	position: absolute;
 	right: 9px;

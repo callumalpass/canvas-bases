@@ -46,6 +46,7 @@ export const pt: TranslationTree = {
 		obsidianVersionRequired: "O Baseboard requer o Obsidian 1.10.1 ou mais recente.",
 		openBaseboardViewFirst: "Abra uma visualização do Baseboard primeiro.",
 		openBasesViewFirst: "Abra uma visualização do Bases primeiro.",
+		resolveInlineEditorConflict: "Resolva o conflito do editor embutido antes de alterar links.",
 		removedDependency: "Dependência removida.",
 		removedProjectRelationship: "Relacionamento de projeto removido.",
 		removedPropertyLink: "Link de {property} removido.",
@@ -264,7 +265,8 @@ export const pt: TranslationTree = {
 			unableToLoad: "Não foi possível carregar",
 			error: "Erro",
 			saving: "Salvando",
-			saved: "Salvo"
+			saved: "Salvo",
+			fileChanged: "O arquivo mudou no disco. Salvar substitui; Esc recarrega."
 		},
 		suggest: {
 			propertyPlaceholder: "Escolha uma propriedade da nota para o link",

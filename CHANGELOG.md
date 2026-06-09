@@ -18,6 +18,8 @@
   clicked location.
 - Added inline Markdown editing to Baseboard note cards.
 - Added debounced autosave for inline Markdown edits in Baseboard note cards.
+- Protected inline note editors from stale content when link or TaskNotes actions
+  change the same note on disk.
 - Added selected Bases properties to Baseboard note cards and improved card
   spacing around paths, metadata, editors, and the board edge.
 - Added zoom controls, fit/reset view actions, modifier-wheel zoom, and

@@ -46,6 +46,7 @@ export const ru: TranslationTree = {
 		obsidianVersionRequired: "Для Baseboard требуется Obsidian 1.10.1 или новее.",
 		openBaseboardViewFirst: "Сначала откройте представление baseboard.",
 		openBasesViewFirst: "Сначала откройте представление bases.",
+		resolveInlineEditorConflict: "Разрешите конфликт встроенного редактора перед изменением ссылок.",
 		removedDependency: "Зависимость удалена.",
 		removedProjectRelationship: "Связь проекта удалена.",
 		removedPropertyLink: "Ссылка {property} удалена.",
@@ -264,7 +265,8 @@ export const ru: TranslationTree = {
 			unableToLoad: "Не удалось загрузить",
 			error: "Ошибка",
 			saving: "Сохранение",
-			saved: "Сохранено"
+			saved: "Сохранено",
+			fileChanged: "Файл изменён на диске. Сохранение перезапишет; Esc перезагрузит."
 		},
 		suggest: {
 			propertyPlaceholder: "Выберите свойство заметки для ссылки",

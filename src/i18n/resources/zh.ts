@@ -46,6 +46,7 @@ export const zh: TranslationTree = {
 		obsidianVersionRequired: "Baseboard 需要 Obsidian 1.10.1 或更新版本。",
 		openBaseboardViewFirst: "请先打开 baseboard 视图。",
 		openBasesViewFirst: "请先打开 bases 视图。",
+		resolveInlineEditorConflict: "请先解决内联编辑器冲突，再更改链接。",
 		removedDependency: "已移除依赖项。",
 		removedProjectRelationship: "已移除项目关系。",
 		removedPropertyLink: "已移除 {property} 链接。",
@@ -264,7 +265,8 @@ export const zh: TranslationTree = {
 			unableToLoad: "无法加载",
 			error: "错误",
 			saving: "保存中",
-			saved: "已保存"
+			saved: "已保存",
+			fileChanged: "文件已在磁盘上更改。保存会覆盖；按 Esc 重新加载。"
 		},
 		suggest: {
 			propertyPlaceholder: "为链接选择笔记属性",

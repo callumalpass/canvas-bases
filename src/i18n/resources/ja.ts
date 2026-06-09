@@ -46,6 +46,7 @@ export const ja: TranslationTree = {
 		obsidianVersionRequired: "Baseboard には Obsidian 1.10.1 以上が必要です。",
 		openBaseboardViewFirst: "先に Baseboard ビューを開いてください。",
 		openBasesViewFirst: "先に Bases ビューを開いてください。",
+		resolveInlineEditorConflict: "リンクを変更する前にインラインエディターの競合を解決してください。",
 		removedDependency: "依存関係を削除しました。",
 		removedProjectRelationship: "プロジェクトの関係を削除しました。",
 		removedPropertyLink: "{property} リンクを削除しました。",
@@ -264,7 +265,8 @@ export const ja: TranslationTree = {
 			unableToLoad: "読み込めません",
 			error: "エラー",
 			saving: "保存中",
-			saved: "保存済み"
+			saved: "保存済み",
+			fileChanged: "ディスク上でファイルが変更されました。保存すると上書きし、Esc で再読み込みします。"
 		},
 		suggest: {
 			propertyPlaceholder: "リンクに使用するノートのプロパティを選択",
