@@ -109,9 +109,13 @@ const FRONT_CARD_Z_INDEX = "20";
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const INLINE_EDITOR_AUTOSAVE_DELAY_MS = 750;
 const INLINE_EDITOR_SAVED_STATUS_DELAY_MS = 1500;
+const RESIZE_HANDLE_DIRECTIONS = ["n", "ne", "e", "se", "s", "sw", "w", "nw"] as const;
+const SELECTION_DRAG_THRESHOLD = 4;
+const SELECTION_GROUP_PADDING = 24;
 
 type CanvasRenderableNode = CanvasFileNode | CanvasGroupNode | CanvasTextNode;
 type CanvasNodeKind = "file" | "group" | "text";
+type ResizeDirection = (typeof RESIZE_HANDLE_DIRECTIONS)[number];
 
 let nextEdgeMarkerId = 0;
 
@@ -131,6 +135,7 @@ interface ResizeState {
 	startClientX: number;
 	startClientY: number;
 	id: string;
+	direction: ResizeDirection;
 	element: HTMLElement;
 	startPosition: BaseboardNodePosition;
 	minWidth: number;
@@ -160,6 +165,16 @@ interface LinkDragState {
 interface LinkPoint {
 	x: number;
 	y: number;
+}
+
+interface SelectionState {
+	pointerId: number;
+	startClientX: number;
+	startClientY: number;
+	startPoint: LinkPoint;
+	selectionEl: HTMLElement;
+	selectedNodeIds: Set<string>;
+	didMove: boolean;
 }
 
 interface CanvasViewportState {
@@ -213,6 +228,7 @@ export class BaseboardView extends BasesView {
 	private resizeState: ResizeState | null = null;
 	private panState: PanState | null = null;
 	private linkDragState: LinkDragState | null = null;
+	private selectionState: SelectionState | null = null;
 	private canvasViewportEl: HTMLElement | null = null;
 	private canvasWorldEl: HTMLElement | null = null;
 	private canvasPlaneEl: HTMLElement | null = null;
@@ -222,6 +238,7 @@ export class BaseboardView extends BasesView {
 	private inlineEditors = new Map<string, InlineEditorState>();
 	private renderedEdges: RenderedBaseboardEdge[] = [];
 	private frontCardEl: HTMLElement | null = null;
+	private selectedNodeIds = new Set<string>();
 	private canvasBounds: { width: number; height: number } | null = null;
 	private canvasRenderState: CanvasRenderState | null = null;
 	private taskEdgeCache: {
@@ -240,6 +257,8 @@ export class BaseboardView extends BasesView {
 	private panEndHandler: ((event: PointerEvent) => void) | null = null;
 	private linkMoveHandler: ((event: PointerEvent) => void) | null = null;
 	private linkEndHandler: ((event: PointerEvent) => void) | null = null;
+	private selectionMoveHandler: ((event: PointerEvent) => void) | null = null;
+	private selectionEndHandler: ((event: PointerEvent) => void) | null = null;
 	private lastRenderSignature: string | null = null;
 	private deferredInlineEditorRender = false;
 	private renderToken = 0;
@@ -731,6 +750,23 @@ export class BaseboardView extends BasesView {
 		).open();
 	}
 
+	private openCreateManualGroupFromSelectionModal(nodeIds: string[]): void {
+		if (!this.config) return;
+
+		new ManualGroupNameModal(
+			this.app,
+			{
+				title: this.t("view.group.createTitle"),
+				initialValue: this.t("view.group.defaultName"),
+				submitLabel: this.t("view.group.create"),
+				cancelLabel: this.t("common.cancel"),
+			},
+			(label) => {
+				this.addManualGroupAroundNodes(label, nodeIds);
+			}
+		).open();
+	}
+
 	private async addTextCard(): Promise<void> {
 		if (!this.config) return;
 
@@ -751,7 +787,7 @@ export class BaseboardView extends BasesView {
 		this.scheduleRender();
 	}
 
-	private addManualGroup(label: string): void {
+	private addManualGroup(label: string, position?: BaseboardNodePosition): void {
 		if (!this.config) return;
 
 		const group: BaseboardManualGroupSnapshot = {
@@ -760,11 +796,32 @@ export class BaseboardView extends BasesView {
 		};
 		const groups = [...this.getManualGroups(), group];
 		const positions = this.getNodePositions();
-		positions[getManualGroupNodeId(group.id)] = this.getNewCardPosition(360, 220);
+		positions[getManualGroupNodeId(group.id)] = position ?? this.getNewCardPosition(360, 220);
 
 		setManualGroups(this.config, groups);
 		this.setNodePositions(positions);
 		this.scheduleRender();
+	}
+
+	private addManualGroupAroundNodes(label: string, nodeIds: string[]): void {
+		const bounds = this.getNodeBounds(nodeIds);
+		if (!bounds) return;
+
+		const x = clampCoordinate(bounds.x - SELECTION_GROUP_PADDING);
+		const y = clampCoordinate(bounds.y - GROUP_HEADER_HEIGHT - SELECTION_GROUP_PADDING);
+		this.addManualGroup(label, {
+			x,
+			y,
+			width: Math.max(
+				MIN_GROUP_NODE_WIDTH,
+				Math.round(bounds.width + SELECTION_GROUP_PADDING * 2)
+			),
+			height: Math.max(
+				MIN_GROUP_NODE_HEIGHT,
+				Math.round(bounds.height + GROUP_HEADER_HEIGHT + SELECTION_GROUP_PADDING * 2)
+			),
+		});
+		this.clearSelectedNodes();
 	}
 
 	private renameManualGroup(id: string, label: string): void {
@@ -1082,6 +1139,7 @@ export class BaseboardView extends BasesView {
 					existingEl,
 					state.nodePositions.get(node.id) ?? getCanvasNodePosition(node)
 				);
+				existingEl.toggleClass("is-selected", this.selectedNodeIds.has(node.id));
 				continue;
 			}
 
@@ -1090,6 +1148,7 @@ export class BaseboardView extends BasesView {
 				applyCanvasNodePosition(node, state.nodePositions.get(node.id)),
 				state
 			);
+			nodeEl.toggleClass("is-selected", this.selectedNodeIds.has(node.id));
 			this.canvasNodeElements.set(node.id, nodeEl);
 			this.registerCanvasNodeInteraction(node.id, nodeEl, state);
 		}
@@ -1146,12 +1205,20 @@ export class BaseboardView extends BasesView {
 			this.startDrag(event, dragNodeIds, this.canvasNodeElements, state.nodePositions);
 		});
 
-		const handleEl = element.querySelector(".baseboard-canvas-resize-handle");
-		if (!(handleEl instanceof HTMLElement) || !kind) return;
+		if (!kind) return;
 
-		this.addElementEvent(handleEl, "pointerdown", (event) => {
-			this.startResize(event, nodeId, kind, element, state.nodePositions);
-		});
+		for (const handleEl of element.querySelectorAll(".baseboard-canvas-resize-handle")) {
+			if (!handleEl.instanceOf(HTMLElement)) continue;
+
+			const direction = getResizeDirection(
+				handleEl.getAttribute("data-baseboard-resize-direction")
+			);
+			if (!direction) continue;
+
+			this.addElementEvent(handleEl, "pointerdown", (event) => {
+				this.startResize(event, nodeId, kind, direction, element, state.nodePositions);
+			});
+		}
 	}
 
 	private bringCardToFront(event: PointerEvent, element: HTMLElement): void {
@@ -2381,6 +2448,8 @@ export class BaseboardView extends BasesView {
 	}
 
 	private clearCanvasReferences(): void {
+		this.clearDragListeners();
+		this.clearSelectedNodes();
 		this.frontCardEl = null;
 		this.edgeLayerEl = null;
 		this.renderedEdges = [];
@@ -2896,13 +2965,16 @@ export class BaseboardView extends BasesView {
 	}
 
 	private addResizeHandle(containerEl: HTMLElement, tooltip: string): void {
-		const handleEl = containerEl.createDiv({
-			cls: "baseboard-canvas-resize-handle",
-			attr: {
-				"aria-label": tooltip,
-			},
-		});
-		setTooltip(handleEl, tooltip);
+		for (const direction of RESIZE_HANDLE_DIRECTIONS) {
+			const handleEl = containerEl.createDiv({
+				cls: `baseboard-canvas-resize-handle is-${direction}`,
+				attr: {
+					"aria-label": tooltip,
+					"data-baseboard-resize-direction": direction,
+				},
+			});
+			setTooltip(handleEl, tooltip);
+		}
 	}
 
 	private startLinkDrag(event: PointerEvent, sourcePath: string, sourceElement: HTMLElement): void {
@@ -3035,7 +3107,15 @@ export class BaseboardView extends BasesView {
 		if (event.button !== 0) return;
 		if (isNodeControlTarget(event.target)) return;
 
-		const nodes = nodeIds
+		const dragNodeIds =
+			nodeIds.length === 1 && this.selectedNodeIds.has(nodeIds[0])
+				? [...this.selectedNodeIds]
+				: nodeIds;
+		if (!nodeIds.some((id) => this.selectedNodeIds.has(id))) {
+			this.clearSelectedNodes();
+		}
+
+		const nodes = [...new Set(dragNodeIds)]
 			.map((id) => {
 				const element = nodeElements.get(id) ?? null;
 				const startPosition = element
@@ -3072,6 +3152,7 @@ export class BaseboardView extends BasesView {
 		event: PointerEvent,
 		nodeId: string,
 		kind: CanvasNodeKind,
+		direction: ResizeDirection,
 		element: HTMLElement,
 		nodePositions: Map<string, BaseboardNodePosition>
 	): void {
@@ -3090,12 +3171,14 @@ export class BaseboardView extends BasesView {
 			startClientX: event.clientX,
 			startClientY: event.clientY,
 			id: nodeId,
+			direction,
 			element,
 			startPosition,
 			minWidth,
 			minHeight,
 		};
 		element.addClass("is-resizing");
+		element.addClass(`is-resizing-${direction}`);
 
 		this.resizeMoveHandler = (moveEvent) => this.handleResizeMove(moveEvent);
 		this.resizeEndHandler = (endEvent) => this.handleResizeEnd(endEvent);
@@ -3106,7 +3189,11 @@ export class BaseboardView extends BasesView {
 
 	private registerPanHandlers(viewportEl: HTMLElement): void {
 		this.registerDomEvent(viewportEl, "pointerdown", (event) => {
-			this.startPan(event, viewportEl);
+			if (event.button === 1) {
+				this.startPan(event, viewportEl);
+				return;
+			}
+			this.startSelection(event);
 		});
 		this.registerDomEvent(viewportEl, "wheel", (event) => {
 			if (!Keymap.isModEvent(event)) return;
@@ -3120,7 +3207,7 @@ export class BaseboardView extends BasesView {
 	}
 
 	private startPan(event: PointerEvent, viewportEl: HTMLElement): void {
-		if (event.button !== 0 || isBoardInteractiveTarget(event.target)) return;
+		if (event.button !== 1 || isBoardInteractiveTarget(event.target)) return;
 
 		event.preventDefault();
 		this.clearDragListeners();
@@ -3140,18 +3227,59 @@ export class BaseboardView extends BasesView {
 		window.addEventListener("pointercancel", this.panEndHandler);
 	}
 
+	private startSelection(event: PointerEvent): void {
+		if (event.button !== 0 || isBoardInteractiveTarget(event.target)) return;
+		if (!this.canvasPlaneEl) return;
+
+		const startPoint = this.getPlanePoint(event.clientX, event.clientY);
+		if (!startPoint) return;
+
+		event.preventDefault();
+		this.clearDragListeners();
+		this.clearSelectedNodes();
+
+		const selectionEl = this.canvasPlaneEl.createDiv({
+			cls: "baseboard-canvas-selection-rect",
+		});
+		setNodeGeometry(selectionEl, {
+			x: startPoint.x,
+			y: startPoint.y,
+			width: 0,
+			height: 0,
+		});
+
+		this.selectionState = {
+			pointerId: event.pointerId,
+			startClientX: event.clientX,
+			startClientY: event.clientY,
+			startPoint,
+			selectionEl,
+			selectedNodeIds: new Set(),
+			didMove: false,
+		};
+		this.canvasViewportEl?.addClass("is-selecting");
+
+		this.selectionMoveHandler = (moveEvent) => this.handleSelectionMove(moveEvent);
+		this.selectionEndHandler = (endEvent) => this.handleSelectionEnd(endEvent);
+		window.addEventListener("pointermove", this.selectionMoveHandler);
+		window.addEventListener("pointerup", this.selectionEndHandler);
+		window.addEventListener("pointercancel", this.selectionEndHandler);
+	}
+
 	private handleDragMove(event: PointerEvent): void {
 		if (!this.dragState || event.pointerId !== this.dragState.pointerId) return;
 
-		const deltaX = event.clientX - this.dragState.startClientX;
-		const deltaY = event.clientY - this.dragState.startClientY;
+		const delta = this.getCanvasPointerDelta(
+			event.clientX - this.dragState.startClientX,
+			event.clientY - this.dragState.startClientY
+		);
 
 		for (const node of this.dragState.nodes) {
 			if (node.element) {
 				setNodeGeometry(node.element, {
 					...node.startPosition,
-					x: clampCoordinate(node.startPosition.x + deltaX),
-					y: clampCoordinate(node.startPosition.y + deltaY),
+					x: clampCoordinate(node.startPosition.x + delta.x),
+					y: clampCoordinate(node.startPosition.y + delta.y),
 				});
 			}
 		}
@@ -3161,15 +3289,17 @@ export class BaseboardView extends BasesView {
 	private handleDragEnd(event: PointerEvent): void {
 		if (!this.dragState || event.pointerId !== this.dragState.pointerId) return;
 
-		const deltaX = event.clientX - this.dragState.startClientX;
-		const deltaY = event.clientY - this.dragState.startClientY;
+		const delta = this.getCanvasPointerDelta(
+			event.clientX - this.dragState.startClientX,
+			event.clientY - this.dragState.startClientY
+		);
 		const nodePositions = this.getNodePositions();
 
 		for (const node of this.dragState.nodes) {
 			const nextPosition = {
 				...node.startPosition,
-				x: clampCoordinate(node.startPosition.x + deltaX),
-				y: clampCoordinate(node.startPosition.y + deltaY),
+				x: clampCoordinate(node.startPosition.x + delta.x),
+				y: clampCoordinate(node.startPosition.y + delta.y),
 			};
 			nodePositions[node.id] = nextPosition;
 			this.canvasRenderState?.nodePositions.set(node.id, nextPosition);
@@ -3188,10 +3318,11 @@ export class BaseboardView extends BasesView {
 	private handleResizeMove(event: PointerEvent): void {
 		if (!this.resizeState || event.pointerId !== this.resizeState.pointerId) return;
 
-		const nextPosition = this.getResizedPosition(
+		const delta = this.getCanvasPointerDelta(
 			event.clientX - this.resizeState.startClientX,
 			event.clientY - this.resizeState.startClientY
 		);
+		const nextPosition = this.getResizedPosition(delta.x, delta.y);
 		setNodeGeometry(this.resizeState.element, nextPosition);
 		this.updateEdgeLayerGeometry();
 	}
@@ -3199,14 +3330,16 @@ export class BaseboardView extends BasesView {
 	private handleResizeEnd(event: PointerEvent): void {
 		if (!this.resizeState || event.pointerId !== this.resizeState.pointerId) return;
 
-		const nextPosition = this.getResizedPosition(
+		const delta = this.getCanvasPointerDelta(
 			event.clientX - this.resizeState.startClientX,
 			event.clientY - this.resizeState.startClientY
 		);
+		const nextPosition = this.getResizedPosition(delta.x, delta.y);
 		const nodePositions = this.getNodePositions();
 		nodePositions[this.resizeState.id] = nextPosition;
 		this.canvasRenderState?.nodePositions.set(this.resizeState.id, nextPosition);
 		this.resizeState.element.removeClass("is-resizing");
+		this.resizeState.element.removeClass(`is-resizing-${this.resizeState.direction}`);
 		setNodeGeometry(this.resizeState.element, nextPosition);
 		this.setNodePositions(nodePositions);
 		this.updateEdgeLayerGeometry();
@@ -3219,16 +3352,33 @@ export class BaseboardView extends BasesView {
 			throw new Error("Baseboard resize state is not active.");
 		}
 
+		const { direction, minWidth, minHeight, startPosition } = this.resizeState;
+		const right = startPosition.x + startPosition.width;
+		const bottom = startPosition.y + startPosition.height;
+		const nextPosition = { ...startPosition };
+
+		if (direction.includes("e")) {
+			nextPosition.width = Math.max(minWidth, Math.round(startPosition.width + deltaX));
+		}
+		if (direction.includes("s")) {
+			nextPosition.height = Math.max(minHeight, Math.round(startPosition.height + deltaY));
+		}
+		if (direction.includes("w")) {
+			nextPosition.x = clampResizeOrigin(startPosition.x + deltaX, right - minWidth);
+			nextPosition.width = Math.max(minWidth, Math.round(right - nextPosition.x));
+		}
+		if (direction.includes("n")) {
+			nextPosition.y = clampResizeOrigin(startPosition.y + deltaY, bottom - minHeight);
+			nextPosition.height = Math.max(minHeight, Math.round(bottom - nextPosition.y));
+		}
+
+		return nextPosition;
+	}
+
+	private getCanvasPointerDelta(deltaX: number, deltaY: number): LinkPoint {
 		return {
-			...this.resizeState.startPosition,
-			width: Math.max(
-				this.resizeState.minWidth,
-				Math.round(this.resizeState.startPosition.width + deltaX)
-			),
-			height: Math.max(
-				this.resizeState.minHeight,
-				Math.round(this.resizeState.startPosition.height + deltaY)
-			),
+			x: deltaX / this.zoom,
+			y: deltaY / this.zoom,
 		};
 	}
 
@@ -3247,6 +3397,111 @@ export class BaseboardView extends BasesView {
 
 		this.panState.viewportEl.removeClass("is-panning");
 		this.clearDragListeners();
+	}
+
+	private handleSelectionMove(event: PointerEvent): void {
+		if (!this.selectionState || event.pointerId !== this.selectionState.pointerId) return;
+
+		event.preventDefault();
+		const point = this.getPlanePoint(event.clientX, event.clientY);
+		if (!point) return;
+
+		const movement = Math.max(
+			Math.abs(event.clientX - this.selectionState.startClientX),
+			Math.abs(event.clientY - this.selectionState.startClientY)
+		);
+		if (movement >= SELECTION_DRAG_THRESHOLD) {
+			this.selectionState.didMove = true;
+		}
+
+		const selectionRect = getRectFromPoints(this.selectionState.startPoint, point);
+		setNodeGeometry(this.selectionState.selectionEl, selectionRect);
+		this.selectionState.selectionEl.toggleClass("is-active", this.selectionState.didMove);
+		this.updateSelection(selectionRect);
+	}
+
+	private handleSelectionEnd(event: PointerEvent): void {
+		if (!this.selectionState || event.pointerId !== this.selectionState.pointerId) return;
+
+		event.preventDefault();
+		const selectedNodeIds = [...this.selectionState.selectedNodeIds];
+		const didMove = this.selectionState.didMove;
+		this.selectionState.selectionEl.remove();
+		this.canvasViewportEl?.removeClass("is-selecting");
+		this.selectionState = null;
+		this.clearDragListeners();
+
+		if (!didMove || selectedNodeIds.length === 0) {
+			this.clearSelectedNodes();
+			return;
+		}
+
+		this.openSelectionMenu(event, selectedNodeIds);
+	}
+
+	private updateSelection(selectionRect: BaseboardNodePosition): void {
+		if (!this.canvasRenderState || !this.selectionState) return;
+
+		const nextSelectedNodeIds = new Set(
+			this.canvasRenderState.allNodes
+				.filter(isSelectableCanvasNode)
+				.filter((node) =>
+					positionsOverlap(
+						this.canvasRenderState?.nodePositions.get(node.id) ?? getCanvasNodePosition(node),
+						selectionRect
+					)
+				)
+				.map((node) => node.id)
+		);
+
+		this.selectionState.selectedNodeIds = nextSelectedNodeIds;
+		this.selectedNodeIds = new Set(nextSelectedNodeIds);
+		this.applySelectedNodeClasses();
+	}
+
+	private applySelectedNodeClasses(): void {
+		for (const [nodeId, element] of this.canvasNodeElements) {
+			element.toggleClass("is-selected", this.selectedNodeIds.has(nodeId));
+		}
+	}
+
+	private clearSelectedNodes(): void {
+		if (this.selectedNodeIds.size === 0) return;
+
+		this.selectedNodeIds = new Set();
+		this.applySelectedNodeClasses();
+	}
+
+	private openSelectionMenu(event: MouseEvent, nodeIds: string[]): void {
+		const menu = new Menu();
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.createGroupFromSelection"))
+				.setIcon("lucide-group")
+				.onClick(() => {
+					this.openCreateManualGroupFromSelectionModal(nodeIds);
+				});
+		});
+		menu.showAtMouseEvent(event);
+	}
+
+	private getNodeBounds(nodeIds: string[]): BaseboardNodePosition | null {
+		const positions = nodeIds
+			.map((nodeId) => this.getCurrentNodePosition(nodeId))
+			.filter((position): position is BaseboardNodePosition => position !== null);
+		if (positions.length === 0) return null;
+
+		const left = Math.min(...positions.map((position) => position.x));
+		const top = Math.min(...positions.map((position) => position.y));
+		const right = Math.max(...positions.map((position) => position.x + position.width));
+		const bottom = Math.max(...positions.map((position) => position.y + position.height));
+
+		return {
+			x: left,
+			y: top,
+			width: right - left,
+			height: bottom - top,
+		};
 	}
 
 	private setZoom(
@@ -3383,18 +3638,33 @@ export class BaseboardView extends BasesView {
 			window.removeEventListener("pointercancel", this.linkEndHandler);
 			this.linkEndHandler = null;
 		}
+		if (this.selectionMoveHandler) {
+			window.removeEventListener("pointermove", this.selectionMoveHandler);
+			this.selectionMoveHandler = null;
+		}
+		if (this.selectionEndHandler) {
+			window.removeEventListener("pointerup", this.selectionEndHandler);
+			window.removeEventListener("pointercancel", this.selectionEndHandler);
+			this.selectionEndHandler = null;
+		}
 		for (const node of this.dragState?.nodes ?? []) {
 			node.element?.removeClass("is-dragging");
 		}
-		this.resizeState?.element.removeClass("is-resizing");
+		if (this.resizeState) {
+			this.resizeState.element.removeClass("is-resizing");
+			this.resizeState.element.removeClass(`is-resizing-${this.resizeState.direction}`);
+		}
 		this.panState?.viewportEl.removeClass("is-panning");
 		this.linkDragState?.sourceElement.removeClass("is-linking");
 		this.linkDragState?.targetElement?.removeClass("is-link-target");
 		this.linkDragState?.previewEl.remove();
+		this.selectionState?.selectionEl.remove();
+		this.canvasViewportEl?.removeClass("is-selecting");
 		this.dragState = null;
 		this.resizeState = null;
 		this.panState = null;
 		this.linkDragState = null;
+		this.selectionState = null;
 	}
 
 	notifyUnavailable(): void {
@@ -3851,8 +4121,16 @@ function clampCoordinate(value: number): number {
 	return Math.max(MIN_NODE_COORDINATE, Math.round(value));
 }
 
+function clampResizeOrigin(value: number, max: number): number {
+	return Math.max(MIN_NODE_COORDINATE, Math.min(Math.round(value), Math.round(max)));
+}
+
 function isRenderableCanvasNode(node: CanvasNode): node is CanvasRenderableNode {
 	return node.type === "file" || node.type === "group" || node.type === "text";
+}
+
+function isSelectableCanvasNode(node: CanvasRenderableNode): node is CanvasFileNode | CanvasTextNode {
+	return node.type === "file" || node.type === "text";
 }
 
 function getCanvasNodePosition(node: CanvasRenderableNode): BaseboardNodePosition {
@@ -3909,6 +4187,18 @@ function positionsOverlap(
 	);
 }
 
+function getRectFromPoints(first: LinkPoint, second: LinkPoint): BaseboardNodePosition {
+	const x = Math.min(first.x, second.x);
+	const y = Math.min(first.y, second.y);
+
+	return {
+		x: clampCoordinate(x),
+		y: clampCoordinate(y),
+		width: Math.round(Math.abs(second.x - first.x)),
+		height: Math.round(Math.abs(second.y - first.y)),
+	};
+}
+
 function setNodeGeometry(element: HTMLElement, position: BaseboardNodePosition): void {
 	element.style.setProperty("left", `${position.x}px`);
 	element.style.setProperty("top", `${position.y}px`);
@@ -3947,6 +4237,12 @@ function getElementPixelStyle(
 function getCanvasNodeKind(element: HTMLElement): CanvasNodeKind | null {
 	const kind = element.getAttribute("data-baseboard-node-kind");
 	return kind === "file" || kind === "group" || kind === "text" ? kind : null;
+}
+
+function getResizeDirection(value: string | null): ResizeDirection | null {
+	return RESIZE_HANDLE_DIRECTIONS.includes(value as ResizeDirection)
+		? (value as ResizeDirection)
+		: null;
 }
 
 function getResizeMinimums(kind: CanvasNodeKind): { minWidth: number; minHeight: number } {

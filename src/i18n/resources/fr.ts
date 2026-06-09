@@ -241,6 +241,7 @@ export const fr: TranslationTree = {
 			removeCard: "Supprimer la carte",
 			renameGroup: "Renommer le groupe",
 			removeGroup: "Supprimer le groupe",
+			createGroupFromSelection: "Créer un groupe à partir de la sélection",
 			sourceBlocksTarget: "{source} bloque {target}",
 			targetBlocksSource: "{target} bloque {source}",
 			targetSubtaskOfSource: "{target} est une sous-tâche de {source}",

@@ -241,6 +241,7 @@ export const zh: TranslationTree = {
 			removeCard: "移除卡片",
 			renameGroup: "重命名分组",
 			removeGroup: "移除分组",
+			createGroupFromSelection: "从所选内容创建分组",
 			sourceBlocksTarget: "{source} 阻塞 {target}",
 			targetBlocksSource: "{target} 阻塞 {source}",
 			targetSubtaskOfSource: "{target} 是 {source} 的子任务",

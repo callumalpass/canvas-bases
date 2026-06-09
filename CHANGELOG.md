@@ -11,7 +11,9 @@
   more room on first render.
 - Reworked the Baseboard layout into a canvas-like view with draggable group
   frames and note nodes whose coordinates persist in the Base view config.
-- Added bottom-right resize handles for Baseboard note cards and group frames.
+- Added edge and corner resize handles for Baseboard note cards and group frames.
+- Added marquee selection for Baseboard cards, including creating a manual group
+  around the selected cards.
 - Added inline Markdown editing to Baseboard note cards.
 - Added debounced autosave for inline Markdown edits in Baseboard note cards.
 - Added selected Bases properties to Baseboard note cards and improved card

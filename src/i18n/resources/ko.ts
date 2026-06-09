@@ -241,6 +241,7 @@ export const ko: TranslationTree = {
 			removeCard: "카드 제거",
 			renameGroup: "그룹 이름 바꾸기",
 			removeGroup: "그룹 제거",
+			createGroupFromSelection: "선택 항목에서 그룹 만들기",
 			sourceBlocksTarget: "{source}이(가) {target}을(를) 차단",
 			targetBlocksSource: "{target}이(가) {source}을(를) 차단",
 			targetSubtaskOfSource: "{target}은(는) {source}의 하위 작업입니다",

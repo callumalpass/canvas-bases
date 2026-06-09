@@ -167,6 +167,10 @@
 	cursor: grabbing;
 }
 
+.baseboard-canvas-viewport.is-selecting {
+	cursor: crosshair;
+}
+
 .baseboard-canvas-world {
 	position: relative;
 }
@@ -243,6 +247,20 @@
 	stroke-width: 2.5;
 	opacity: 0.9;
 	vector-effect: non-scaling-stroke;
+}
+
+.baseboard-canvas-selection-rect {
+	position: absolute;
+	z-index: 25;
+	box-sizing: border-box;
+	border: 1px solid var(--interactive-accent);
+	background: color-mix(in srgb, var(--interactive-accent) 12%, transparent);
+	opacity: 0;
+	pointer-events: none;
+}
+
+.baseboard-canvas-selection-rect.is-active {
+	opacity: 1;
 }
 
 .baseboard-canvas-edge__arrow {
@@ -337,6 +355,7 @@
 .baseboard-canvas-file:focus,
 .baseboard-canvas-file.is-dragging,
 .baseboard-canvas-file.is-resizing,
+.baseboard-canvas-file.is-selected,
 .baseboard-canvas-file.is-linking,
 .baseboard-canvas-file.is-link-target {
 	border-color: var(--interactive-accent);
@@ -379,33 +398,103 @@
 		0 1px 5px rgb(0 0 0 / 0.12);
 }
 
+.baseboard-canvas-file.is-selected,
+.baseboard-canvas-text-card.is-selected {
+	box-shadow:
+		0 0 0 2px color-mix(in srgb, var(--interactive-accent) 42%, transparent),
+		0 1px 5px rgb(0 0 0 / 0.12);
+}
+
 .baseboard-canvas-resize-handle {
 	position: absolute;
-	right: 0;
-	bottom: 0;
-	z-index: 5;
-	width: 18px;
-	height: 18px;
-	border-radius: 0 0 8px 0;
-	cursor: nwse-resize;
+	z-index: 6;
+	border-radius: 4px;
 	touch-action: none;
 }
 
-.baseboard-canvas-resize-handle::after {
+.baseboard-canvas-resize-handle:hover {
+	background: color-mix(in srgb, var(--interactive-accent) 16%, transparent);
+}
+
+.baseboard-canvas-resize-handle.is-n,
+.baseboard-canvas-resize-handle.is-s {
+	right: 14px;
+	left: 14px;
+	height: 10px;
+	cursor: ns-resize;
+}
+
+.baseboard-canvas-resize-handle.is-n {
+	top: -5px;
+}
+
+.baseboard-canvas-resize-handle.is-s {
+	bottom: -5px;
+}
+
+.baseboard-canvas-resize-handle.is-e,
+.baseboard-canvas-resize-handle.is-w {
+	top: 14px;
+	bottom: 14px;
+	width: 10px;
+	cursor: ew-resize;
+}
+
+.baseboard-canvas-resize-handle.is-e {
+	right: -5px;
+}
+
+.baseboard-canvas-resize-handle.is-w {
+	left: -5px;
+}
+
+.baseboard-canvas-resize-handle.is-ne,
+.baseboard-canvas-resize-handle.is-nw,
+.baseboard-canvas-resize-handle.is-se,
+.baseboard-canvas-resize-handle.is-sw {
+	width: 18px;
+	height: 18px;
+}
+
+.baseboard-canvas-resize-handle.is-ne {
+	top: -5px;
+	right: -5px;
+	cursor: nesw-resize;
+}
+
+.baseboard-canvas-resize-handle.is-nw {
+	top: -5px;
+	left: -5px;
+	cursor: nwse-resize;
+}
+
+.baseboard-canvas-resize-handle.is-se {
+	right: -5px;
+	bottom: -5px;
+	cursor: nwse-resize;
+}
+
+.baseboard-canvas-resize-handle.is-sw {
+	bottom: -5px;
+	left: -5px;
+	cursor: nesw-resize;
+}
+
+.baseboard-canvas-resize-handle.is-se::after {
 	content: "";
 	position: absolute;
-	right: 4px;
-	bottom: 4px;
+	right: 5px;
+	bottom: 5px;
 	width: 7px;
 	height: 7px;
 	border-right: 1px solid var(--text-faint);
 	border-bottom: 1px solid var(--text-faint);
 }
 
-.baseboard-canvas-resize-handle:hover::after,
-.baseboard-canvas-file.is-resizing .baseboard-canvas-resize-handle::after,
-.baseboard-canvas-group.is-resizing .baseboard-canvas-resize-handle::after,
-.baseboard-canvas-text-card.is-resizing .baseboard-canvas-resize-handle::after {
+.baseboard-canvas-resize-handle.is-se:hover::after,
+.baseboard-canvas-file.is-resizing .baseboard-canvas-resize-handle.is-se::after,
+.baseboard-canvas-group.is-resizing .baseboard-canvas-resize-handle.is-se::after,
+.baseboard-canvas-text-card.is-resizing .baseboard-canvas-resize-handle.is-se::after {
 	border-color: var(--interactive-accent);
 }
 
@@ -818,7 +907,8 @@
 .baseboard-canvas-text-card:hover,
 .baseboard-canvas-text-card:focus,
 .baseboard-canvas-text-card.is-dragging,
-.baseboard-canvas-text-card.is-resizing {
+.baseboard-canvas-text-card.is-resizing,
+.baseboard-canvas-text-card.is-selected {
 	border-color: var(--interactive-accent);
 }
 

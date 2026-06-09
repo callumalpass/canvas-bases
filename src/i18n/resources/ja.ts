@@ -241,6 +241,7 @@ export const ja: TranslationTree = {
 			removeCard: "カードを削除",
 			renameGroup: "グループ名を変更",
 			removeGroup: "グループを削除",
+			createGroupFromSelection: "選択範囲からグループを作成",
 			sourceBlocksTarget: "{source} は {target} をブロックします",
 			targetBlocksSource: "{target} は {source} をブロックします",
 			targetSubtaskOfSource: "{target} は {source} のサブタスクです",

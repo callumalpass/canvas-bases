@@ -56,6 +56,10 @@
       "source": "b2e9724a982ab0e55c7128d47a7e5019cf5e3909",
       "translation": "13ec01abfd4d28b759b78424117590f94f6ece60"
     },
+    "commands.createStarterFiles": {
+      "source": "e089de371443e2a47344796946612a74c65ffb83",
+      "translation": "be05154239486d53fcd22ba1d95816c23bdb04e5"
+    },
     "commands.openLinkedCanvas": {
       "source": "09f1de0073a6094afcd17f30a70fb40cc13288dd",
       "translation": "981d09ef404559cb9716aade9e9ca89ae92b1270"
@@ -143,6 +147,14 @@
     "notices.chooseLinkProperty": {
       "source": "fed122e036e782418c5d059c2644a208b3106be2",
       "translation": "2d8389afce70524829cbc311bea863ad43d5ab48"
+    },
+    "notices.starterFilesBlocked": {
+      "source": "c91f868082efa0feb06a151961f0f6cbcb6430d7",
+      "translation": "3c589393f2ef48276ac640fa53ec5c8c7f4447c3"
+    },
+    "notices.starterFilesReady": {
+      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
+      "translation": "3cecb1a7a3d1b77d2c486b939c0baa7902c24601"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -580,6 +592,10 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "f6de41947fa8d200dba09f0351ab75d3920a6e28"
     },
+    "view.menu.createGroupFromSelection": {
+      "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
+      "translation": "39feb00b93bdea9509b07dbd657af524b4d566f3"
+    },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
       "translation": "7295ae7505d4f40b97463c837c1d3a3060100abc"
@@ -806,6 +822,10 @@
       "source": "b2e9724a982ab0e55c7128d47a7e5019cf5e3909",
       "translation": "826988eb83dd48962b48d891076727c260e41f4a"
     },
+    "commands.createStarterFiles": {
+      "source": "e089de371443e2a47344796946612a74c65ffb83",
+      "translation": "2b260fde742ba2a8116c0a70c40df1f0e3c456cd"
+    },
     "commands.openLinkedCanvas": {
       "source": "09f1de0073a6094afcd17f30a70fb40cc13288dd",
       "translation": "793010430160649fae25c506f4080f0b803c791c"
@@ -893,6 +913,14 @@
     "notices.chooseLinkProperty": {
       "source": "fed122e036e782418c5d059c2644a208b3106be2",
       "translation": "67efc06d7d04848ad1c855571a293e60c4729790"
+    },
+    "notices.starterFilesBlocked": {
+      "source": "c91f868082efa0feb06a151961f0f6cbcb6430d7",
+      "translation": "1da03f66d902e460404e54ec84aba188bf383e25"
+    },
+    "notices.starterFilesReady": {
+      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
+      "translation": "cc96893ca471540a2e7bc425d5e837681d72bc4c"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -1330,6 +1358,10 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "88363196686124bd014373d65a73cf3916fcf4f7"
     },
+    "view.menu.createGroupFromSelection": {
+      "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
+      "translation": "42029f672ea90ff6c0838314dfde9fb71b6e7875"
+    },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
       "translation": "567cbb58f3b40eb7dc15d2a593f2434f52cc011a"
@@ -1556,6 +1588,10 @@
       "source": "b2e9724a982ab0e55c7128d47a7e5019cf5e3909",
       "translation": "3431a435a49cbba343cc1c0b8c8d8b9599fb9ce2"
     },
+    "commands.createStarterFiles": {
+      "source": "e089de371443e2a47344796946612a74c65ffb83",
+      "translation": "b7c7bf665322a1f1cc94b5b9252625357bfee1d8"
+    },
     "commands.openLinkedCanvas": {
       "source": "09f1de0073a6094afcd17f30a70fb40cc13288dd",
       "translation": "a64c55b875d61f8f661e8da9b6225742c03fd764"
@@ -1643,6 +1679,14 @@
     "notices.chooseLinkProperty": {
       "source": "fed122e036e782418c5d059c2644a208b3106be2",
       "translation": "4914b22d1b03558a5a4af65702d857c6d7edc1e6"
+    },
+    "notices.starterFilesBlocked": {
+      "source": "c91f868082efa0feb06a151961f0f6cbcb6430d7",
+      "translation": "482f916a94665cffa4cd9de94648be27db5252ac"
+    },
+    "notices.starterFilesReady": {
+      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
+      "translation": "0fdf2a36ea806df8d51eb7759337846f9df0fa75"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -2080,6 +2124,10 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "64ba04798494b141ccb2971451811c1da77f53e1"
     },
+    "view.menu.createGroupFromSelection": {
+      "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
+      "translation": "00dbab269ee29e150026a87c666d964864614e13"
+    },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
       "translation": "1f31a447b7a57c1d1393d078024b8222ba6695aa"
@@ -2306,6 +2354,10 @@
       "source": "b2e9724a982ab0e55c7128d47a7e5019cf5e3909",
       "translation": "7b5321982719a803ae7cb52dc290d7dd59a66066"
     },
+    "commands.createStarterFiles": {
+      "source": "e089de371443e2a47344796946612a74c65ffb83",
+      "translation": "b543b6b91f2b21be248bbb438d866465eb825ecb"
+    },
     "commands.openLinkedCanvas": {
       "source": "09f1de0073a6094afcd17f30a70fb40cc13288dd",
       "translation": "9a938e75079760ef9702b726296406953a5cd3fd"
@@ -2393,6 +2445,14 @@
     "notices.chooseLinkProperty": {
       "source": "fed122e036e782418c5d059c2644a208b3106be2",
       "translation": "14a24de7a4f5629e523fdf8cbab8758aadf783cd"
+    },
+    "notices.starterFilesBlocked": {
+      "source": "c91f868082efa0feb06a151961f0f6cbcb6430d7",
+      "translation": "9915cc7e52ddbc17e0c6de1055dfe7c756798458"
+    },
+    "notices.starterFilesReady": {
+      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
+      "translation": "0f534138a902813e6a6ecaf9438b54150fe4b280"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -2830,6 +2890,10 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "aa414a7991ff7e84f21832eafa76966daea787bd"
     },
+    "view.menu.createGroupFromSelection": {
+      "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
+      "translation": "9c8cf759975b89d286641bd92f4f234333ff943f"
+    },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
       "translation": "c20db5c5284dd93dbc493263a2d605d15ee8def3"
@@ -3056,6 +3120,10 @@
       "source": "b2e9724a982ab0e55c7128d47a7e5019cf5e3909",
       "translation": "3062171ffa8a349b4757a7c82cf09d06ea92e5a7"
     },
+    "commands.createStarterFiles": {
+      "source": "e089de371443e2a47344796946612a74c65ffb83",
+      "translation": "22acf72b001ef65a6f545438c1210964fd3be77f"
+    },
     "commands.openLinkedCanvas": {
       "source": "09f1de0073a6094afcd17f30a70fb40cc13288dd",
       "translation": "b24d098dfc860a9a5bece11215bb6ad5830db299"
@@ -3143,6 +3211,14 @@
     "notices.chooseLinkProperty": {
       "source": "fed122e036e782418c5d059c2644a208b3106be2",
       "translation": "d6dd392053bf07a2ffe427b0982b10ea502b6299"
+    },
+    "notices.starterFilesBlocked": {
+      "source": "c91f868082efa0feb06a151961f0f6cbcb6430d7",
+      "translation": "0ce3d468df39bc8a2dfcd047c0f670fb6e954fc3"
+    },
+    "notices.starterFilesReady": {
+      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
+      "translation": "aa226546cb577fb86eec6e95726aad24108be620"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -3580,6 +3656,10 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "a69b5777a59e3d761aa981c30a33dad8838c7532"
     },
+    "view.menu.createGroupFromSelection": {
+      "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
+      "translation": "3616d39d6e4f54125176fef19693827d93676162"
+    },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
       "translation": "a9536862581f3c67fa0a1e61e9412f6462dcacc4"
@@ -3806,6 +3886,10 @@
       "source": "b2e9724a982ab0e55c7128d47a7e5019cf5e3909",
       "translation": "62ce54f0ed1b656152692fd85168c76744f99531"
     },
+    "commands.createStarterFiles": {
+      "source": "e089de371443e2a47344796946612a74c65ffb83",
+      "translation": "e216a2a04be39f881fe981e5ca52355f10db12f4"
+    },
     "commands.openLinkedCanvas": {
       "source": "09f1de0073a6094afcd17f30a70fb40cc13288dd",
       "translation": "88878aacc07912c5d6b4d9272d91cc88931a2924"
@@ -3893,6 +3977,14 @@
     "notices.chooseLinkProperty": {
       "source": "fed122e036e782418c5d059c2644a208b3106be2",
       "translation": "469bb3eb2a93594f97c90813dae8720daa7e0c1f"
+    },
+    "notices.starterFilesBlocked": {
+      "source": "c91f868082efa0feb06a151961f0f6cbcb6430d7",
+      "translation": "5dc26de9f42d040eb944ed4600bee4e9d934290c"
+    },
+    "notices.starterFilesReady": {
+      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
+      "translation": "60e2a4f0e30bf4575c27067b7753bb0b7378ef4d"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -4330,6 +4422,10 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "4083e64ec708b7e754c617a9fc94615e2264059e"
     },
+    "view.menu.createGroupFromSelection": {
+      "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
+      "translation": "060ea694b2c48d5c41badc5abdd3ca666f4ca22b"
+    },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
       "translation": "ba5456323d0b001fbce1534c19f20f145f27d010"
@@ -4556,6 +4652,10 @@
       "source": "b2e9724a982ab0e55c7128d47a7e5019cf5e3909",
       "translation": "cdab01397aba0b1ff927eb6d7b49192612bf69b2"
     },
+    "commands.createStarterFiles": {
+      "source": "e089de371443e2a47344796946612a74c65ffb83",
+      "translation": "4398afef4eab0d5192b843a5913bbfd72a260877"
+    },
     "commands.openLinkedCanvas": {
       "source": "09f1de0073a6094afcd17f30a70fb40cc13288dd",
       "translation": "d0967211d43d5f1a6665d5c1af8e38cc5befc98b"
@@ -4643,6 +4743,14 @@
     "notices.chooseLinkProperty": {
       "source": "fed122e036e782418c5d059c2644a208b3106be2",
       "translation": "6c7d6a0da918026af9124d06239ed14cf6b9017e"
+    },
+    "notices.starterFilesBlocked": {
+      "source": "c91f868082efa0feb06a151961f0f6cbcb6430d7",
+      "translation": "e0e2ad4e7407bb0d1ec3d4b74f1c9c140edeaf86"
+    },
+    "notices.starterFilesReady": {
+      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
+      "translation": "9b4084ef96e87051865ba5a8b085aa437155738f"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -5080,6 +5188,10 @@
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "05b970e68bb424dbc78e035610e84b9bba7eaec1"
     },
+    "view.menu.createGroupFromSelection": {
+      "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
+      "translation": "ebe39357adfb0b88c937ace39e7f5cb083b5e859"
+    },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
       "translation": "f0dbecc94b766566970bc3f77af10f6566286d8b"
@@ -5306,6 +5418,10 @@
       "source": "b2e9724a982ab0e55c7128d47a7e5019cf5e3909",
       "translation": "650997818fd904b0ff97b63c7d461fd6be42bc62"
     },
+    "commands.createStarterFiles": {
+      "source": "e089de371443e2a47344796946612a74c65ffb83",
+      "translation": "45518a2203ed001be664e8842109331f4390f820"
+    },
     "commands.openLinkedCanvas": {
       "source": "09f1de0073a6094afcd17f30a70fb40cc13288dd",
       "translation": "786d548579b719dcdfdc17b9384e4b946acfc2c5"
@@ -5393,6 +5509,14 @@
     "notices.chooseLinkProperty": {
       "source": "fed122e036e782418c5d059c2644a208b3106be2",
       "translation": "31f0a51377d600ab87b65f7c38c32f846065a7bf"
+    },
+    "notices.starterFilesBlocked": {
+      "source": "c91f868082efa0feb06a151961f0f6cbcb6430d7",
+      "translation": "4a043eb99965761255ed5ae64b3b885f481f64f5"
+    },
+    "notices.starterFilesReady": {
+      "source": "5f871b8a33b551e7b762aa4cd106777752246eaa",
+      "translation": "c89b4cdf5aee1ea20cc4aab2096650798c16cf9b"
     },
     "notices.updatedCanvas": {
       "source": "295afe8c690d30caf72967ffd2921ad4cff6ca23",
@@ -5829,6 +5953,10 @@
     "view.menu.removeGroup": {
       "source": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
       "translation": "35c6d23953b12af592bd10f7d58e7138e8b94ddc"
+    },
+    "view.menu.createGroupFromSelection": {
+      "source": "0c79f91f52bccce3a338547bb59a6418217412f4",
+      "translation": "61135f27780bf3918806f86d30789efeaa68f39a"
     },
     "view.menu.sourceBlocksTarget": {
       "source": "5eee905cda68853f18b0d3f0ebff9d05b6cfb1e7",
