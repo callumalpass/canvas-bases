@@ -22,6 +22,8 @@
   spacing around paths, metadata, editors, and the board edge.
 - Added zoom controls, fit/reset view actions, modifier-wheel zoom, and
   background-drag panning to the Baseboard board.
+- Lowered the Baseboard board zoom-out floor to 10% so larger boards can fit on
+  screen.
 - Added live relationship edges to the Baseboard board using the same wikilink
   and link-property configuration as canvas materialization.
 - Added card-to-card link controls for creating TaskNotes dependency/project
