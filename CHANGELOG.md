@@ -1,9 +1,14 @@
 # Changelog
 
+## 0.1.1
+
+- Added the MIT license file for the published plugin.
+- Refined the plugin-directory description to avoid redundant wording.
+
 ## 0.1.0
 
-- Initial release of Canvas Bases as an Obsidian plugin for live canvas-style
-  Bases layouts and JSON Canvas materialization.
+- Initial release of Canvas Bases for live canvas-style Bases layouts and JSON
+  Canvas materialization.
 - Added the Canvas Bases layout for `.base` views, with draggable and resizable
   cards, zooming, panning, group frames, card colors, editable note bodies,
   manual notes, text cards, and linked Canvas settings stored in the Base view

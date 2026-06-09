@@ -1,7 +1,7 @@
 {
 	"name": "canvas-bases",
-	"version": "0.1.0",
-	"description": "Canvas-style layouts and JSON Canvas materialization for Obsidian Bases.",
+	"version": "0.1.1",
+	"description": "Canvas-style layouts and JSON Canvas materialization for Bases.",
 	"type": "module",
 	"main": "main.js",
 	"scripts": {
