@@ -76,7 +76,6 @@ import {
 	DEFAULT_ZONE_ACTION,
 	DEFAULT_ZONE_UPDATE_MODE,
 	DEFAULT_ZONE_VALUE_TYPE,
-	ZONE_ACTIONS,
 	ZONE_UPDATE_MODES,
 	ZONE_VALUE_TYPES,
 	getZoneKey,
@@ -133,6 +132,15 @@ const GROUP_PADDING = 18;
 const NODE_GAP = 16;
 const DEFAULT_ACTIVE_GROUP_COLOR = "#8b5cf6";
 const DEFAULT_CARD_COLOR = "#8b5cf6";
+const CARD_COLOR_SWATCHES = ["1", "2", "3", "4", "5", "6"] as const;
+const ZONE_COLOR_SWATCHES = [
+	"#e93147",
+	"#ec7500",
+	"#e0ac00",
+	"#08b94e",
+	"#00bfbc",
+	"#8b5cf6",
+] as const;
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 2;
 const ZOOM_STEP = 0.1;
@@ -145,6 +153,10 @@ const LINK_PREVIEW_MIN_TENSION = 48;
 const LINK_PREVIEW_MAX_TENSION = 220;
 const RESIZE_HANDLE_DIRECTIONS = ["n", "ne", "e", "se", "s", "sw", "w", "nw"] as const;
 const SELECTION_DRAG_THRESHOLD = 4;
+const EDGE_SCROLL_ZONE = 72;
+const EDGE_SCROLL_MAX_SPEED = 900;
+const EDGE_SCROLL_FALLBACK_FRAME_MS = 16;
+const EDGE_SCROLL_MAX_FRAME_MS = 32;
 
 type CanvasRenderableNode = CanvasFileNode | CanvasGroupNode | CanvasTextNode;
 type CanvasNodeKind = "file" | "group" | "text";
@@ -158,6 +170,8 @@ interface DragState {
 	pointerId: number;
 	startClientX: number;
 	startClientY: number;
+	startScrollLeft: number;
+	startScrollTop: number;
 	nodes: Array<{
 		id: string;
 		element: HTMLElement | null;
@@ -197,6 +211,8 @@ interface ResizeState {
 	pointerId: number;
 	startClientX: number;
 	startClientY: number;
+	startScrollLeft: number;
+	startScrollTop: number;
 	id: string;
 	direction: ResizeDirection;
 	element: HTMLElement;
@@ -240,6 +256,30 @@ interface SelectionState {
 	selectionEl: HTMLElement;
 	selectedNodeIds: Set<string>;
 	didMove: boolean;
+}
+
+type EdgeScrollInteraction = "drag" | "resize" | "link" | "selection";
+
+interface EdgeScrollState {
+	pointerId: number;
+	interaction: EdgeScrollInteraction;
+	viewportEl: HTMLElement;
+	latestClientX: number;
+	latestClientY: number;
+	animationFrame: number | null;
+	lastTimestamp: number | null;
+}
+
+interface ColorMenuOptions {
+	label: string;
+	currentColor: string | undefined;
+	defaultColor: string;
+	swatches: readonly string[];
+	clearLabel: string;
+	setLabel: string;
+	getSwatchCssColor: (color: string) => string | undefined;
+	normalizeColor: (color: unknown) => string | undefined;
+	onChange: (color: string | undefined) => void;
 }
 
 interface CanvasViewportState {
@@ -303,6 +343,7 @@ export class CanvasBasesView extends BasesView {
 	private panState: PanState | null = null;
 	private linkDragState: LinkDragState | null = null;
 	private selectionState: SelectionState | null = null;
+	private edgeScrollState: EdgeScrollState | null = null;
 	private canvasViewportEl: HTMLElement | null = null;
 	private canvasWorldEl: HTMLElement | null = null;
 	private canvasPlaneEl: HTMLElement | null = null;
@@ -622,6 +663,25 @@ export class CanvasBasesView extends BasesView {
 		this.scheduleRender();
 	}
 
+	private setDataActiveGroupColor(
+		group: CanvasBasesGroupSnapshot,
+		color: string | undefined
+	): void {
+		if (!this.config || !group.property || typeof group.value !== "string") return;
+
+		const key = getZoneKey("bases", group.property, group.value);
+		const nextColor = normalizeZoneColor(color);
+		setZones(
+			this.config,
+			this.getZones().map((zone) =>
+				zone.origin === "bases" && getZoneKey("bases", zone.property, zone.value) === key
+					? setZoneConfigColor(zone, nextColor)
+					: zone
+			)
+		);
+		this.updateActiveGroupElementColor(group.id, nextColor);
+	}
+
 	private fitDataGroupToMembers(group: CanvasBasesGroupSnapshot): void {
 		if (!this.config || !this.canvasRenderState) return;
 
@@ -715,6 +775,35 @@ export class CanvasBasesView extends BasesView {
 		new Notice(this.t("notices.activeGroupDisabled", { label: group.label }));
 	}
 
+	private setManualActiveGroupColor(
+		group: CanvasBasesManualGroupSnapshot,
+		color: string | undefined
+	): void {
+		if (!this.config) return;
+
+		const nextColor = normalizeZoneColor(color);
+		setZones(
+			this.config,
+			this.getZones().map((zone) =>
+				zone.origin === "custom" && zone.id === group.id
+					? setZoneConfigColor(zone, nextColor)
+					: zone
+			)
+		);
+		this.updateActiveGroupElementColor(getManualGroupNodeId(group.id), nextColor);
+	}
+
+	private updateActiveGroupElementColor(nodeId: string, color: string | undefined): void {
+		const element = this.canvasNodeElements.get(nodeId);
+		if (!element) return;
+
+		if (color) {
+			element.style.setProperty("--canvas-bases-active-group-color", color);
+		} else {
+			element.style.removeProperty("--canvas-bases-active-group-color");
+		}
+	}
+
 	private getActiveGroupPropertyOptions(): string[] {
 		const properties = new Set<string>();
 		const addProperty = (property: string | null | undefined) => {
@@ -747,7 +836,7 @@ export class CanvasBasesView extends BasesView {
 		return [...properties].sort((left, right) => left.localeCompare(right));
 	}
 
-	private getActiveGroupActionOptions(): Record<CanvasBasesZoneAction, string> {
+	private getActiveGroupActionOptions(): Record<string, string> {
 		const labels: Record<CanvasBasesZoneAction, string> = {
 			"set-property": this.t("view.group.actionSetProperty"),
 			"task.complete": this.t("view.group.actionCompleteTask"),
@@ -761,10 +850,18 @@ export class CanvasBasesView extends BasesView {
 			"recurring.complete": this.t("view.group.actionCompleteRecurring"),
 			"recurring.skip": this.t("view.group.actionSkipRecurring"),
 		};
+		const actions: CanvasBasesZoneAction[] = [
+			DEFAULT_ZONE_ACTION,
+			...this.plugin.taskNotes.getAvailableZoneActions(),
+		];
 
 		return Object.fromEntries(
-			ZONE_ACTIONS.map((action) => [action, labels[action]])
-		) as Record<CanvasBasesZoneAction, string>;
+			actions.map((action) => [action, labels[action]])
+		);
+	}
+
+	private getActiveGroupActionLabel(action: CanvasBasesZoneAction): string {
+		return this.getActiveGroupActionOptions()[action] ?? action;
 	}
 
 	private getActiveGroupUpdateModeOptions(): Record<CanvasBasesZoneUpdateMode, string> {
@@ -1346,7 +1443,7 @@ export class CanvasBasesView extends BasesView {
 			const label = settings.label?.trim() ||
 				(action === DEFAULT_ZONE_ACTION
 					? settings.value
-					: this.getActiveGroupActionOptions()[action]) ||
+					: this.getActiveGroupActionLabel(action)) ||
 				DEFAULT_ZONE_LABEL;
 			const positions = this.getNodePositions();
 			positions[getManualGroupNodeId(id)] = position ?? this.getNewCardPosition(360, 220);
@@ -1800,6 +1897,256 @@ export class CanvasBasesView extends BasesView {
 		};
 	}
 
+	private startEdgeScroll(event: PointerEvent, interaction: EdgeScrollInteraction): void {
+		if (!this.canvasViewportEl) return;
+
+		this.stopEdgeScroll();
+		this.edgeScrollState = {
+			pointerId: event.pointerId,
+			interaction,
+			viewportEl: this.canvasViewportEl,
+			latestClientX: event.clientX,
+			latestClientY: event.clientY,
+			animationFrame: null,
+			lastTimestamp: null,
+		};
+		this.scheduleEdgeScrollFrame();
+	}
+
+	private updateEdgeScrollPointer(event: PointerEvent): void {
+		if (!this.edgeScrollState || this.edgeScrollState.pointerId !== event.pointerId) return;
+
+		this.edgeScrollState.latestClientX = event.clientX;
+		this.edgeScrollState.latestClientY = event.clientY;
+	}
+
+	private stopEdgeScroll(): void {
+		if (!this.edgeScrollState) return;
+
+		if (this.edgeScrollState.animationFrame !== null) {
+			this.cancelViewAnimationFrame(this.edgeScrollState.animationFrame);
+		}
+		this.edgeScrollState = null;
+	}
+
+	private scheduleEdgeScrollFrame(): void {
+		if (!this.edgeScrollState || this.edgeScrollState.animationFrame !== null) return;
+
+		this.edgeScrollState.animationFrame = this.requestViewAnimationFrame((timestamp) => {
+			this.handleEdgeScrollFrame(timestamp);
+		});
+	}
+
+	private handleEdgeScrollFrame(timestamp: number): void {
+		const state = this.edgeScrollState;
+		if (!state) return;
+
+		state.animationFrame = null;
+		if (!this.isEdgeScrollInteractionActive(state)) {
+			this.edgeScrollState = null;
+			return;
+		}
+
+		const elapsedMs =
+			state.lastTimestamp === null
+				? EDGE_SCROLL_FALLBACK_FRAME_MS
+				: clampNumber(timestamp - state.lastTimestamp, 0, EDGE_SCROLL_MAX_FRAME_MS);
+		state.lastTimestamp = timestamp;
+
+		if (
+			this.isPointerInEdgeScrollZone(
+				state.viewportEl,
+				state.latestClientX,
+				state.latestClientY
+			)
+		) {
+			this.expandCanvasBoundsForClientPoint(state.latestClientX, state.latestClientY);
+		}
+		const velocity = this.getEdgeScrollVelocity(
+			state.viewportEl,
+			state.latestClientX,
+			state.latestClientY
+		);
+		if (velocity.x !== 0 || velocity.y !== 0) {
+			const previousScrollLeft = state.viewportEl.scrollLeft;
+			const previousScrollTop = state.viewportEl.scrollTop;
+			state.viewportEl.scrollLeft += (velocity.x * elapsedMs) / 1000;
+			state.viewportEl.scrollTop += (velocity.y * elapsedMs) / 1000;
+			const didScroll =
+				state.viewportEl.scrollLeft !== previousScrollLeft ||
+				state.viewportEl.scrollTop !== previousScrollTop;
+
+			if (didScroll) {
+				this.scheduleVirtualCanvasRender();
+				this.updateActiveEdgeScrolledInteraction(state);
+			}
+		}
+
+		this.scheduleEdgeScrollFrame();
+	}
+
+	private isEdgeScrollInteractionActive(state: EdgeScrollState): boolean {
+		switch (state.interaction) {
+			case "drag":
+				return this.dragState?.pointerId === state.pointerId;
+			case "resize":
+				return this.resizeState?.pointerId === state.pointerId;
+			case "link":
+				return this.linkDragState?.pointerId === state.pointerId;
+			case "selection":
+				return this.selectionState?.pointerId === state.pointerId;
+		}
+	}
+
+	private updateActiveEdgeScrolledInteraction(state: EdgeScrollState): void {
+		switch (state.interaction) {
+			case "drag":
+				this.applyDragMoveFromClient(state.latestClientX, state.latestClientY);
+				break;
+			case "resize":
+				this.applyResizeMoveFromClient(state.latestClientX, state.latestClientY);
+				break;
+			case "link":
+				this.applyLinkDragFromClient(state.latestClientX, state.latestClientY);
+				break;
+			case "selection":
+				this.applySelectionMoveFromClient(state.latestClientX, state.latestClientY);
+				break;
+		}
+	}
+
+	private isPointerInEdgeScrollZone(
+		viewportEl: HTMLElement,
+		clientX: number,
+		clientY: number
+	): boolean {
+		const rect = viewportEl.getBoundingClientRect();
+		return (
+			clientX < rect.left + EDGE_SCROLL_ZONE ||
+			clientX > rect.right - EDGE_SCROLL_ZONE ||
+			clientY < rect.top + EDGE_SCROLL_ZONE ||
+			clientY > rect.bottom - EDGE_SCROLL_ZONE
+		);
+	}
+
+	private getEdgeScrollVelocity(
+		viewportEl: HTMLElement,
+		clientX: number,
+		clientY: number
+	): LinkPoint {
+		const rect = viewportEl.getBoundingClientRect();
+		return {
+			x: this.getEdgeScrollAxisVelocity(
+				clientX,
+				rect.left,
+				rect.right,
+				viewportEl.scrollLeft,
+				Math.max(0, viewportEl.scrollWidth - viewportEl.clientWidth)
+			),
+			y: this.getEdgeScrollAxisVelocity(
+				clientY,
+				rect.top,
+				rect.bottom,
+				viewportEl.scrollTop,
+				Math.max(0, viewportEl.scrollHeight - viewportEl.clientHeight)
+			),
+		};
+	}
+
+	private getEdgeScrollAxisVelocity(
+		pointerPosition: number,
+		min: number,
+		max: number,
+		scrollPosition: number,
+		maxScrollPosition: number
+	): number {
+		if (pointerPosition < min + EDGE_SCROLL_ZONE && scrollPosition > 0) {
+			const proximity = clampNumber(
+				(EDGE_SCROLL_ZONE - (pointerPosition - min)) / EDGE_SCROLL_ZONE,
+				0,
+				1
+			);
+			return -EDGE_SCROLL_MAX_SPEED * proximity * proximity;
+		}
+
+		if (pointerPosition > max - EDGE_SCROLL_ZONE && scrollPosition < maxScrollPosition) {
+			const proximity = clampNumber(
+				(EDGE_SCROLL_ZONE - (max - pointerPosition)) / EDGE_SCROLL_ZONE,
+				0,
+				1
+			);
+			return EDGE_SCROLL_MAX_SPEED * proximity * proximity;
+		}
+
+		return 0;
+	}
+
+	private expandCanvasBoundsForClientPoint(clientX: number, clientY: number): void {
+		const point = this.getPlanePoint(clientX, clientY);
+		if (!point) return;
+
+		this.ensureCanvasBounds({
+			width: Math.ceil(point.x + CANVAS_PADDING),
+			height: Math.ceil(point.y + CANVAS_PADDING),
+		});
+	}
+
+	private expandCanvasBoundsForPositions(positions: CanvasBasesNodePosition[]): void {
+		if (positions.length === 0) return;
+
+		this.ensureCanvasBounds({
+			width: Math.max(...positions.map((position) => position.x + position.width + CANVAS_PADDING)),
+			height: Math.max(
+				...positions.map((position) => position.y + position.height + CANVAS_PADDING)
+			),
+		});
+	}
+
+	private ensureCanvasBounds(bounds: { width: number; height: number }): void {
+		if (!this.canvasBounds) return;
+
+		const nextBounds = {
+			width: Math.max(this.canvasBounds.width, Math.ceil(bounds.width)),
+			height: Math.max(this.canvasBounds.height, Math.ceil(bounds.height)),
+		};
+		if (
+			nextBounds.width === this.canvasBounds.width &&
+			nextBounds.height === this.canvasBounds.height
+		) {
+			return;
+		}
+
+		this.canvasBounds = nextBounds;
+		if (this.canvasRenderState) {
+			this.canvasRenderState.bounds = nextBounds;
+		}
+		this.applyCanvasBounds();
+	}
+
+	private applyCanvasBounds(): void {
+		if (!this.canvasBounds) return;
+
+		if (this.canvasPlaneEl) {
+			this.canvasPlaneEl.style.setProperty("width", `${this.canvasBounds.width}px`);
+			this.canvasPlaneEl.style.setProperty("height", `${this.canvasBounds.height}px`);
+		}
+		if (this.edgeLayerEl) {
+			this.setSvgBounds(this.edgeLayerEl, this.canvasBounds);
+		}
+		if (this.linkDragState) {
+			this.setSvgBounds(this.linkDragState.previewEl, this.canvasBounds);
+		}
+		this.applyZoom();
+	}
+
+	private setSvgBounds(svgEl: SVGSVGElement, bounds: { width: number; height: number }): void {
+		setSvgAttributes(svgEl, {
+			width: String(bounds.width),
+			height: String(bounds.height),
+			viewBox: `0 0 ${bounds.width} ${bounds.height}`,
+		});
+	}
+
 	private getAlwaysRenderNodeIds(): Set<string> {
 		const nodeIds = new Set<string>();
 		for (const node of this.dragState?.nodes ?? []) {
@@ -2120,14 +2467,7 @@ export class CanvasBasesView extends BasesView {
 					void this.app.workspace.openLinkText(path, "", Keymap.isModEvent(event));
 				});
 		});
-		menu.addItem((item) => {
-			item
-				.setTitle(this.t("view.menu.setCardColor"))
-				.setIcon("lucide-palette")
-				.onClick(() => {
-					this.openCardColorModal(getFileNodeId(path), this.t("view.card.noteColor"));
-				});
-		});
+		this.addCardColorMenu(menu, getFileNodeId(path));
 
 		if (entry?.isManual) {
 			menu.addSeparator();
@@ -2142,23 +2482,6 @@ export class CanvasBasesView extends BasesView {
 		}
 
 		menu.showAtMouseEvent(event);
-	}
-
-	private openCardColorModal(nodeId: string, title: string): void {
-		const color = this.getStoredNodeColor(nodeId);
-		new CardColorModal(
-			this.app,
-			{
-				title,
-				colorLabel: this.t("view.card.color"),
-				clearLabel: this.t("view.menu.clearCardColor"),
-				closeLabel: this.t("common.close"),
-				initialColor: color,
-			},
-			(nextColor) => {
-				this.setStoredNodeColor(nodeId, nextColor);
-			}
-		).open();
 	}
 
 	private getStoredNodeColor(nodeId: string): string | undefined {
@@ -2193,25 +2516,155 @@ export class CanvasBasesView extends BasesView {
 		this.setNodePositions(positions);
 	}
 
+	private addCardColorMenu(menu: Menu, nodeId: string): void {
+		this.addColorMenu(menu, {
+			label: this.t("view.card.color"),
+			currentColor: this.getStoredNodeColor(nodeId),
+			defaultColor: DEFAULT_CARD_COLOR,
+			swatches: CARD_COLOR_SWATCHES,
+			clearLabel: this.t("view.menu.clearCardColor"),
+			setLabel: this.t("view.menu.setCardColor"),
+			getSwatchCssColor: getCanvasNodeCssColor,
+			normalizeColor: normalizeCanvasNodeColor,
+			onChange: (color) => {
+				this.setStoredNodeColor(nodeId, color);
+			},
+		});
+	}
+
+	private addZoneColorMenu(
+		menu: Menu,
+		currentColor: string | undefined,
+		onChange: (color: string | undefined) => void
+	): void {
+		this.addColorMenu(menu, {
+			label: this.t("view.group.color"),
+			currentColor: normalizeZoneColor(currentColor),
+			defaultColor: DEFAULT_ACTIVE_GROUP_COLOR,
+			swatches: ZONE_COLOR_SWATCHES,
+			clearLabel: this.t("view.menu.clearCardColor"),
+			setLabel: this.t("view.menu.setCardColor"),
+			getSwatchCssColor: (color) => color,
+			normalizeColor: normalizeZoneColor,
+			onChange,
+		});
+	}
+
+	private addColorMenu(menu: Menu, options: ColorMenuOptions): void {
+		menu.addItem((item) => {
+			item
+				.setTitle(this.createColorMenuFragment(menu, options))
+				.setIcon("lucide-palette");
+		});
+	}
+
+	private createColorMenuFragment(menu: Menu, options: ColorMenuOptions): DocumentFragment {
+		const currentColor = options.normalizeColor(options.currentColor);
+		const fragment = createFragment();
+		const menuEl = fragment.createDiv({ cls: "canvas-bases-color-menu" });
+		const stopMenuPropagation = (event: Event) => {
+			event.stopPropagation();
+		};
+		menuEl.addEventListener("pointerdown", stopMenuPropagation);
+		menuEl.addEventListener("click", stopMenuPropagation);
+
+		menuEl.createDiv({
+			cls: "canvas-bases-color-menu__label",
+			text: options.label,
+		});
+		const swatchesEl = menuEl.createDiv({ cls: "canvas-bases-color-menu__swatches" });
+		this.addColorSwatchButton(swatchesEl, menu, options, undefined, currentColor);
+
+		for (const color of options.swatches) {
+			this.addColorSwatchButton(swatchesEl, menu, options, color, currentColor);
+		}
+
+		const customColor = getColorPickerValue(currentColor, options.defaultColor);
+		const customLabelEl = swatchesEl.createEl("label", {
+			cls: "canvas-bases-color-menu__custom",
+			attr: {
+				"aria-label": options.setLabel,
+			},
+		});
+		customLabelEl.toggleClass(
+			"is-active",
+			Boolean(currentColor?.startsWith("#") && !options.swatches.includes(currentColor))
+		);
+		customLabelEl.style.setProperty("--canvas-bases-color-menu-custom", customColor);
+		const inputEl = customLabelEl.createEl("input", {
+			attr: {
+				"aria-label": options.setLabel,
+				type: "color",
+				value: customColor,
+			},
+		});
+		const applyCustomColor = () => {
+			const nextColor = options.normalizeColor(inputEl.value);
+			if (!nextColor) return;
+
+			customLabelEl.style.setProperty("--canvas-bases-color-menu-custom", nextColor);
+			options.onChange(nextColor);
+		};
+		inputEl.addEventListener("pointerdown", stopMenuPropagation);
+		inputEl.addEventListener("click", stopMenuPropagation);
+		inputEl.addEventListener("input", applyCustomColor);
+		inputEl.addEventListener("change", () => {
+			applyCustomColor();
+			menu.hide();
+		});
+
+		return fragment;
+	}
+
+	private addColorSwatchButton(
+		containerEl: HTMLElement,
+		menu: Menu,
+		options: ColorMenuOptions,
+		color: string | undefined,
+		currentColor: string | undefined
+	): void {
+		const isClear = typeof color === "undefined";
+		const buttonEl = containerEl.createEl("button", {
+			cls: [
+				"canvas-bases-color-menu__swatch",
+				isClear ? "is-clear" : "",
+			].filter(Boolean),
+			attr: {
+				"aria-label": isClear ? options.clearLabel : `${options.setLabel} ${color}`,
+				type: "button",
+			},
+		});
+		buttonEl.toggleClass("is-active", isClear ? !currentColor : currentColor === color);
+		const swatchColor = color ? options.getSwatchCssColor(color) : undefined;
+		if (swatchColor) {
+			buttonEl.style.setProperty("--canvas-bases-color-menu-swatch", swatchColor);
+		}
+		buttonEl.addEventListener("pointerdown", (event) => {
+			event.stopPropagation();
+		});
+		buttonEl.addEventListener("click", (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			options.onChange(color ? options.normalizeColor(color) : undefined);
+			menu.hide();
+		});
+	}
+
 	private openTextCardMenu(
 		event: MouseEvent,
 		card: CanvasBasesTextCardSnapshot | undefined
 	): void {
 		const menu = new Menu();
-		menu.addItem((item) => {
-			item
-				.setTitle(this.t("view.menu.setCardColor"))
-				.setIcon("lucide-palette")
-				.setDisabled(!card)
-				.onClick(() => {
-					if (card) {
-						this.openCardColorModal(
-							getTextCardNodeId(card.id),
-							this.t("view.card.cardColor")
-						);
-					}
-				});
-		});
+		if (card) {
+			this.addCardColorMenu(menu, getTextCardNodeId(card.id));
+		} else {
+			menu.addItem((item) => {
+				item
+					.setTitle(this.t("view.menu.setCardColor"))
+					.setIcon("lucide-palette")
+					.setDisabled(true);
+			});
+		}
 		menu.addSeparator();
 		menu.addItem((item) => {
 			item
@@ -2344,6 +2797,13 @@ export class CanvasBasesView extends BasesView {
 				});
 		});
 		if (isActive) {
+			this.addZoneColorMenu(
+				menu,
+				this.getCustomZoneConfig(group)?.color,
+				(color) => {
+					this.setManualActiveGroupColor(group, color);
+				}
+			);
 			menu.addItem((item) => {
 				item
 					.setTitle(this.t("view.menu.deactivateActiveGroup"))
@@ -2389,6 +2849,13 @@ export class CanvasBasesView extends BasesView {
 						this.openConfigureDataActiveGroupModal(group);
 					});
 			});
+			this.addZoneColorMenu(
+				menu,
+				this.getDataZoneConfig(group)?.color,
+				(color) => {
+					this.setDataActiveGroupColor(group, color);
+				}
+			);
 		}
 		menu.addItem((item) => {
 			item
@@ -4114,8 +4581,8 @@ export class CanvasBasesView extends BasesView {
 			targetPath: null,
 			invalidReason: "empty",
 		};
-		this.updateLinkDragTarget(event);
-		this.updateLinkPreview(event);
+		this.applyLinkDragFromClient(event.clientX, event.clientY);
+		this.startEdgeScroll(event, "link");
 
 		this.linkMoveHandler = (moveEvent) => this.handleLinkMove(moveEvent);
 		this.linkEndHandler = (endEvent) => this.handleLinkEnd(endEvent);
@@ -4128,8 +4595,8 @@ export class CanvasBasesView extends BasesView {
 		if (!this.linkDragState || event.pointerId !== this.linkDragState.pointerId) return;
 
 		event.preventDefault();
-		this.updateLinkDragTarget(event);
-		this.updateLinkPreview(event);
+		this.updateEdgeScrollPointer(event);
+		this.applyLinkDragFromClient(event.clientX, event.clientY);
 	}
 
 	private handleLinkEnd(event: PointerEvent): void {
@@ -4145,10 +4612,15 @@ export class CanvasBasesView extends BasesView {
 		this.openLinkCreationMenu(event, sourcePath, targetPath);
 	}
 
-	private updateLinkPreview(event: PointerEvent): void {
+	private applyLinkDragFromClient(clientX: number, clientY: number): void {
+		this.updateLinkDragTarget(clientX, clientY);
+		this.updateLinkPreview(clientX, clientY);
+	}
+
+	private updateLinkPreview(clientX: number, clientY: number): void {
 		if (!this.linkDragState) return;
 
-		const pointerPoint = this.getPlanePoint(event.clientX, event.clientY);
+		const pointerPoint = this.getPlanePoint(clientX, clientY);
 		if (!pointerPoint) return;
 
 		const sourcePosition = getElementNodePosition(this.linkDragState.sourceElement);
@@ -4194,10 +4666,10 @@ export class CanvasBasesView extends BasesView {
 		this.updateLinkDragHint(targetPosition ? targetPoint : pointerPoint);
 	}
 
-	private updateLinkDragTarget(event: PointerEvent): void {
+	private updateLinkDragTarget(clientX: number, clientY: number): void {
 		if (!this.linkDragState) return;
 
-		const target = this.getFileTargetAtPoint(event.clientX, event.clientY);
+		const target = this.getFileTargetAtPoint(clientX, clientY);
 		const invalidReason: LinkDragInvalidReason = !target
 			? "empty"
 			: target.path === this.linkDragState.sourcePath
@@ -4303,12 +4775,15 @@ export class CanvasBasesView extends BasesView {
 			pointerId: event.pointerId,
 			startClientX: event.clientX,
 			startClientY: event.clientY,
+			startScrollLeft: this.canvasViewportEl?.scrollLeft ?? 0,
+			startScrollTop: this.canvasViewportEl?.scrollTop ?? 0,
 			nodes,
 		};
 
 		for (const node of nodes) {
 			node.element?.addClass("is-dragging");
 		}
+		this.startEdgeScroll(event, "drag");
 
 		this.dragMoveHandler = (moveEvent) => this.handleDragMove(moveEvent);
 		this.dragEndHandler = (endEvent) => this.handleDragEnd(endEvent);
@@ -4342,6 +4817,8 @@ export class CanvasBasesView extends BasesView {
 			pointerId: event.pointerId,
 			startClientX: event.clientX,
 			startClientY: event.clientY,
+			startScrollLeft: this.canvasViewportEl?.scrollLeft ?? 0,
+			startScrollTop: this.canvasViewportEl?.scrollTop ?? 0,
 			id: nodeId,
 			direction,
 			element,
@@ -4351,6 +4828,7 @@ export class CanvasBasesView extends BasesView {
 		};
 		element.addClass("is-resizing");
 		element.addClass(`is-resizing-${direction}`);
+		this.startEdgeScroll(event, "resize");
 
 		this.resizeMoveHandler = (moveEvent) => this.handleResizeMove(moveEvent);
 		this.resizeEndHandler = (endEvent) => this.handleResizeEnd(endEvent);
@@ -4481,12 +4959,17 @@ export class CanvasBasesView extends BasesView {
 	private handleDragMove(event: PointerEvent): void {
 		if (!this.dragState || event.pointerId !== this.dragState.pointerId) return;
 
-		const delta = this.getCanvasPointerDelta(
-			event.clientX - this.dragState.startClientX,
-			event.clientY - this.dragState.startClientY
-		);
+		this.updateEdgeScrollPointer(event);
+		this.applyDragMoveFromClient(event.clientX, event.clientY);
+	}
+
+	private applyDragMoveFromClient(clientX: number, clientY: number): void {
+		if (!this.dragState) return;
+
+		const delta = this.getDragDeltaFromClient(clientX, clientY);
 		const nextActiveDropTargetIds = new Set<string>();
 		const isDraggingGroup = this.isDraggingGroup();
+		const nextPositions: CanvasBasesNodePosition[] = [];
 
 		for (const node of this.dragState.nodes) {
 			const nextPosition = {
@@ -4497,6 +4980,7 @@ export class CanvasBasesView extends BasesView {
 			if (node.element) {
 				setNodeGeometry(node.element, nextPosition);
 			}
+			nextPositions.push(nextPosition);
 			const targetGroup = this.getActiveGroupDropTargetForDragNode(node, nextPosition, {
 				isDraggingGroup,
 			});
@@ -4504,6 +4988,7 @@ export class CanvasBasesView extends BasesView {
 				nextActiveDropTargetIds.add(targetGroup.id);
 			}
 		}
+		this.expandCanvasBoundsForPositions(nextPositions);
 		this.setActiveGroupDropTargets(nextActiveDropTargetIds);
 		this.updateEdgeLayerGeometry();
 	}
@@ -4511,10 +4996,8 @@ export class CanvasBasesView extends BasesView {
 	private handleDragEnd(event: PointerEvent): void {
 		if (!this.dragState || event.pointerId !== this.dragState.pointerId) return;
 
-		const delta = this.getCanvasPointerDelta(
-			event.clientX - this.dragState.startClientX,
-			event.clientY - this.dragState.startClientY
-		);
+		this.updateEdgeScrollPointer(event);
+		const delta = this.getDragDeltaFromClient(event.clientX, event.clientY);
 		const nodePositions = this.getNodePositions();
 		const draggedGroup = this.dragState.nodes.some((node) =>
 			this.canvasRenderState?.allNodes.some(
@@ -4763,7 +5246,7 @@ export class CanvasBasesView extends BasesView {
 			if (result === "updated") {
 				await this.refreshInlineEditorsForPaths([path]);
 				new Notice(this.t("notices.activeGroupActionRun", {
-					action: this.getActiveGroupActionOptions()[group.action],
+					action: this.getActiveGroupActionLabel(group.action),
 				}));
 				return true;
 			}
@@ -4783,23 +5266,24 @@ export class CanvasBasesView extends BasesView {
 	private handleResizeMove(event: PointerEvent): void {
 		if (!this.resizeState || event.pointerId !== this.resizeState.pointerId) return;
 
-		const delta = this.getCanvasPointerDelta(
-			event.clientX - this.resizeState.startClientX,
-			event.clientY - this.resizeState.startClientY
-		);
-		const nextPosition = this.getResizedPosition(delta.x, delta.y);
+		this.updateEdgeScrollPointer(event);
+		this.applyResizeMoveFromClient(event.clientX, event.clientY);
+	}
+
+	private applyResizeMoveFromClient(clientX: number, clientY: number): void {
+		if (!this.resizeState) return;
+
+		const nextPosition = this.getResizedPositionFromClient(clientX, clientY);
 		setNodeGeometry(this.resizeState.element, nextPosition);
+		this.expandCanvasBoundsForPositions([nextPosition]);
 		this.updateEdgeLayerGeometry();
 	}
 
 	private handleResizeEnd(event: PointerEvent): void {
 		if (!this.resizeState || event.pointerId !== this.resizeState.pointerId) return;
 
-		const delta = this.getCanvasPointerDelta(
-			event.clientX - this.resizeState.startClientX,
-			event.clientY - this.resizeState.startClientY
-		);
-		const nextPosition = this.getResizedPosition(delta.x, delta.y);
+		this.updateEdgeScrollPointer(event);
+		const nextPosition = this.getResizedPositionFromClient(event.clientX, event.clientY);
 		const nodePositions = this.getNodePositions();
 		nodePositions[this.resizeState.id] = nextPosition;
 		this.canvasRenderState?.nodePositions.set(this.resizeState.id, nextPosition);
@@ -4810,6 +5294,14 @@ export class CanvasBasesView extends BasesView {
 		this.updateEdgeLayerGeometry();
 		this.refreshGroupContainment();
 		this.clearDragListeners();
+	}
+
+	private getResizedPositionFromClient(
+		clientX: number,
+		clientY: number
+	): CanvasBasesNodePosition {
+		const delta = this.getResizeDeltaFromClient(clientX, clientY);
+		return this.getResizedPosition(delta.x, delta.y);
 	}
 
 	private getResizedPosition(deltaX: number, deltaY: number): CanvasBasesNodePosition {
@@ -4840,6 +5332,45 @@ export class CanvasBasesView extends BasesView {
 		return nextPosition;
 	}
 
+	private getDragDeltaFromClient(clientX: number, clientY: number): LinkPoint {
+		if (!this.dragState) {
+			throw new Error("Canvas Bases drag state is not active.");
+		}
+
+		const scrollDelta = this.getViewportScrollDelta(
+			this.dragState.startScrollLeft,
+			this.dragState.startScrollTop
+		);
+		return this.getCanvasPointerDelta(
+			clientX - this.dragState.startClientX + scrollDelta.x,
+			clientY - this.dragState.startClientY + scrollDelta.y
+		);
+	}
+
+	private getResizeDeltaFromClient(clientX: number, clientY: number): LinkPoint {
+		if (!this.resizeState) {
+			throw new Error("Canvas Bases resize state is not active.");
+		}
+
+		const scrollDelta = this.getViewportScrollDelta(
+			this.resizeState.startScrollLeft,
+			this.resizeState.startScrollTop
+		);
+		return this.getCanvasPointerDelta(
+			clientX - this.resizeState.startClientX + scrollDelta.x,
+			clientY - this.resizeState.startClientY + scrollDelta.y
+		);
+	}
+
+	private getViewportScrollDelta(startScrollLeft: number, startScrollTop: number): LinkPoint {
+		if (!this.canvasViewportEl) return { x: 0, y: 0 };
+
+		return {
+			x: this.canvasViewportEl.scrollLeft - startScrollLeft,
+			y: this.canvasViewportEl.scrollTop - startScrollTop,
+		};
+	}
+
 	private getCanvasPointerDelta(deltaX: number, deltaY: number): LinkPoint {
 		return {
 			x: deltaX / this.zoom,
@@ -4868,14 +5399,28 @@ export class CanvasBasesView extends BasesView {
 		if (!this.selectionState || event.pointerId !== this.selectionState.pointerId) return;
 
 		event.preventDefault();
-		const point = this.getPlanePoint(event.clientX, event.clientY);
+		this.updateEdgeScrollPointer(event);
+		this.applySelectionMoveFromClient(event.clientX, event.clientY);
+		if (this.selectionState?.didMove && !this.edgeScrollState) {
+			this.startEdgeScroll(event, "selection");
+		}
+	}
+
+	private applySelectionMoveFromClient(clientX: number, clientY: number): void {
+		if (!this.selectionState) return;
+
+		const point = this.getPlanePoint(clientX, clientY);
 		if (!point) return;
 
-		const movement = Math.max(
-			Math.abs(event.clientX - this.selectionState.startClientX),
-			Math.abs(event.clientY - this.selectionState.startClientY)
+		const screenMovement = Math.max(
+			Math.abs(clientX - this.selectionState.startClientX),
+			Math.abs(clientY - this.selectionState.startClientY)
 		);
-		if (movement >= SELECTION_DRAG_THRESHOLD) {
+		const canvasMovement = Math.max(
+			Math.abs(point.x - this.selectionState.startPoint.x) * this.zoom,
+			Math.abs(point.y - this.selectionState.startPoint.y) * this.zoom
+		);
+		if (Math.max(screenMovement, canvasMovement) >= SELECTION_DRAG_THRESHOLD) {
 			this.selectionState.didMove = true;
 		}
 
@@ -4883,6 +5428,7 @@ export class CanvasBasesView extends BasesView {
 		this.selectionState.selectionRect = selectionRect;
 		setNodeGeometry(this.selectionState.selectionEl, selectionRect);
 		this.selectionState.selectionEl.toggleClass("is-active", this.selectionState.didMove);
+		this.expandCanvasBoundsForPositions([selectionRect]);
 		this.updateSelection(selectionRect);
 	}
 
@@ -5032,6 +5578,8 @@ export class CanvasBasesView extends BasesView {
 	private applyZoom(): void {
 		if (!this.canvasWorldEl || !this.canvasPlaneEl || !this.canvasBounds) return;
 
+		this.canvasPlaneEl.style.setProperty("width", `${this.canvasBounds.width}px`);
+		this.canvasPlaneEl.style.setProperty("height", `${this.canvasBounds.height}px`);
 		this.canvasWorldEl.style.setProperty(
 			"width",
 			`${Math.ceil(this.canvasBounds.width * this.zoom)}px`
@@ -5072,6 +5620,7 @@ export class CanvasBasesView extends BasesView {
 
 	private clearDragListeners(): void {
 		this.setActiveGroupDropTargets(new Set());
+		this.stopEdgeScroll();
 		if (this.dragMoveHandler) {
 			window.removeEventListener("pointermove", this.dragMoveHandler);
 			this.dragMoveHandler = null;
@@ -5224,7 +5773,7 @@ interface ActiveGroupSettingsModalOptions {
 	initialUpdateMode: CanvasBasesZoneUpdateMode;
 	initialValueType: CanvasBasesZoneValueType;
 	initialColor: string;
-	actionOptions: Record<CanvasBasesZoneAction, string>;
+	actionOptions: Record<string, string>;
 	propertyOptions: string[];
 	updateModeOptions: Record<CanvasBasesZoneUpdateMode, string>;
 	valueTypeOptions: Record<CanvasBasesZoneValueType, string>;
@@ -5268,6 +5817,9 @@ class ActiveGroupSettingsModal extends Modal {
 		this.options = options;
 		this.label = options.initialLabel ?? "";
 		this.action = normalizeZoneAction(options.initialAction);
+		if (!Object.prototype.hasOwnProperty.call(options.actionOptions, this.action)) {
+			this.action = DEFAULT_ZONE_ACTION;
+		}
 		for (const option of getFriendlyZonePropertyOptions(
 			options.propertyOptions,
 			options.t("settings.tasknotes.heading")
@@ -5515,7 +6067,7 @@ class ActiveGroupSettingsModal extends Modal {
 			this.action === DEFAULT_ZONE_ACTION
 				? this.getPropertyPreviewText()
 				: this.options.t("view.group.previewAction", {
-						action: this.options.actionOptions[this.action],
+						action: this.options.actionOptions[this.action] ?? this.action,
 					});
 
 		if (this.previewEl) {
@@ -5636,77 +6188,23 @@ function getFriendlyTaskPropertyId(property: string, taskPrefix: string): string
 	return taskProperty ? `task.${taskProperty}` : null;
 }
 
-function getColorPickerValue(color: string | undefined): string {
-	return color?.startsWith("#") ? color : DEFAULT_CARD_COLOR;
+function getColorPickerValue(color: string | undefined, fallback: string): string {
+	return color?.startsWith("#") ? color : fallback;
 }
 
-class CardColorModal extends Modal {
-	private readonly options: {
-		title: string;
-		colorLabel: string;
-		clearLabel: string;
-		closeLabel: string;
-		initialColor?: string;
-	};
-	private readonly onChange: (color: string | undefined) => void;
-	private color: string;
-
-	constructor(
-		app: App,
-		options: {
-			title: string;
-			colorLabel: string;
-			clearLabel: string;
-			closeLabel: string;
-			initialColor?: string;
-		},
-		onChange: (color: string | undefined) => void
-	) {
-		super(app);
-		this.options = options;
-		this.onChange = onChange;
-		this.color = getColorPickerValue(options.initialColor);
+function setZoneConfigColor(
+	zone: CanvasBasesZoneConfig,
+	color: string | undefined
+): CanvasBasesZoneConfig {
+	const nextZone = { ...zone };
+	const nextColor = normalizeZoneColor(color);
+	if (nextColor) {
+		nextZone.color = nextColor;
+	} else {
+		delete nextZone.color;
 	}
 
-	onOpen(): void {
-		this.contentEl.empty();
-		this.contentEl.addClass("canvas-bases-modal", "canvas-bases-card-color-modal");
-		this.contentEl.createEl("h2", { text: this.options.title });
-
-		new Setting(this.contentEl)
-			.setName(this.options.colorLabel)
-			.addColorPicker((color) => {
-				color
-					.setValue(this.color)
-					.onChange((value) => {
-						const nextColor = normalizeCanvasNodeColor(value);
-						if (!nextColor) return;
-
-						this.color = nextColor;
-						this.onChange(nextColor);
-					});
-			});
-
-		const actionsEl = this.contentEl.createDiv({ cls: "canvas-bases-modal__actions" });
-		actionsEl
-			.createEl("button", { text: this.options.clearLabel })
-			.addEventListener("click", () => {
-				this.onChange(undefined);
-				this.close();
-			});
-		actionsEl
-			.createEl("button", {
-				text: this.options.closeLabel,
-				cls: "mod-cta",
-			})
-			.addEventListener("click", () => {
-				this.close();
-			});
-	}
-
-	onClose(): void {
-		this.contentEl.empty();
-	}
+	return nextZone;
 }
 
 class ManualGroupNameModal extends Modal {

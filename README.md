@@ -1,8 +1,6 @@
 # Canvas Bases
 
-Canvas Bases is an Obsidian plugin for Bases and Canvas, and the TaskNotes
-canvas companion plugin.
-
+Canvas Bases is an Obsidian plugin for Bases and Canvas, and a companion plugin for TaskNotes.
 It turns a live Obsidian Bases view into a canvas-style working board. Bases
 still owns the query: filters, sorting, grouping, and visible properties stay in
 the `.base` file. Canvas Bases adds spatial layout, cards, groups, relationship
@@ -154,56 +152,4 @@ Canvas Bases: Create canvas from current bases view
 Canvas Bases: Update linked canvas
 Canvas Bases: Open linked canvas
 Canvas Bases: Create starter files
-```
-
-## Development
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Run checks:
-
-```bash
-npm run lint
-npm test
-npm run typecheck
-```
-
-Build the plugin:
-
-```bash
-npm run build
-```
-
-Build and copy the plugin into the configured test vaults:
-
-```bash
-npm run build:test
-```
-
-Reload Canvas Bases in a running Obsidian test vault:
-
-```bash
-obsidian vault=test plugin:reload id=canvas-bases
-```
-
-For code or CSS changes, run `npm run build:test` and reload the plugin before
-manual verification.
-
-## Media
-
-README media lives in:
-
-```text
-media/readme/
-```
-
-The local source captures used to create the README media are kept under:
-
-```text
-media/canvas-bases-release-video/
-media/canvas-bases-demo/
 ```

@@ -246,6 +246,25 @@ describe("TaskNotesRuntime", () => {
 		]);
 	});
 
+	it("only exposes available TaskNotes zone actions", () => {
+		const unavailable = new TaskNotesRuntime({
+			plugins: {
+				getPlugin: () => null,
+			},
+		} as unknown as App);
+		expect(unavailable.getAvailableZoneActions()).toEqual([]);
+
+		const taskOnly = new TaskNotesRuntime(makeTaskNotesApp({
+			capabilities: ["tasks.read", "tasks.write"],
+		}));
+		expect(taskOnly.getAvailableZoneActions()).toEqual([
+			"task.complete",
+			"task.uncomplete",
+			"task.archive",
+			"task.unarchive",
+		]);
+	});
+
 	it("applies active-group append rules to TaskNotes user list fields", async () => {
 		const writes = createTaskWrites();
 		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
@@ -666,6 +685,7 @@ function rootTaskSnapshot(): CanvasBasesViewSnapshot {
 }
 
 function makeTaskNotesApp({
+	capabilities: capabilityList,
 	tasks = {},
 	relationships = {},
 	fields = [],
@@ -675,6 +695,7 @@ function makeTaskNotesApp({
 	taskMenu,
 	writes = createTaskWrites(),
 }: {
+	capabilities?: string[];
 	tasks?: Record<string, ReturnType<typeof task>>;
 	relationships?: Record<string, unknown>;
 	fields?: Array<{
@@ -692,15 +713,15 @@ function makeTaskNotesApp({
 	taskMenu?: TaskMenuLog;
 	writes?: TaskWriteLog;
 }): App {
-		const capabilities = new Set([
-			"tasks.read",
-			"tasks.write",
-			"catalog.read",
-			"relationships.read",
-			"time.write",
-			"pomodoro.write",
-			"recurring.write",
-		]);
+	const capabilities = new Set(capabilityList ?? [
+		"tasks.read",
+		"tasks.write",
+		"catalog.read",
+		"relationships.read",
+		"time.write",
+		"pomodoro.write",
+		"recurring.write",
+	]);
 	if (taskMenu) capabilities.add("ui.task-menu");
 
 	return {

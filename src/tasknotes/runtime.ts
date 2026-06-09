@@ -254,6 +254,21 @@ interface TaskNotesTimeEntry {
 	description?: string | null;
 }
 
+type TaskNotesZoneAction = Exclude<CanvasBasesZoneAction, "set-property">;
+
+const TASK_NOTES_ZONE_ACTIONS = [
+	"task.complete",
+	"task.uncomplete",
+	"task.archive",
+	"task.unarchive",
+	"time.start",
+	"time.stop",
+	"pomodoro.start",
+	"pomodoro.assign",
+	"recurring.complete",
+	"recurring.skip",
+] as const satisfies readonly TaskNotesZoneAction[];
+
 export class TaskNotesRuntime {
 	private readonly app: App;
 	private readonly t: TranslateFn;
@@ -294,6 +309,15 @@ export class TaskNotesRuntime {
 			api?.hasCapability("tasks.write") &&
 				typeof api.tasks?.addDependency === "function" &&
 				typeof api.tasks.addProject === "function"
+		);
+	}
+
+	getAvailableZoneActions(): TaskNotesZoneAction[] {
+		const api = this.getApi();
+		if (!api?.tasks?.get || !api.hasCapability("tasks.read")) return [];
+
+		return TASK_NOTES_ZONE_ACTIONS.filter((action) =>
+			this.isZoneActionAvailable(api, action)
 		);
 	}
 
@@ -441,6 +465,39 @@ export class TaskNotesRuntime {
 				}
 				await api.recurring.toggleSkippedInstance(path, undefined, context);
 				return "updated";
+		}
+	}
+
+	private isZoneActionAvailable(
+		api: TaskNotesRuntimeApiV1,
+		action: TaskNotesZoneAction
+	): boolean {
+		switch (action) {
+			case "task.complete":
+				return Boolean(api.tasks?.complete && api.hasCapability("tasks.write"));
+			case "task.uncomplete":
+				return Boolean(api.tasks?.uncomplete && api.hasCapability("tasks.write"));
+			case "task.archive":
+			case "task.unarchive":
+				return Boolean(api.tasks?.archive && api.hasCapability("tasks.write"));
+			case "time.start":
+				return Boolean(api.time?.start && api.hasCapability("time.write"));
+			case "time.stop":
+				return Boolean(api.time?.stop && api.hasCapability("time.write"));
+			case "pomodoro.start":
+				return Boolean(api.pomodoro?.start && api.hasCapability("pomodoro.write"));
+			case "pomodoro.assign":
+				return Boolean(api.pomodoro?.assignTask && api.hasCapability("pomodoro.write"));
+			case "recurring.complete":
+				return Boolean(
+					api.recurring?.toggleCompleteInstance &&
+						api.hasCapability("recurring.write")
+				);
+			case "recurring.skip":
+				return Boolean(
+					api.recurring?.toggleSkippedInstance &&
+						api.hasCapability("recurring.write")
+				);
 		}
 	}
 
