@@ -145,6 +145,8 @@
   "view.menu.openNote": "c66a827e3397b1e4eb14c164a586dbd77b36e8bc",
   "view.menu.unpinFromBoard": "54703152ec0f397c5aafa832a9b5e587f434ce60",
   "view.menu.removeCard": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
+  "view.menu.addPinnedNote": "bf328becc493b451c87edeb3355d9ae32dd3e478",
+  "view.menu.addCard": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
   "view.menu.renameGroup": "673e72771575c873f460ec3151bfc192c442864c",
   "view.menu.removeGroup": "9a5319bc9fe3f0138086e02c1b75eb6a91800b6a",
   "view.menu.createGroupFromSelection": "0c79f91f52bccce3a338547bb59a6418217412f4",

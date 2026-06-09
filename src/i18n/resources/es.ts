@@ -239,6 +239,8 @@ export const es: TranslationTree = {
 			openNote: "Abrir nota",
 			unpinFromBoard: "Desfijar del tablero",
 			removeCard: "Eliminar tarjeta",
+			addPinnedNote: "Añadir nota fijada",
+			addCard: "Añadir tarjeta",
 			renameGroup: "Renombrar grupo",
 			removeGroup: "Eliminar grupo",
 			createGroupFromSelection: "Crear grupo a partir de la selección",

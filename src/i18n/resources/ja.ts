@@ -239,6 +239,8 @@ export const ja: TranslationTree = {
 			openNote: "ノートを開く",
 			unpinFromBoard: "ボードからピン留めを解除",
 			removeCard: "カードを削除",
+			addPinnedNote: "ピン留めノートを追加",
+			addCard: "カードを追加",
 			renameGroup: "グループ名を変更",
 			removeGroup: "グループを削除",
 			createGroupFromSelection: "選択範囲からグループを作成",

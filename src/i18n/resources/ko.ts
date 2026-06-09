@@ -239,6 +239,8 @@ export const ko: TranslationTree = {
 			openNote: "노트 열기",
 			unpinFromBoard: "보드에서 고정 해제",
 			removeCard: "카드 제거",
+			addPinnedNote: "고정 노트 추가",
+			addCard: "카드 추가",
 			renameGroup: "그룹 이름 바꾸기",
 			removeGroup: "그룹 제거",
 			createGroupFromSelection: "선택 항목에서 그룹 만들기",

@@ -14,6 +14,8 @@
 - Added edge and corner resize handles for Baseboard note cards and group frames.
 - Added marquee selection for Baseboard cards, including creating a manual group
   around the selected cards.
+- Added a blank-board context menu for adding pinned notes or text cards at the
+  clicked location.
 - Added inline Markdown editing to Baseboard note cards.
 - Added debounced autosave for inline Markdown edits in Baseboard note cards.
 - Added selected Bases properties to Baseboard note cards and improved card

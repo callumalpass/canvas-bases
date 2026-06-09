@@ -239,6 +239,8 @@ export const ru: TranslationTree = {
 			openNote: "Открыть заметку",
 			unpinFromBoard: "Открепить от доски",
 			removeCard: "Удалить карточку",
+			addPinnedNote: "Добавить закреплённую заметку",
+			addCard: "Добавить карточку",
 			renameGroup: "Переименовать группу",
 			removeGroup: "Удалить группу",
 			createGroupFromSelection: "Создать группу из выделенного",

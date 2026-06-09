@@ -584,6 +584,14 @@
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "6f6a96c40785f4db25538ccafc37f80f8764e040"
     },
+    "view.menu.addPinnedNote": {
+      "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
+      "translation": "14d195443b7f3c2f08bfbbfd361be3d4db6887e5"
+    },
+    "view.menu.addCard": {
+      "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
+      "translation": "8596ffc9a0501d55dba9e4eb6138d9a6f74518bf"
+    },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
       "translation": "6de15fb7218018efe0e0cf931b34cfe5bcaf33e3"
@@ -1349,6 +1357,14 @@
     "view.menu.removeCard": {
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "8a0a4650066c090caadde19db192ae3cd0846d71"
+    },
+    "view.menu.addPinnedNote": {
+      "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
+      "translation": "7d37297d95465749a8ea1f210998f83a35e98a78"
+    },
+    "view.menu.addCard": {
+      "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
+      "translation": "0b7aaf3c67880d7a576e24ce64bd6be56828df67"
     },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -2116,6 +2132,14 @@
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "432cd4ac46f652a648bed09760de144608293295"
     },
+    "view.menu.addPinnedNote": {
+      "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
+      "translation": "b9c6918c7ca6e976528485d30a0efd46c3825b6e"
+    },
+    "view.menu.addCard": {
+      "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
+      "translation": "58744e263e4bc3a9cb40b8933649f3c437aee1f1"
+    },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
       "translation": "ee84757baa339f2fe6b157349e9967e57c9324f0"
@@ -2881,6 +2905,14 @@
     "view.menu.removeCard": {
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "ffc91b4d93868a62d7c0ee0eceb075f19b4be49d"
+    },
+    "view.menu.addPinnedNote": {
+      "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
+      "translation": "91af2326739d549289889b7423b9d378073cc8d4"
+    },
+    "view.menu.addCard": {
+      "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
+      "translation": "cab7e6ecdf3baf8e96864c851d955cce6eb53ee1"
     },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -3648,6 +3680,14 @@
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "21dde39b247351c5211b416d1d7efd6343bb148a"
     },
+    "view.menu.addPinnedNote": {
+      "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
+      "translation": "bb31523d5befb9cf313754c2abd4e5eb3e6d42bd"
+    },
+    "view.menu.addCard": {
+      "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
+      "translation": "96e7574b113d5566925dd3137d0634b9bc1e1cb9"
+    },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
       "translation": "df1d5631ecae5d92a63917f26d97e272160dbbdb"
@@ -4413,6 +4453,14 @@
     "view.menu.removeCard": {
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "0513b3aeb0d429a50d959ca2c23416a2e4920f5f"
+    },
+    "view.menu.addPinnedNote": {
+      "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
+      "translation": "10232b2692b9834a6ab77058db1c4e98f4bee44a"
+    },
+    "view.menu.addCard": {
+      "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
+      "translation": "d58083f04fa5df7cbe861e9feca9c48882a04be5"
     },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
@@ -5180,6 +5228,14 @@
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "a092ae871fdf2848ee4eb46d6d198a89bb783f29"
     },
+    "view.menu.addPinnedNote": {
+      "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
+      "translation": "d5ebd4e31659e2fa4986a391cf09c1f698ccb013"
+    },
+    "view.menu.addCard": {
+      "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
+      "translation": "c814d23ba2e730ab4a983a8cec75ff49475b1467"
+    },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",
       "translation": "001d1e6cd0441872b1829a2f6866b6c648af3839"
@@ -5945,6 +6001,14 @@
     "view.menu.removeCard": {
       "source": "872fc85f5d63d561cdb1d37ac7db1724e7543452",
       "translation": "b44ad0c86e07b0a68d93b5945847043c747048e6"
+    },
+    "view.menu.addPinnedNote": {
+      "source": "bf328becc493b451c87edeb3355d9ae32dd3e478",
+      "translation": "d48f478057fb4bd73a13e05d2bffcf9784a33b4d"
+    },
+    "view.menu.addCard": {
+      "source": "91edf1fe47ea5146d6ad00c7fd516e408a03ba08",
+      "translation": "ab89692a677dbd474342fbe1e458a8284ddf49f1"
     },
     "view.menu.renameGroup": {
       "source": "673e72771575c873f460ec3151bfc192c442864c",

@@ -239,6 +239,8 @@ export const zh: TranslationTree = {
 			openNote: "打开笔记",
 			unpinFromBoard: "从面板取消固定",
 			removeCard: "移除卡片",
+			addPinnedNote: "添加固定笔记",
+			addCard: "添加卡片",
 			renameGroup: "重命名分组",
 			removeGroup: "移除分组",
 			createGroupFromSelection: "从所选内容创建分组",

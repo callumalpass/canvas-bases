@@ -722,14 +722,14 @@ export class BaseboardView extends BasesView {
 			.join(", ");
 	}
 
-	private async openManualNotePicker(): Promise<void> {
+	private async openManualNotePicker(position?: BaseboardNodePosition): Promise<void> {
 		if (!this.config) return;
 
 		const pinnedPaths = this.getManualNotePaths();
 		const unavailablePaths = new Set(pinnedPaths);
 
 		new ManualNoteSuggestModal(this.app, unavailablePaths, this.t.bind(this), (file) => {
-			this.pinNoteToDefaultGroup(file.path);
+			this.pinNoteToDefaultGroup(file.path, position);
 		}).open();
 	}
 
@@ -767,20 +767,20 @@ export class BaseboardView extends BasesView {
 		).open();
 	}
 
-	private async addTextCard(): Promise<void> {
+	private async addTextCard(position?: BaseboardNodePosition): Promise<void> {
 		if (!this.config) return;
 
 		const options = this.getMaterializeOptions();
+		const cardPosition =
+			position ??
+			this.getNewCardPosition(Math.max(220, options.nodeWidth), Math.max(120, options.nodeHeight));
 		const card: BaseboardTextCardSnapshot = {
 			id: createItemId(),
 			text: "",
 		};
 		const cards = [...normalizeTextCards(this.config.get(VIEW_CONFIG_KEYS.textCards)), card];
 		const positions = this.getNodePositions();
-		positions[getTextCardNodeId(card.id)] = this.getNewCardPosition(
-			Math.max(220, options.nodeWidth),
-			Math.max(120, options.nodeHeight)
-		);
+		positions[getTextCardNodeId(card.id)] = cardPosition;
 
 		setTextCards(this.config, cards);
 		this.setNodePositions(positions);
@@ -852,7 +852,7 @@ export class BaseboardView extends BasesView {
 		this.scheduleRender();
 	}
 
-	private pinNoteToDefaultGroup(path: string): void {
+	private pinNoteToDefaultGroup(path: string, position?: BaseboardNodePosition): void {
 		if (!this.config) return;
 
 		const group = this.ensureDefaultManualGroup();
@@ -864,7 +864,7 @@ export class BaseboardView extends BasesView {
 		}
 
 		const positions = this.getNodePositions();
-		positions[getFileNodeId(path)] = this.getPositionInsideManualGroup(group.id);
+		positions[getFileNodeId(path)] = position ?? this.getPositionInsideManualGroup(group.id);
 		this.setNodePositions(positions);
 		this.scheduleRender();
 	}
@@ -3195,6 +3195,9 @@ export class BaseboardView extends BasesView {
 			}
 			this.startSelection(event);
 		});
+		this.registerDomEvent(viewportEl, "contextmenu", (event) => {
+			this.openBoardContextMenu(event);
+		});
 		this.registerDomEvent(viewportEl, "wheel", (event) => {
 			if (!Keymap.isModEvent(event)) return;
 			event.preventDefault();
@@ -3225,6 +3228,37 @@ export class BaseboardView extends BasesView {
 		window.addEventListener("pointermove", this.panMoveHandler);
 		window.addEventListener("pointerup", this.panEndHandler);
 		window.addEventListener("pointercancel", this.panEndHandler);
+	}
+
+	private openBoardContextMenu(event: MouseEvent): void {
+		if (isBoardInteractiveTarget(event.target)) return;
+
+		const point = this.getPlanePoint(event.clientX, event.clientY);
+		if (!point) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+		this.clearDragListeners();
+		this.clearSelectedNodes();
+
+		const menu = new Menu();
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.addPinnedNote"))
+				.setIcon("lucide-file-plus")
+				.onClick(() => {
+					void this.openManualNotePicker(this.getFileCardPositionAtPoint(point));
+				});
+		});
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.addCard"))
+				.setIcon("lucide-sticky-note")
+				.onClick(() => {
+					void this.addTextCard(this.getTextCardPositionAtPoint(point));
+				});
+		});
+		menu.showAtMouseEvent(event);
 	}
 
 	private startSelection(event: PointerEvent): void {
@@ -3502,6 +3536,20 @@ export class BaseboardView extends BasesView {
 			width: right - left,
 			height: bottom - top,
 		};
+	}
+
+	private getFileCardPositionAtPoint(point: LinkPoint): BaseboardNodePosition {
+		const options = this.getMaterializeOptions();
+		return getNodePositionAtPoint(point, options.nodeWidth, options.nodeHeight);
+	}
+
+	private getTextCardPositionAtPoint(point: LinkPoint): BaseboardNodePosition {
+		const options = this.getMaterializeOptions();
+		return getNodePositionAtPoint(
+			point,
+			Math.max(220, options.nodeWidth),
+			Math.max(120, options.nodeHeight)
+		);
 	}
 
 	private setZoom(
@@ -4196,6 +4244,19 @@ function getRectFromPoints(first: LinkPoint, second: LinkPoint): BaseboardNodePo
 		y: clampCoordinate(y),
 		width: Math.round(Math.abs(second.x - first.x)),
 		height: Math.round(Math.abs(second.y - first.y)),
+	};
+}
+
+function getNodePositionAtPoint(
+	point: LinkPoint,
+	width: number,
+	height: number
+): BaseboardNodePosition {
+	return {
+		x: clampCoordinate(point.x),
+		y: clampCoordinate(point.y),
+		width,
+		height,
 	};
 }
 

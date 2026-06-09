@@ -239,6 +239,8 @@ export const en: TranslationTree = {
 			openNote: "Open note",
 			unpinFromBoard: "Unpin from board",
 			removeCard: "Remove card",
+			addPinnedNote: "Add pinned note",
+			addCard: "Add card",
 			renameGroup: "Rename group",
 			removeGroup: "Remove group",
 			createGroupFromSelection: "Create group from selection",
