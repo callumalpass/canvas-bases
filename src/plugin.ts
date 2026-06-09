@@ -53,6 +53,8 @@ interface CanvasBasesMaterializeSource {
 	getCanvasPath(): string | null;
 }
 
+type TranslatePluralFn = (key: string, count: number, params?: InterpolationValues) => string;
+
 export default class CanvasBasesPlugin extends Plugin {
 	settings: CanvasBasesSettings = DEFAULT_SETTINGS;
 	taskNotes!: TaskNotesRuntime;
@@ -60,11 +62,14 @@ export default class CanvasBasesPlugin extends Plugin {
 	private views = new Set<CanvasBasesView>();
 	private activeView: CanvasBasesView | null = null;
 	private shouldCreateStarterFiles = false;
+	private readonly translate: TranslateFn = (key, params) => this.t(key, params);
+	private readonly translatePlural: TranslatePluralFn = (key, count, params) =>
+		this.tp(key, count, params);
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
 		this.i18n = createI18nService({ initialLocale: this.settings.locale });
-		this.taskNotes = new TaskNotesRuntime(this.app, this.t.bind(this) as TranslateFn);
+		this.taskNotes = new TaskNotesRuntime(this.app, this.translate);
 		this.addSettingTab(new CanvasBasesSettingTab(this));
 		this.registerCanvasBasesBasesView();
 		this.registerCommands();
@@ -102,7 +107,7 @@ export default class CanvasBasesPlugin extends Plugin {
 	unregisterViewInstance(view: CanvasBasesView): void {
 		this.views.delete(view);
 		if (this.activeView === view) {
-			this.activeView = this.views.values().next().value ?? null;
+			this.activeView = getFirstCanvasBasesView(this.views);
 		}
 	}
 
@@ -127,8 +132,8 @@ export default class CanvasBasesPlugin extends Plugin {
 			this.app,
 			snapshot,
 			source.getMaterializeOptions(),
-			this.t.bind(this) as TranslateFn,
-			this.tp.bind(this),
+			this.translate,
+			this.translatePlural,
 			async (options) => {
 				await source.setMaterializeOptions(options);
 				const summary = await this.materialize(source, options);
@@ -194,7 +199,7 @@ export default class CanvasBasesPlugin extends Plugin {
 			factory: (controller, containerEl) => {
 				return new CanvasBasesView(controller, containerEl, this);
 			},
-			options: (): BasesAllOptions[] => buildCanvasBasesViewOptions(this.t.bind(this) as TranslateFn),
+			options: (): BasesAllOptions[] => buildCanvasBasesViewOptions(this.translate),
 		};
 
 		this.registerBasesView(CANVAS_BASES_VIEW_TYPE, registration);
@@ -269,7 +274,7 @@ export default class CanvasBasesPlugin extends Plugin {
 			return this.activeView;
 		}
 
-		return this.views.values().next().value ?? null;
+		return getFirstCanvasBasesView(this.views);
 	}
 
 	private getMaterializeSource(view?: CanvasBasesView): CanvasBasesMaterializeSource | null {
@@ -398,4 +403,12 @@ export default class CanvasBasesPlugin extends Plugin {
 			})
 		);
 	}
+}
+
+function getFirstCanvasBasesView(views: Set<CanvasBasesView>): CanvasBasesView | null {
+	for (const view of views) {
+		return view;
+	}
+
+	return null;
 }

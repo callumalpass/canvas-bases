@@ -15,6 +15,14 @@ export interface ActiveBasesViewSource {
 	viewType: string;
 }
 
+type ViewConfigProvider = {
+	getViewConfig(): unknown;
+};
+
+type ViewTypeProvider = {
+	getViewType(): unknown;
+};
+
 export function getActiveBasesViewSource(app: App): ActiveBasesViewSource | null {
 	const leafView = app.workspace.getMostRecentLeaf()?.view;
 	if (!isRecord(leafView) || getViewType(leafView) !== BASES_VIEW_TYPE) {
@@ -62,9 +70,9 @@ function getBasesViewConfig(
 	if (isBasesViewConfig(viewConfig)) return viewConfig;
 
 	const getViewConfig = controller?.getViewConfig;
-	if (typeof getViewConfig !== "function") return null;
+	if (typeof getViewConfig !== "function" || !isViewConfigProvider(controller)) return null;
 
-	const controllerConfig = getViewConfig.call(controller);
+	const controllerConfig = controller.getViewConfig();
 	return isBasesViewConfig(controllerConfig) ? controllerConfig : null;
 }
 
@@ -88,9 +96,9 @@ function getBaseFile(
 
 function getViewType(view: Record<string, unknown>): string | null {
 	const getType = view.getViewType;
-	if (typeof getType !== "function") return null;
+	if (typeof getType !== "function" || !isViewTypeProvider(view)) return null;
 
-	const viewType = getType.call(view);
+	const viewType = view.getViewType();
 	return typeof viewType === "string" ? viewType : null;
 }
 
@@ -123,4 +131,16 @@ function toRecord(value: unknown): Record<string, unknown> | null {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isViewConfigProvider(
+	value: Record<string, unknown> | null
+): value is Record<string, unknown> & ViewConfigProvider {
+	return typeof value?.getViewConfig === "function";
+}
+
+function isViewTypeProvider(
+	value: Record<string, unknown>
+): value is Record<string, unknown> & ViewTypeProvider {
+	return typeof value.getViewType === "function";
 }

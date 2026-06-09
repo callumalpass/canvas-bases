@@ -1,7 +1,7 @@
 {
   "id": "canvas-bases",
   "name": "Canvas Bases",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "minAppVersion": "1.10.1",
   "description": "Canvas-style layouts and JSON Canvas materialization for Bases.",
   "author": "Callum Alpass",

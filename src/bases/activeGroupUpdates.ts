@@ -59,7 +59,7 @@ function getActiveGroupValueTarget(
 	const metadataTarget = getMetadataValueTarget(options.metadataType);
 	if (metadataTarget) return metadataTarget;
 
-	if (Array.isArray(currentValue)) {
+	if (isUnknownArray(currentValue)) {
 		return {
 			container: "list",
 			scalarType: getArrayScalarType(currentValue) ?? "string",
@@ -117,7 +117,7 @@ function getScalarTypeFromMetadata(type: string): ActiveGroupScalarValueType | n
 }
 
 function getArrayScalarType(value: unknown): ActiveGroupScalarValueType | null {
-	if (!Array.isArray(value)) return null;
+	if (!isUnknownArray(value)) return null;
 
 	for (const entry of value) {
 		const type = getScalarType(entry);
@@ -161,14 +161,14 @@ function coerceActiveGroupValue(
 
 function appendActiveGroupValue(currentValue: unknown, nextValue: unknown): unknown {
 	if (isMissingValue(currentValue)) return [nextValue];
-	if (Array.isArray(currentValue)) return [...currentValue, nextValue];
+	if (isUnknownArray(currentValue)) return [...currentValue, nextValue];
 
 	return [currentValue, nextValue];
 }
 
 function appendUniqueActiveGroupValue(currentValue: unknown, nextValue: unknown): unknown {
 	if (isMissingValue(currentValue)) return [nextValue];
-	if (Array.isArray(currentValue)) {
+	if (isUnknownArray(currentValue)) {
 		return currentValue.some((entry) => valuesEqual(entry, nextValue))
 			? currentValue
 			: [...currentValue, nextValue];
@@ -178,7 +178,7 @@ function appendUniqueActiveGroupValue(currentValue: unknown, nextValue: unknown)
 }
 
 function removeActiveGroupValue(currentValue: unknown, nextValue: unknown): unknown {
-	if (Array.isArray(currentValue)) {
+	if (isUnknownArray(currentValue)) {
 		const values = currentValue.filter((entry) => !valuesEqual(entry, nextValue));
 		return values.length > 0 ? values : undefined;
 	}
@@ -188,6 +188,10 @@ function removeActiveGroupValue(currentValue: unknown, nextValue: unknown): unkn
 
 function isMissingValue(value: unknown): boolean {
 	return typeof value === "undefined" || value === null || value === "";
+}
+
+function isUnknownArray(value: unknown): value is unknown[] {
+	return Array.isArray(value);
 }
 
 function valuesEqual(left: unknown, right: unknown): boolean {

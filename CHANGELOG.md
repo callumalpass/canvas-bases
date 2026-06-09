@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2
+
+- Hardened release-review linting so unsafe TypeScript boundary access is caught
+  before publication.
+- Refreshed the README demo media and recording copy to use the Canvas Bases
+  naming consistently.
+
 ## 0.1.1
 
 - Added the MIT license file for the published plugin.

@@ -1301,9 +1301,14 @@ export class CanvasBasesView extends BasesView {
 		const pinnedPaths = this.getManualNotePaths();
 		const unavailablePaths = new Set(pinnedPaths);
 
-		new ManualNoteSuggestModal(this.app, unavailablePaths, this.t.bind(this), (file) => {
-			this.pinNoteToDefaultGroup(file.path, position);
-		}).open();
+		new ManualNoteSuggestModal(
+			this.app,
+			unavailablePaths,
+			(key, params) => this.t(key, params),
+			(file) => {
+				this.pinNoteToDefaultGroup(file.path, position);
+			}
+		).open();
 	}
 
 	private async openCreateManualGroupModal(): Promise<void> {
@@ -3205,9 +3210,14 @@ export class CanvasBasesView extends BasesView {
 			return;
 		}
 
-		new PropertyLinkSuggestModal(this.app, properties, this.t.bind(this), (property) => {
-			void this.addPropertyLink(sourcePath, targetPath, property);
-		}).open();
+		new PropertyLinkSuggestModal(
+			this.app,
+			properties,
+			(key, params) => this.t(key, params),
+			(property) => {
+				void this.addPropertyLink(sourcePath, targetPath, property);
+			}
+		).open();
 	}
 
 	private getConfiguredLinkProperties(): string[] {
@@ -3254,7 +3264,7 @@ export class CanvasBasesView extends BasesView {
 			}
 
 			const link = createNoteWikiLink(targetPath);
-			await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+			await this.app.fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
 				frontmatter[propertyName] = appendPropertyLinkValue(
 					frontmatter[propertyName],
 					link,
@@ -3291,7 +3301,7 @@ export class CanvasBasesView extends BasesView {
 				return;
 			}
 
-			await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+			await this.app.fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
 				const nextValue = removePropertyLinkValue(
 					frontmatter[property],
 					(value) => this.valueReferencesPath(value, sourcePath, targetPath)
@@ -5211,7 +5221,7 @@ export class CanvasBasesView extends BasesView {
 			}
 
 			const metadataType = this.getVaultPropertyType(propertyName);
-			await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+			await this.app.fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
 				const nextValue = applyActiveGroupUpdate(frontmatter[propertyName], groupValue, {
 					updateMode: group.updateMode,
 					valueType: group.valueType,
@@ -6998,7 +7008,7 @@ function appendPropertyLinkValue(
 		return link;
 	}
 
-	if (Array.isArray(value)) {
+	if (isUnknownArray(value)) {
 		return [...value, link];
 	}
 
@@ -7115,4 +7125,8 @@ function setSvgAttributes(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isUnknownArray(value: unknown): value is unknown[] {
+	return Array.isArray(value);
 }

@@ -203,7 +203,7 @@ function writeDemoFiles() {
     - file.hasTag("canvas-bases-active-demo")
 views:
   - type: canvas-bases
-    name: "Feature tour"
+    name: "Canvas Bases"
     order:
       - stage
       - status
@@ -247,7 +247,7 @@ dateModified: 2026-06-09T09:00:00.000+10:00
 
 # ${task.title}
 
-This demo note is used by the Canvas Bases feature tour recording.
+This demo note is used by the Canvas Bases recording.
 `
 		);
 	}

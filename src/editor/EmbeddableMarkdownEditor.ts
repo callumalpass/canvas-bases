@@ -39,6 +39,10 @@ interface WidgetEditorView {
 	unload(): void;
 }
 
+type MarkdownEditorPrototype = {
+	constructor?: unknown;
+};
+
 type MarkdownEditorInternal = {
 	cm: {
 		cm?: unknown;
@@ -138,14 +142,22 @@ function resolveEditorPrototype(app: App): Constructor<ScrollableMarkdownEditor>
 	widgetEditorView.showEditor();
 
 	const editMode = widgetEditorView.editMode;
-	if (!editMode) {
+	if (!isPrototypeSource(editMode)) {
 		widgetEditorView.unload();
 		throw new Error("Markdown editor edit mode was not initialized.");
 	}
 
-	const MarkdownEditor = Object.getPrototypeOf(Object.getPrototypeOf(editMode));
+	const editModePrototype = Object.getPrototypeOf(editMode) as object | null;
+	const markdownEditorPrototype = editModePrototype
+		? (Object.getPrototypeOf(editModePrototype) as MarkdownEditorPrototype | null)
+		: null;
+	const MarkdownEditor = markdownEditorPrototype?.constructor;
 	widgetEditorView.unload();
-	return MarkdownEditor.constructor as Constructor<ScrollableMarkdownEditor>;
+	if (typeof MarkdownEditor !== "function") {
+		throw new Error("Markdown editor constructor was not initialized.");
+	}
+
+	return MarkdownEditor as Constructor<ScrollableMarkdownEditor>;
 }
 
 function getEditorBase(): Constructor<ScrollableMarkdownEditor> {
@@ -228,6 +240,10 @@ const defaultProperties: ResolvedMarkdownEditorProps = {
 
 function getMarkdownEditorTooltipParent(container: HTMLElement): HTMLElement {
 	return container.ownerDocument?.body ?? getEditorDocument().body;
+}
+
+function isPrototypeSource(value: unknown): value is object {
+	return (typeof value === "object" && value !== null) || typeof value === "function";
 }
 
 class CodeMirrorEditorAdapter {

@@ -65,7 +65,7 @@ function collectPropertyLinks(
 	if (properties.length === 0) return [];
 
 	const cache = app.metadataCache.getFileCache(file);
-	const frontmatter = cache?.frontmatter;
+	const frontmatter = cache?.frontmatter as Record<string, unknown> | null | undefined;
 	if (!frontmatter) return [];
 
 	const relationships: CanvasBasesRelationship[] = [];

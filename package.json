@@ -1,6 +1,6 @@
 {
 	"name": "canvas-bases",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Canvas-style layouts and JSON Canvas materialization for Bases.",
 	"type": "module",
 	"main": "main.js",
