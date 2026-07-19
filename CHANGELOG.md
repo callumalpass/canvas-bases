@@ -2,6 +2,14 @@
 
 ## 0.1.2
 
+- Registered Canvas Bases with the selected `mdbase-obsidian` runtime and emit
+  versioned `canvas.drop` events after notes are dropped into active groups.
+  Assignment-zone actions now dispatch through policy-enforced runtime action
+  contracts first, with the direct TaskNotes API retained only as a compatibility
+  fallback when the action contract is unavailable.
+- Render image and PDF rows as read-only attachment cards instead of editable
+  markdown bodies, preventing binary files from being overwritten when a Canvas
+  Bases card is saved. Thanks to @yumizyg for reporting this in issue #5.
 - Hardened release-review linting so unsafe TypeScript boundary access is caught
   before publication.
 - Refreshed the README demo media and recording copy to use the Canvas Bases

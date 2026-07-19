@@ -236,6 +236,7 @@ export default [
 			"coverage/**",
 			"docs/**",
 			"e2e/**",
+			"playground/**",
 			"scripts/**",
 			"**/*.test.ts",
 			"**/*.spec.ts",

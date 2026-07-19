@@ -1,5 +1,6 @@
 import {
 	BasesView,
+	type RenderContext,
 	ButtonComponent,
 	FuzzySuggestModal,
 	Keymap,
@@ -39,6 +40,13 @@ import type {
 	MaterializeOptions,
 } from "../types";
 import { buildCanvasBasesSnapshot } from "./snapshot";
+import {
+	getCanvasBasesFileExtension,
+	getCanvasBasesFileIcon,
+	getCanvasBasesFileKind,
+	isCanvasBasesMarkdownFile,
+	type CanvasBasesFileKind,
+} from "./fileCards";
 import type { BasesViewAction } from "./actions";
 import {
 	getCanvasNodeCssColor,
@@ -334,7 +342,7 @@ interface InlineEditorState {
 export class CanvasBasesView extends BasesView {
 	readonly type = CANVAS_BASES_VIEW_TYPE;
 	private readonly plugin: CanvasBasesPlugin;
-	private readonly queryController: CanvasBasesQueryController;
+	private readonly canvasQueryController: CanvasBasesQueryController;
 	private readonly edgeMarkerId = `canvas-bases-edge-arrow-${nextEdgeMarkerId++}`;
 	private readonly containerEl: HTMLElement;
 	private rootEl: HTMLElement | null = null;
@@ -382,7 +390,7 @@ export class CanvasBasesView extends BasesView {
 	constructor(controller: QueryController, containerEl: HTMLElement, plugin: CanvasBasesPlugin) {
 		super(controller);
 		this.plugin = plugin;
-		this.queryController = controller as CanvasBasesQueryController;
+		this.canvasQueryController = controller as CanvasBasesQueryController;
 		this.containerEl = containerEl;
 	}
 
@@ -488,8 +496,8 @@ export class CanvasBasesView extends BasesView {
 	}
 
 	private getGroupByPropertyId(): string | null {
-		const views = this.queryController.query?.views;
-		const viewName = this.queryController.viewName ?? this.config?.name;
+		const views = this.canvasQueryController.query?.views;
+		const viewName = this.canvasQueryController.viewName ?? this.config?.name;
 		if (!views || !viewName) return null;
 
 		const view = views.find((candidate) => candidate?.name === viewName);
@@ -2271,6 +2279,10 @@ export class CanvasBasesView extends BasesView {
 		node: CanvasFileNode,
 		entry: CanvasBasesEntrySnapshot | undefined
 	): HTMLElement {
+		const file = this.app.vault.getAbstractFileByPath(node.file);
+		const tFile = file instanceof TFile ? file : null;
+		const fileKind = getCanvasBasesFileKind(node.file, tFile);
+		const isMarkdown = fileKind === "markdown";
 		const fileEl = containerEl.createDiv({
 			cls: "canvas-bases-canvas-file",
 			attr: {
@@ -2279,14 +2291,19 @@ export class CanvasBasesView extends BasesView {
 		});
 		fileEl.setAttr("data-canvas-bases-node-id", node.id);
 		fileEl.setAttr("data-canvas-bases-node-kind", "file");
+		fileEl.addClass(`is-file-kind-${fileKind}`);
+		fileEl.toggleClass("is-attachment-card", !isMarkdown);
 		setNodeGeometry(fileEl, node);
 		setNodeColor(fileEl, node.color);
-		setTooltip(fileEl, this.t("view.tooltips.dragNote"));
+		setTooltip(fileEl, this.t(isMarkdown ? "view.tooltips.dragNote" : "view.tooltips.dragCard"));
 		const showBodyEditor = this.getMaterializeOptions().showBodyEditor;
-		fileEl.toggleClass("is-body-editor-hidden", !showBodyEditor);
+		fileEl.toggleClass("is-body-editor-hidden", isMarkdown && !showBodyEditor);
 
 		const headerEl = fileEl.createDiv({ cls: "canvas-bases-canvas-file__header" });
-		setIcon(headerEl.createSpan({ cls: "canvas-bases-canvas-file__icon" }), "lucide-file-text");
+		setIcon(
+			headerEl.createSpan({ cls: "canvas-bases-canvas-file__icon" }),
+			getCanvasBasesFileIcon(fileKind)
+		);
 		headerEl.createDiv({
 			cls: "canvas-bases-canvas-file__title",
 			text: node.file.split("/").pop()?.replace(/\.md$/u, "") || node.file,
@@ -2297,17 +2314,28 @@ export class CanvasBasesView extends BasesView {
 				text: this.t("view.card.pinned"),
 			});
 		}
-		this.renderCardLinkHandle(headerEl, node.file, fileEl);
-		this.renderCardActionButton(headerEl, this.t("view.card.noteActions"), (event) => {
-			void this.openFileCardMenu(event, node.file, entry);
-		});
+		if (isMarkdown) {
+			this.renderCardLinkHandle(headerEl, node.file, fileEl);
+		}
+		this.renderCardActionButton(
+			headerEl,
+			this.t(isMarkdown ? "view.card.noteActions" : "view.card.cardActions"),
+			(event) => {
+				void this.openFileCardMenu(event, node.file, entry);
+			}
+		);
 		fileEl.createDiv({
 			cls: "canvas-bases-canvas-file__path",
 			text: node.file,
 		});
 		this.renderCardProperties(fileEl, entry);
-		if (showBodyEditor) {
+		if (isMarkdown && showBodyEditor) {
 			this.renderInlineEditor(fileEl, node.id, node.file);
+		} else if (isMarkdown) {
+			this.destroyInlineEditor(node.id, false);
+		} else {
+			this.destroyInlineEditor(node.id, false);
+			this.renderAttachmentPreview(fileEl, node.file, tFile, fileKind);
 		}
 
 		this.addElementEvent(fileEl, "dblclick", (event) => {
@@ -2326,6 +2354,58 @@ export class CanvasBasesView extends BasesView {
 		this.addResizeHandle(fileEl, this.t("view.tooltips.resizeCard"));
 
 		return fileEl;
+	}
+
+	private renderAttachmentPreview(
+		containerEl: HTMLElement,
+		path: string,
+		file: TFile | null,
+		kind: CanvasBasesFileKind
+	): void {
+		const previewEl = containerEl.createDiv({
+			cls: `canvas-bases-canvas-file__attachment-preview is-${kind}`,
+		});
+		const filename = path.split("/").pop() || path;
+		const resourcePath = file ? this.app.vault.getResourcePath(file) : null;
+
+		if (kind === "image" && resourcePath) {
+			previewEl.createEl("img", {
+				cls: "canvas-bases-canvas-file__attachment-image",
+				attr: {
+					alt: filename,
+					draggable: "false",
+					src: resourcePath,
+				},
+			});
+			return;
+		}
+
+		if (kind === "pdf" && resourcePath) {
+			previewEl.createEl("iframe", {
+				cls: "canvas-bases-canvas-file__attachment-pdf",
+				attr: {
+					src: resourcePath,
+					tabindex: "-1",
+					title: filename,
+				},
+			});
+		}
+
+		const tileEl = previewEl.createDiv({ cls: "canvas-bases-canvas-file__attachment-tile" });
+		const iconEl = tileEl.createDiv({ cls: "canvas-bases-canvas-file__attachment-icon" });
+		setIcon(iconEl, getCanvasBasesFileIcon(kind));
+		const detailEl = tileEl.createDiv({ cls: "canvas-bases-canvas-file__attachment-detail" });
+		const extension = getCanvasBasesFileExtension(path, file).toUpperCase();
+		if (extension) {
+			detailEl.createDiv({
+				cls: "canvas-bases-canvas-file__attachment-type",
+				text: extension,
+			});
+		}
+		detailEl.createDiv({
+			cls: "canvas-bases-canvas-file__attachment-name",
+			text: filename,
+		});
 	}
 
 	private renderCardLinkHandle(
@@ -2440,6 +2520,13 @@ export class CanvasBasesView extends BasesView {
 		path: string,
 		entry: CanvasBasesEntrySnapshot | undefined
 	): Promise<void> {
+		const file = this.app.vault.getAbstractFileByPath(path);
+		const tFile = file instanceof TFile ? file : null;
+		const fileKind = getCanvasBasesFileKind(path, tFile);
+		const isMarkdown = fileKind === "markdown";
+		if (!isMarkdown) {
+			this.destroyInlineEditor(getFileNodeId(path), false);
+		}
 		if (!(await this.flushInlineEditorsForPaths([path]))) {
 			new Notice(this.t("notices.resolveInlineEditorConflict"));
 			return;
@@ -2453,7 +2540,7 @@ export class CanvasBasesView extends BasesView {
 			});
 		};
 		let taskActionsAdded = false;
-		if (options.taskNotesMode !== "off" && options.taskNotesShowActions) {
+		if (isMarkdown && options.taskNotesMode !== "off" && options.taskNotesShowActions) {
 			taskActionsAdded = await this.plugin.taskNotes.populateTaskMenu(menu, path, onTaskMenuUpdate);
 			if (!taskActionsAdded) {
 				const shown = await this.plugin.taskNotes.showTaskMenu(path, event, onTaskMenuUpdate);
@@ -2466,8 +2553,12 @@ export class CanvasBasesView extends BasesView {
 
 		menu.addItem((item) => {
 			item
-				.setTitle(this.t("view.menu.openNote"))
-				.setIcon("lucide-file-text")
+				.setTitle(
+					isMarkdown
+						? this.t("view.menu.openNote")
+						: this.t("view.menu.openPath", { name: formatPathName(path) })
+				)
+				.setIcon(getCanvasBasesFileIcon(fileKind))
 				.onClick(() => {
 					void this.app.workspace.openLinkText(path, "", Keymap.isModEvent(event));
 				});
@@ -2890,8 +2981,13 @@ export class CanvasBasesView extends BasesView {
 		const sourceName = formatPathName(sourcePath);
 		const targetName = formatPathName(targetPath);
 		const menu = new Menu();
+		const sourceFile = this.app.vault.getAbstractFileByPath(sourcePath);
+		const targetFile = this.app.vault.getAbstractFileByPath(targetPath);
+		const canCreateTaskLink =
+			isCanvasBasesMarkdownFile(sourcePath, sourceFile instanceof TFile ? sourceFile : null) &&
+			isCanvasBasesMarkdownFile(targetPath, targetFile instanceof TFile ? targetFile : null);
 
-		if (this.plugin.taskNotes.getTaskLinkingEnabled()) {
+		if (canCreateTaskLink && this.plugin.taskNotes.getTaskLinkingEnabled()) {
 			this.addMenuSectionLabel(
 				menu,
 				this.t("view.menu.dependencyLinks"),
@@ -3256,6 +3352,10 @@ export class CanvasBasesView extends BasesView {
 			new Notice(this.t("notices.couldNotFind", { path: sourcePath }));
 			return;
 		}
+		if (!isCanvasBasesMarkdownFile(sourcePath, file)) {
+			new Notice(this.t("notices.linkActionUnavailable"));
+			return;
+		}
 
 		try {
 			if (!(await this.flushInlineEditorsForPaths([sourcePath]))) {
@@ -3292,6 +3392,10 @@ export class CanvasBasesView extends BasesView {
 		const file = this.app.vault.getAbstractFileByPath(sourcePath);
 		if (!(file instanceof TFile)) {
 			new Notice(this.t("notices.couldNotFind", { path: sourcePath }));
+			return;
+		}
+		if (!isCanvasBasesMarkdownFile(sourcePath, file)) {
+			new Notice(this.t("notices.linkActionUnavailable"));
 			return;
 		}
 
@@ -3433,7 +3537,7 @@ export class CanvasBasesView extends BasesView {
 		}
 
 		try {
-			property.value.renderTo(containerEl, { hoverPopover: null });
+			property.value.renderTo(containerEl, { hoverPopover: null } as RenderContext);
 		} catch {
 			containerEl.setText(property.text);
 		}
@@ -3568,7 +3672,10 @@ export class CanvasBasesView extends BasesView {
 	): Promise<void> {
 		if (options.taskNotesMode === "off") return;
 
-		const paths = getSnapshotPaths(snapshot);
+		const paths = getSnapshotPaths(snapshot).filter((path) => {
+			const file = this.app.vault.getAbstractFileByPath(path);
+			return isCanvasBasesMarkdownFile(path, file instanceof TFile ? file : null);
+		});
 		const entriesByPath = getSnapshotEntriesByPath(snapshot);
 		if (
 			options.taskNotesShowBadges &&
@@ -3676,7 +3783,12 @@ export class CanvasBasesView extends BasesView {
 		}
 
 		const visiblePaths = new Set(state.filePathsByNodeId.values());
-		const pathsToRefresh = [...new Set(paths)].filter((path) => visiblePaths.has(path));
+		const pathsToRefresh = [...new Set(paths)]
+			.filter((path) => visiblePaths.has(path))
+			.filter((path) => {
+				const file = this.app.vault.getAbstractFileByPath(path);
+				return isCanvasBasesMarkdownFile(path, file instanceof TFile ? file : null);
+			});
 		if (pathsToRefresh.length === 0) return;
 
 		const taskCards = await this.plugin.taskNotes.getTaskCards(pathsToRefresh);
@@ -3890,6 +4002,12 @@ export class CanvasBasesView extends BasesView {
 	}
 
 	private renderInlineEditor(containerEl: HTMLElement, nodeId: string, path: string): void {
+		const file = this.app.vault.getAbstractFileByPath(path);
+		if (!isCanvasBasesMarkdownFile(path, file instanceof TFile ? file : null)) {
+			this.destroyInlineEditor(nodeId, false);
+			return;
+		}
+
 		const existingState = this.inlineEditors.get(nodeId);
 		if (existingState && existingState.path === path) {
 			containerEl.appendChild(existingState.shellEl);
@@ -3927,6 +4045,10 @@ export class CanvasBasesView extends BasesView {
 		if (!(file instanceof TFile)) {
 			this.renderInlineEditorFallback(containerEl, path, statusEl, "", true);
 			statusEl.setText(this.t("view.editor.missing"));
+			return;
+		}
+		if (!isCanvasBasesMarkdownFile(path, file)) {
+			statusEl.setText(this.t("view.editor.error"));
 			return;
 		}
 
@@ -4136,6 +4258,11 @@ export class CanvasBasesView extends BasesView {
 			statusEl.setText(this.t("view.editor.missing"));
 			return;
 		}
+		if (!isCanvasBasesMarkdownFile(path, file)) {
+			editorEl.disabled = true;
+			statusEl.setText(this.t("view.editor.error"));
+			return;
+		}
 
 		try {
 			const content = await this.app.vault.read(file);
@@ -4166,6 +4293,11 @@ export class CanvasBasesView extends BasesView {
 		const file = this.app.vault.getAbstractFileByPath(path);
 		if (!(file instanceof TFile)) {
 			statusEl.setText(this.t("view.editor.missing"));
+			return;
+		}
+		if (!isCanvasBasesMarkdownFile(path, file)) {
+			editorEl.disabled = true;
+			statusEl.setText(this.t("view.editor.error"));
 			return;
 		}
 
@@ -4305,6 +4437,11 @@ export class CanvasBasesView extends BasesView {
 			state.statusEl.setText(this.t("view.editor.missing"));
 			return false;
 		}
+		if (!isCanvasBasesMarkdownFile(state.path, file)) {
+			state.statusEl.setText(this.t("view.editor.error"));
+			this.destroyInlineEditor(nodeId, false);
+			return false;
+		}
 
 		this.clearInlineEditorSavedStatusTimer(state);
 		state.statusEl.setText(this.t("view.editor.saving"));
@@ -4401,6 +4538,10 @@ export class CanvasBasesView extends BasesView {
 			state.statusEl.setText(this.t("view.editor.missing"));
 			return;
 		}
+		if (!isCanvasBasesMarkdownFile(state.path, file)) {
+			this.destroyInlineEditor(nodeId, false);
+			return;
+		}
 
 		const diskValue = await this.app.vault.read(file);
 		if (this.inlineEditors.get(nodeId) !== state) return;
@@ -4470,7 +4611,7 @@ export class CanvasBasesView extends BasesView {
 		this.cancelInlineEditorAutosave(state);
 		this.clearInlineEditorSavedStatusTimer(state);
 		const value = state.editor.getValue();
-		if (saveDirty && value !== state.original) {
+		if (saveDirty && value !== state.original && isCanvasBasesMarkdownFile(state.path)) {
 			void this.saveInlineEditorValue(nodeId, state, value);
 		}
 		state.editor.destroy();
@@ -5053,6 +5194,8 @@ export class CanvasBasesView extends BasesView {
 
 		const path = state.filePathsByNodeId.get(node.id);
 		if (!path) return null;
+		const file = this.app.vault.getAbstractFileByPath(path);
+		if (!isCanvasBasesMarkdownFile(path, file instanceof TFile ? file : null)) return null;
 
 		const targetGroup = this.getActiveGroupAtPosition(position);
 		if (!targetGroup) return null;
@@ -5099,7 +5242,11 @@ export class CanvasBasesView extends BasesView {
 				...node,
 				path: state.filePathsByNodeId.get(node.id),
 			}))
-			.filter((node): node is DroppedDragNode & { path: string } => Boolean(node.path));
+			.filter((node): node is DroppedDragNode & { path: string } => Boolean(node.path))
+			.filter((node) => {
+				const file = this.app.vault.getAbstractFileByPath(node.path);
+				return isCanvasBasesMarkdownFile(node.path, file instanceof TFile ? file : null);
+			});
 		if (fileDrops.length === 0) return;
 
 		let dataChanged = false;
@@ -5115,6 +5262,24 @@ export class CanvasBasesView extends BasesView {
 				}
 				const changed = await this.updateActiveGroupValue(node.path, targetGroup);
 				dataChanged ||= changed;
+				await this.plugin.taskNotes.emitCanvasDrop({
+					board: {
+						view: this.getSnapshot()?.viewName ?? this.canvasQueryController.viewName ?? "Canvas Bases",
+					},
+					record: {
+						path: node.path,
+						node_id: node.id,
+					},
+					position: { ...node.position },
+					target: {
+						id: targetGroup.id,
+						label: targetGroup.label,
+						action: targetGroup.action,
+						property: targetGroup.property,
+						value: targetGroup.value,
+					},
+					changed,
+				});
 			}
 		}
 
@@ -5174,6 +5339,16 @@ export class CanvasBasesView extends BasesView {
 			return false;
 		}
 
+		const file = this.app.vault.getAbstractFileByPath(path);
+		if (!(file instanceof TFile)) {
+			new Notice(this.t("notices.couldNotFind", { path }));
+			return false;
+		}
+		if (!isCanvasBasesMarkdownFile(path, file)) {
+			new Notice(this.t("notices.activeGroupReadOnly"));
+			return false;
+		}
+
 		if (group.action !== DEFAULT_ZONE_ACTION) {
 			return this.runActiveGroupAction(path, group);
 		}
@@ -5181,12 +5356,6 @@ export class CanvasBasesView extends BasesView {
 		const propertyName = toWritableNotePropertyName(group.property);
 		const groupValue = options.value ?? group.value;
 		const valueLabel = options.label ?? group.label;
-
-		const file = this.app.vault.getAbstractFileByPath(path);
-		if (!(file instanceof TFile)) {
-			new Notice(this.t("notices.couldNotFind", { path }));
-			return false;
-		}
 
 		try {
 			if (!(await this.flushInlineEditorsForPaths([path]))) {
@@ -5246,6 +5415,16 @@ export class CanvasBasesView extends BasesView {
 	}
 
 	private async runActiveGroupAction(path: string, group: ActiveGroupTarget): Promise<boolean> {
+		const file = this.app.vault.getAbstractFileByPath(path);
+		if (!(file instanceof TFile)) {
+			new Notice(this.t("notices.couldNotFind", { path }));
+			return false;
+		}
+		if (!isCanvasBasesMarkdownFile(path, file)) {
+			new Notice(this.t("notices.activeGroupActionNotTask"));
+			return false;
+		}
+
 		try {
 			if (!(await this.flushInlineEditorsForPaths([path]))) {
 				new Notice(this.t("notices.resolveInlineEditorConflict"));

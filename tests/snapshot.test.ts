@@ -70,6 +70,30 @@ describe("buildCanvasBasesSnapshot", () => {
 		]);
 	});
 
+	it("keeps non-markdown Bases rows in the snapshot", () => {
+		const file = makeTFile("Attachments/Diagram.png", "Diagram", "png");
+		const entry = makeEntry(file, {
+			"file.name": makeValue("Diagram"),
+			"file.ext": makeValue("png"),
+		});
+		const snapshot = buildCanvasBasesSnapshot(
+			makeQueryResult(entry),
+			makeViewConfig(["file.name", "file.ext"])
+		);
+
+		expect(snapshot.groups[0].entries[0]).toMatchObject({
+			path: "Attachments/Diagram.png",
+			name: "Diagram",
+			properties: [
+				{
+					id: "file.ext",
+					text: "png",
+					isEmpty: false,
+				},
+			],
+		});
+	});
+
 	it("keeps group ids stable when grouped data order changes", () => {
 		const activeEntry = makeEntry(makeTFile("Tasks/Active.md", "Active", "md"), {});
 		const waitingEntry = makeEntry(makeTFile("Tasks/Waiting.md", "Waiting", "md"), {});

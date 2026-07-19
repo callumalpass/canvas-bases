@@ -45,13 +45,14 @@
 		"jsdom": "^29.1.1",
 		"obsidian": "^1.12.3",
 		"obsidian-test-mocks": "^3.1.0",
-		"obsidian-typings": "^4.49.0",
+		"obsidian-typings": "^6.24.0",
 		"postcss-selector-parser": "^7.1.1",
 		"stylelint": "^17.12.0",
 		"typescript": "^5.9.2",
 		"vitest": "^4.0.13"
 	},
 	"dependencies": {
+		"@callumalpass/mdbase-runtime": "file:../mdbase-spec/packages/runtime-contracts",
 		"@codemirror/state": "^6.5.0",
 		"@codemirror/view": "^6.38.6"
 	}

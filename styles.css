@@ -879,6 +879,100 @@
 	text-decoration: none;
 }
 
+.canvas-bases-canvas-file__attachment-preview {
+	position: relative;
+	display: flex;
+	flex: 1 1 auto;
+	align-items: center;
+	justify-content: center;
+	width: calc(100% - 28px);
+	min-height: 0;
+	margin: 0 14px 12px;
+	overflow: hidden;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background: color-mix(in srgb, var(--background-secondary) 88%, var(--background-primary));
+	user-select: none;
+}
+
+.canvas-bases-canvas-file__attachment-preview.is-image {
+	background: color-mix(in srgb, var(--background-primary) 82%, var(--background-secondary));
+}
+
+.canvas-bases-canvas-file__attachment-image {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	pointer-events: none;
+}
+
+.canvas-bases-canvas-file__attachment-pdf {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border: 0;
+	background: var(--background-primary);
+	pointer-events: none;
+}
+
+.canvas-bases-canvas-file__attachment-tile {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	max-width: calc(100% - 22px);
+	min-width: 0;
+	padding: 10px 11px;
+	border: 1px solid color-mix(in srgb, var(--background-modifier-border) 72%, transparent);
+	border-radius: 6px;
+	background: color-mix(in srgb, var(--background-primary) 86%, var(--background-secondary));
+	color: var(--text-normal);
+}
+
+.canvas-bases-canvas-file__attachment-preview.is-pdf .canvas-bases-canvas-file__attachment-tile {
+	position: absolute;
+	right: 8px;
+	bottom: 8px;
+	left: 8px;
+	max-width: none;
+	background: color-mix(in srgb, var(--background-primary) 92%, transparent);
+	box-shadow: 0 1px 4px rgb(0 0 0 / 0.16);
+}
+
+.canvas-bases-canvas-file__attachment-icon {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	color: var(--text-muted);
+}
+
+.canvas-bases-canvas-file__attachment-detail {
+	min-width: 0;
+}
+
+.canvas-bases-canvas-file__attachment-type {
+	overflow: hidden;
+	color: var(--text-muted);
+	font-size: 0.625rem;
+	font-weight: 700;
+	line-height: 1.25;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.canvas-bases-canvas-file__attachment-name {
+	overflow: hidden;
+	color: var(--text-normal);
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.35;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .canvas-bases-canvas-file__editor {
 	box-sizing: border-box;
 	flex: 1 1 auto;

@@ -69,7 +69,9 @@ export default class CanvasBasesPlugin extends Plugin {
 	async onload(): Promise<void> {
 		await this.loadSettings();
 		this.i18n = createI18nService({ initialLocale: this.settings.locale });
-		this.taskNotes = new TaskNotesRuntime(this.app, this.translate);
+		this.taskNotes = new TaskNotesRuntime(this.app, this.translate, this.manifest.version);
+		this.taskNotes.registerRuntimeProvider();
+		this.registerInterval(window.setInterval(() => this.taskNotes.registerRuntimeProvider(), 5000));
 		this.addSettingTab(new CanvasBasesSettingTab(this));
 		this.registerCanvasBasesBasesView();
 		this.registerCommands();
@@ -77,6 +79,7 @@ export default class CanvasBasesPlugin extends Plugin {
 	}
 
 	onunload(): void {
+		void this.taskNotes.dispose();
 		this.unregisterCanvasBasesBasesView();
 		this.views.clear();
 		this.activeView = null;

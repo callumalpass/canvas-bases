@@ -1,4 +1,14 @@
 import { TFile, type App, type EventRef, type Menu } from "obsidian";
+import { RuntimeHostError } from "@callumalpass/mdbase-runtime";
+import type {
+	MdbaseRuntimeContract,
+	MdbaseRuntimeDisposable,
+	MdbaseRuntimeEventEnvelope,
+	MdbaseRuntimeEventHandler,
+	MdbaseRuntimeHostApi,
+	MdbaseRuntimeProvider,
+	MdbaseRuntimeProviderRegistration,
+} from "@callumalpass/mdbase-runtime";
 import type {
 	CanvasBasesRelationship,
 	CanvasBasesTaskNotesRelationshipMode,
@@ -50,6 +60,13 @@ type TaskNotesPluginInstance = {
 	api?: TaskNotesRuntimeApiV1;
 	cacheManager?: {
 		isTaskFile?(frontmatter: Record<string, unknown>): boolean;
+	};
+};
+
+type MdbaseObsidianPluginInstance = {
+	api?: {
+		apiVersion: number;
+		runtime?: MdbaseRuntimeHostApi;
 	};
 };
 
@@ -162,6 +179,7 @@ interface TaskNotesRuntimeApiV1 {
 	events?: {
 		on(event: string, handler: () => void): EventRef;
 	};
+	runtime?: MdbaseRuntimeHostApi;
 }
 
 interface TaskNotesMutationContext {
@@ -226,6 +244,30 @@ export type CanvasBasesTaskNotesZoneActionResult =
 	| "unavailable"
 	| "updated";
 
+export interface CanvasDropRuntimePayload {
+	board: {
+		view: string;
+	};
+	record: {
+		path: string;
+		node_id: string;
+	};
+	position: {
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+	};
+	target?: {
+		id: string;
+		label: string;
+		action: string;
+		property: string;
+		value: string;
+	};
+	changed: boolean;
+}
+
 interface TaskNotesPropertyUpdateOptions {
 	updateMode?: CanvasBasesZoneUpdateMode;
 	valueType?: CanvasBasesZoneValueType;
@@ -272,10 +314,63 @@ const TASK_NOTES_ZONE_ACTIONS = [
 export class TaskNotesRuntime {
 	private readonly app: App;
 	private readonly t: TranslateFn;
+	private readonly providerVersion: string;
+	private providerRegistration: Promise<void> | null = null;
+	private providerHandle: MdbaseRuntimeProviderRegistration | null = null;
+	private providerHost: MdbaseRuntimeHostApi | null = null;
+	private readonly canvasEventHandlers = new Set<MdbaseRuntimeEventHandler>();
 
-	constructor(app: App, t: TranslateFn = defaultTranslate) {
+	constructor(app: App, t: TranslateFn = defaultTranslate, providerVersion = "0.0.0") {
 		this.app = app;
 		this.t = t;
+		this.providerVersion = providerVersion;
+	}
+
+	registerRuntimeProvider(): void {
+		const runtime = this.getRuntimeHost();
+		if (!runtime || this.providerRegistration) return;
+		if (this.providerHandle && this.providerHost === runtime) return;
+		this.providerRegistration = (async () => {
+			if (this.providerHandle) await this.providerHandle.unregister();
+			this.providerHandle = null;
+			this.providerHost = runtime;
+			this.providerHandle = await runtime.registerProvider(this.createRuntimeProvider());
+		})()
+			.catch(() => {
+				this.providerHost = null;
+			})
+			.finally(() => {
+				this.providerRegistration = null;
+			});
+	}
+
+	async dispose(): Promise<void> {
+		await this.providerRegistration;
+		const handle = this.providerHandle;
+		this.providerHandle = null;
+		this.providerHost = null;
+		await handle?.unregister();
+		this.canvasEventHandlers.clear();
+	}
+
+	async emitCanvasDrop(payload: CanvasDropRuntimePayload): Promise<boolean> {
+		this.registerRuntimeProvider();
+		if (!this.providerHandle || this.canvasEventHandlers.size === 0) return false;
+		const id = runtimeEventId();
+		const event: MdbaseRuntimeEventEnvelope<CanvasDropRuntimePayload & Record<string, unknown>> = {
+			type: "canvas.drop",
+			contract_version: 1,
+			id: `evt-${id}`,
+			occurred_at: new Date().toISOString(),
+			source: {
+				runtime: "obsidian",
+				provider: "canvas-bases",
+			},
+			payload: { ...payload },
+			trace: { correlation_id: `corr-${id}` },
+		};
+		for (const handler of this.canvasEventHandlers) await handler(event);
+		return true;
 	}
 
 	isAvailable(): boolean {
@@ -313,12 +408,32 @@ export class TaskNotesRuntime {
 	}
 
 	getAvailableZoneActions(): TaskNotesZoneAction[] {
+		const available = new Set<TaskNotesZoneAction>();
+		const runtime = this.getRuntimeHost();
+		if (runtime) {
+			try {
+				const actions = new Set(
+					runtime.contracts()
+						.filter((contract) => contract.type === "action")
+						.map((contract) => contract.id)
+				);
+				for (const action of TASK_NOTES_ZONE_ACTIONS) {
+					if (actions.has(action) && runtime.preflight({ actions: [action] }).valid) {
+						available.add(action);
+					}
+				}
+			} catch {
+				// The compatibility API below remains available while a host refreshes.
+			}
+		}
 		const api = this.getApi();
-		if (!api?.tasks?.get || !api.hasCapability("tasks.read")) return [];
+		if (api?.tasks?.get && api.hasCapability("tasks.read")) {
+			for (const action of TASK_NOTES_ZONE_ACTIONS) {
+				if (this.isZoneActionAvailable(api, action)) available.add(action);
+			}
+		}
 
-		return TASK_NOTES_ZONE_ACTIONS.filter((action) =>
-			this.isZoneActionAvailable(api, action)
-		);
+		return TASK_NOTES_ZONE_ACTIONS.filter((action) => available.has(action));
 	}
 
 	getPropertyKind(propertyId: string): CanvasBasesTaskPropertyKind | null {
@@ -404,6 +519,10 @@ export class TaskNotesRuntime {
 		path: string,
 		action: CanvasBasesZoneAction
 	): Promise<CanvasBasesTaskNotesZoneActionResult> {
+		if (action === "set-property") return "unavailable";
+		const runtimeResult = await this.dispatchRuntimeZoneAction(path, action);
+		if (runtimeResult !== "fallback") return runtimeResult;
+
 		const api = this.getApi();
 		if (!api?.tasks?.get || !api.hasCapability("tasks.read")) return "unavailable";
 
@@ -416,8 +535,6 @@ export class TaskNotesRuntime {
 		};
 
 		switch (action) {
-			case "set-property":
-				return "unavailable";
 			case "task.complete":
 				if (!api.tasks.complete || !api.hasCapability("tasks.write")) return "unavailable";
 				await api.tasks.complete(path, undefined, context);
@@ -465,6 +582,39 @@ export class TaskNotesRuntime {
 				}
 				await api.recurring.toggleSkippedInstance(path, undefined, context);
 				return "updated";
+		}
+	}
+
+	private async dispatchRuntimeZoneAction(
+		path: string,
+		action: TaskNotesZoneAction
+	): Promise<CanvasBasesTaskNotesZoneActionResult | "fallback"> {
+		const runtime = this.getRuntimeHost();
+		if (!runtime) return "fallback";
+		const preflight = runtime.preflight({ actions: [action] });
+		if (!preflight.valid) {
+			return preflight.diagnostics.every((diagnostic) => diagnostic.code === "action_unavailable")
+				? "fallback"
+				: "unavailable";
+		}
+
+		const id = runtimeEventId();
+		try {
+			await runtime.dispatch(action, { path }, {
+				actor: { id: "canvas-bases", kind: "plugin" },
+				origin: { provider: "canvas-bases", path },
+				run_id: `run-${id}`,
+				correlation_id: `corr-${id}`,
+				executor: "canvas-bases",
+				resource: { path },
+			});
+			return "updated";
+		} catch (error) {
+			const code = getRuntimeErrorCode(error);
+			if (code === "action_unavailable" || code === "contract_missing") return "fallback";
+			if (code === "task_not_found" || code === "not_task") return "not-task";
+			if (error instanceof RuntimeHostError || code) return "unavailable";
+			throw error;
 		}
 	}
 
@@ -657,11 +807,88 @@ export class TaskNotesRuntime {
 		];
 	}
 
+	private createRuntimeProvider(): MdbaseRuntimeProvider {
+		const contracts: MdbaseRuntimeContract[] = [
+			{
+				type: "event",
+				id: "canvas.drop",
+				version: 1,
+				provider: "canvas-bases",
+				schemas: {
+					dialect: "json-schema-2020-12",
+					payload: {
+						type: "object",
+						required: ["board", "record", "position", "changed"],
+						additionalProperties: false,
+						properties: {
+							board: {
+								type: "object",
+								required: ["view"],
+								properties: { view: { type: "string" } },
+							},
+							record: {
+								type: "object",
+								required: ["path", "node_id"],
+								properties: {
+									path: { type: "string" },
+									node_id: { type: "string" },
+								},
+							},
+							position: {
+								type: "object",
+								required: ["x", "y", "width", "height"],
+								properties: {
+									x: { type: "number" },
+									y: { type: "number" },
+									width: { type: "number" },
+									height: { type: "number" },
+								},
+							},
+							target: { type: "object" },
+							changed: { type: "boolean" },
+						},
+					},
+				},
+			},
+		];
+		return {
+			descriptor: () => ({
+				type: "provider",
+				id: "canvas-bases",
+				version: 1,
+				name: "Canvas Bases",
+				provider_version: this.providerVersion,
+				contracts: { events: ["canvas.drop"] },
+			}),
+			contracts: () => contracts,
+			readiness: () => ({ valid: true, status: "ready", diagnostics: [] }),
+			subscribe: (eventId: string, handler: MdbaseRuntimeEventHandler): MdbaseRuntimeDisposable => {
+				if (eventId !== "canvas.drop") throw new Error(`Unsupported Canvas Bases runtime event: ${eventId}`);
+				this.canvasEventHandlers.add(handler);
+				return {
+					dispose: () => {
+						this.canvasEventHandlers.delete(handler);
+					},
+				};
+			},
+			dispatch: (actionId: string) => {
+				throw new Error(`Canvas Bases does not dispatch runtime action ${actionId}.`);
+			},
+			dispose: () => this.canvasEventHandlers.clear(),
+		};
+	}
+
 	private getApi(): TaskNotesRuntimeApiV1 | null {
 		const tasknotes = this.app.plugins.getPlugin("tasknotes") as TaskNotesPluginInstance | null;
 		const api = tasknotes?.api;
 
 		return api?.apiVersion === 1 && typeof api.hasCapability === "function" ? api : null;
+	}
+
+	private getRuntimeHost(): MdbaseRuntimeHostApi | null {
+		const mdbase = this.app.plugins.getPlugin("mdbase-obsidian") as MdbaseObsidianPluginInstance | null;
+		if (mdbase?.api?.apiVersion === 1 && mdbase.api.runtime) return mdbase.api.runtime;
+		return null;
 	}
 
 	private populateLegacyTaskFileMenu(menu: Menu, path: string): boolean {
@@ -748,6 +975,10 @@ export class TaskNotesRuntime {
 
 		return taskReferencePathCandidates(linkPath).some((candidate) => candidate === targetPath);
 	}
+}
+
+function runtimeEventId(): string {
+	return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 interface TaskNotesCatalog {
@@ -985,6 +1216,10 @@ function getMenuItemCount(menu: Menu): number | null {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function getRuntimeErrorCode(error: unknown): string | null {
+	return isRecord(error) && typeof error.code === "string" ? error.code : null;
 }
 
 function defaultTranslate(key: string): string {
