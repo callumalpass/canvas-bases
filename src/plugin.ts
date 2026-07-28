@@ -68,15 +68,17 @@ export default class CanvasBasesPlugin extends Plugin {
 	private readonly translatePlural: TranslatePluralFn = (key, count, params) =>
 		this.tp(key, count, params);
 
+	get interop(): CanvasBasesInteropProvider {
+		return this.interopProvider;
+	}
+
 	async onload(): Promise<void> {
 		await this.loadSettings();
 		this.i18n = createI18nService({ initialLocale: this.settings.locale });
-		this.taskNotes = new TaskNotesRuntime(this.app, this.translate, this.manifest.version);
+		this.taskNotes = new TaskNotesRuntime(this.app, this.translate);
 		this.interopProvider = new CanvasBasesInteropProvider(this);
-		this.taskNotes.registerRuntimeProvider();
 		this.interopProvider.connect();
 		this.registerInterval(window.setInterval(() => {
-			this.taskNotes.registerRuntimeProvider();
 			this.interopProvider.connect();
 		}, 5000));
 		this.addSettingTab(new CanvasBasesSettingTab(this));
@@ -86,7 +88,6 @@ export default class CanvasBasesPlugin extends Plugin {
 	}
 
 	onunload(): void {
-		void this.taskNotes.dispose();
 		void this.interopProvider.dispose();
 		this.unregisterCanvasBasesBasesView();
 		this.views.clear();

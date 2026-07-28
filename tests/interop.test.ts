@@ -7,6 +7,7 @@ import {
 import { parseJsonCanvas } from "../src/canvas/jsonCanvas";
 import {
 	CANVAS_CARD_CREATE_CONTRACT,
+	CANVAS_DROP_EVENT_CONTRACT,
 	CanvasBasesInteropProvider,
 } from "../src/interop";
 
@@ -44,6 +45,7 @@ describe("Canvas Bases interoperability provider", () => {
 
 		await vi.waitFor(() => {
 			expect(bridge.describe().action_providers).toHaveLength(1);
+			expect(bridge.describe().event_sources).toHaveLength(1);
 		});
 		const outcome = await caller.invokeAction({
 			request_id: "req-create-card",
@@ -79,6 +81,38 @@ describe("Canvas Bases interoperability provider", () => {
 			}),
 		]);
 
+		const received: unknown[] = [];
+		const subscription = await caller.subscribeEvents(
+			{ contract: { id: CANVAS_DROP_EVENT_CONTRACT.id, version: "^1.0.0" } },
+			(event) => received.push(event),
+		);
+		await expect(provider.publishCanvasDrop({
+			board: { view: "Planning" },
+			record: { path: "Tasks/Ship contracts.md", node_id: "file-1" },
+			position: { x: 10, y: 20, width: 240, height: 160 },
+			target: {
+				id: "done",
+				label: "Done",
+				action: "set-property",
+				property: "status",
+				value: "done",
+			},
+			changed: true,
+		})).resolves.toBe(true);
+		expect(received).toEqual([
+			expect.objectContaining({
+				specversion: "1.0",
+				type: CANVAS_DROP_EVENT_CONTRACT.id,
+				mdbasecontractversion: CANVAS_DROP_EVENT_CONTRACT.version,
+				mdbaseapplication: "canvas-bases",
+				subject: "Tasks/Ship%20contracts.md",
+				data: expect.objectContaining({
+					record: { path: "Tasks/Ship contracts.md", node_id: "file-1" },
+				}),
+			}),
+		]);
+
+		await subscription.dispose();
 		await provider.dispose();
 		await caller.dispose();
 		await bridge.dispose();

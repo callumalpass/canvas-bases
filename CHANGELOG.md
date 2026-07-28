@@ -2,11 +2,10 @@
 
 ## 0.1.2
 
-- Registered Canvas Bases with the selected `mdbase-obsidian` runtime and emit
-  versioned `canvas.drop` events after notes are dropped into active groups.
-  Assignment-zone actions now dispatch through policy-enforced runtime action
-  contracts first, with the direct TaskNotes API retained only as a compatibility
-  fallback when the action contract is unavailable.
+- Publish `canvas.drop@1.0.0` as a JSON-Schema-defined CloudEvent after notes
+  are dropped into active groups. Canvas Bases now uses the interoperability
+  bridge only for cross-application events and actions; its own TaskNotes zone
+  behavior continues to use the TaskNotes API directly.
 - Render image and PDF rows as read-only attachment cards instead of editable
   markdown bodies, preventing binary files from being overwritten when a Canvas
   Bases card is saved. Thanks to @yumizyg for reporting this in issue #5.
