@@ -44,9 +44,10 @@ Rendered relationship edge on the board:
 - Obsidian Canvas when opening or editing generated `.canvas` files.
 - TaskNotes is optional. TaskNotes badges, task menus, task relationship edges,
   and task zone actions are skipped when TaskNotes is unavailable or does not
-  expose the required runtime capability.
+  expose the required API capability.
 - mdbase is optional. When its local interoperability grant is enabled, Canvas
-  Bases provides the `canvas.card.create` action contract to other plugins.
+  Bases provides the `canvas.card.create` action contract and publishes the
+  `canvas.drop` event contract to other plugins.
 
 ## Using The Canvas Bases Layout
 
@@ -147,7 +148,7 @@ the live board and generated Canvas.
 If TaskNotes is disabled, absent, or missing a capability, Canvas Bases keeps the
 Bases and Canvas workflows working without TaskNotes-only behavior.
 
-## mdbase Action Provider
+## mdbase Interoperability
 
 With the mdbase plugin installed and **Allow local application
 interoperability** enabled, Canvas Bases registers one action provider:
@@ -162,6 +163,13 @@ contract using JSON Schema. Callers can require the exact provider application
 `canvas-bases`; provider ambiguity and incompatible versions fail explicitly.
 
 The provider is optional and does not change normal Canvas Bases behavior.
+
+Canvas Bases also declares `canvas.drop@1.0.0` as an event source. Dropping a
+file card into an active group publishes a CloudEvent containing the board,
+record, position, target group, and whether the group assignment changed.
+Events are multicast, so every granted compatible subscriber receives its own
+copy. Contract compatibility does not grant access; the mdbase interoperability
+grant remains the authorization boundary.
 
 ## Commands
 

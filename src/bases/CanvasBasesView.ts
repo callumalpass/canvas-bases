@@ -5262,7 +5262,7 @@ export class CanvasBasesView extends BasesView {
 				}
 				const changed = await this.updateActiveGroupValue(node.path, targetGroup);
 				dataChanged ||= changed;
-				await this.plugin.taskNotes.emitCanvasDrop({
+				await this.plugin.interop.publishCanvasDrop({
 					board: {
 						view: this.getSnapshot()?.viewName ?? this.canvasQueryController.viewName ?? "Canvas Bases",
 					},

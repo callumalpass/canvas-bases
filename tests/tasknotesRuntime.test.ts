@@ -1,6 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import { InMemoryRuntimeHost } from "@callumalpass/mdbase-runtime";
-import type { MdbaseRuntimeEventEnvelope, MdbaseRuntimeProvider } from "@callumalpass/mdbase-runtime";
 import type { App, TFile } from "obsidian";
 import { TaskNotesRuntime } from "../src/tasknotes/runtime";
 import type { CanvasBasesViewSnapshot } from "../src/types";
@@ -650,164 +648,6 @@ describe("TaskNotesRuntime", () => {
 	});
 });
 
-describe("Canvas Bases mdbase runtime provider", () => {
-	it("degrades when the selected mdbase host is unavailable", async () => {
-		const runtime = new TaskNotesRuntime(makeTaskNotesApp({}), undefined, "0.1.2");
-		runtime.registerRuntimeProvider();
-
-		await expect(runtime.emitCanvasDrop(dropPayload())).resolves.toBe(false);
-	});
-
-	it("prefers the mdbase host and emits canvas.drop without TaskNotes", async () => {
-		let provider: MdbaseRuntimeProvider | null = null;
-		const received: MdbaseRuntimeEventEnvelope[] = [];
-		const unregister = vi.fn(async () => undefined);
-		const runtimeHost = {
-			registerProvider: vi.fn(async (candidate: MdbaseRuntimeProvider) => {
-				provider = candidate;
-				candidate.subscribe("canvas.drop", (event) => received.push(event));
-				return { providerId: "canvas-bases", unregister };
-			}),
-		};
-		const runtime = new TaskNotesRuntime(makeTaskNotesApp({ mdbaseRuntimeHost: runtimeHost }), undefined, "0.1.2");
-		runtime.registerRuntimeProvider();
-		await Promise.resolve();
-
-		expect((await provider?.descriptor())?.provider_version).toBe("0.1.2");
-		expect((await provider?.contracts())?.map((contract) => `${contract.type}:${contract.id}`)).toEqual([
-			"event:canvas.drop",
-		]);
-		await expect(runtime.emitCanvasDrop(dropPayload())).resolves.toBe(true);
-		expect(received).toHaveLength(1);
-		expect(received[0]).toMatchObject({
-			type: "canvas.drop",
-			contract_version: 1,
-			source: { runtime: "obsidian", provider: "canvas-bases" },
-			payload: { record: { path: "Tasks/Alpha.md", node_id: "file-alpha" } },
-		});
-
-		await runtime.dispose();
-		expect(unregister).toHaveBeenCalledTimes(1);
-	});
-
-	it("dispatches zone actions through the mdbase host without TaskNotes", async () => {
-		const dispatch = vi.fn(async () => ({ path: "Tasks/Alpha.md" }));
-		const runtimeHost = {
-			contracts: () => [{ type: "action", id: "task.complete" }],
-			preflight: vi.fn(() => ({ valid: true, diagnostics: [] })),
-			dispatch,
-		};
-		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
-			capabilities: [],
-			mdbaseRuntimeHost: runtimeHost,
-		}), undefined, "0.1.2");
-
-		expect(runtime.getAvailableZoneActions()).toContain("task.complete");
-		await expect(runtime.runZoneAction("Tasks/Alpha.md", "task.complete")).resolves.toBe("updated");
-		expect(dispatch).toHaveBeenCalledWith(
-			"task.complete",
-			{ path: "Tasks/Alpha.md" },
-			expect.objectContaining({
-				actor: { id: "canvas-bases", kind: "plugin" },
-				origin: { provider: "canvas-bases", path: "Tasks/Alpha.md" },
-				executor: "canvas-bases",
-			})
-		);
-	});
-
-	it("does not bypass a runtime policy denial through the TaskNotes compatibility API", async () => {
-		const writes = createTaskWrites();
-		const runtimeHost = {
-			contracts: () => [{ type: "action", id: "task.complete" }],
-			preflight: vi.fn(() => ({ valid: true, diagnostics: [] })),
-			dispatch: vi.fn(async () => {
-				throw Object.assign(new Error("denied"), { code: "capability_denied" });
-			}),
-		};
-		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
-			writes,
-			mdbaseRuntimeHost: runtimeHost,
-		}), undefined, "0.1.2");
-
-		await expect(runtime.runZoneAction("Tasks/Alpha.md", "task.complete")).resolves.toBe("unavailable");
-		expect(writes.zoneActions).toEqual([]);
-	});
-
-	it("runs a zone action through real host contract and policy validation", async () => {
-		const dispatch = vi.fn(async () => ({ path: "Tasks/Alpha.md" }));
-		const host = new InMemoryRuntimeHost({
-			policy: {
-				id: "test-policy",
-				selected: true,
-				capabilities: { "task.patch": "allow" },
-			},
-		});
-		await host.registerProvider({
-			descriptor: () => ({
-				type: "provider",
-				id: "task-provider",
-				version: 1,
-				name: "Task provider",
-				provider_version: "0.1.0",
-				contracts: { actions: ["task.complete"], capabilities: ["task.patch"] },
-			}),
-			contracts: () => [
-				{
-					type: "capability",
-					id: "task.patch",
-					version: 1,
-					name: "Task patch",
-					risk: "medium",
-				},
-				{
-					type: "action",
-					id: "task.complete",
-					version: 1,
-					name: "Complete task",
-					provider: "task-provider",
-					schemas: {
-						dialect: "json-schema-2020-12",
-						input: {
-							type: "object",
-							required: ["path"],
-							additionalProperties: false,
-							properties: { path: { type: "string" } },
-						},
-						output: { type: "object" },
-					},
-					effects: ["task.patch"],
-				},
-			],
-			readiness: () => ({ valid: true, status: "ready", diagnostics: [] }),
-			subscribe: () => ({ dispose: () => undefined }),
-			dispatch,
-			dispose: () => undefined,
-		});
-		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
-			capabilities: [],
-			mdbaseRuntimeHost: host,
-		}), undefined, "0.1.2");
-
-		await expect(runtime.runZoneAction("Tasks/Alpha.md", "task.complete")).resolves.toBe("updated");
-		expect(dispatch).toHaveBeenCalledWith(
-			"task.complete",
-			{ path: "Tasks/Alpha.md" },
-			expect.objectContaining({ executor: "canvas-bases" })
-		);
-		await host.dispose();
-	});
-});
-
-function dropPayload() {
-	return {
-		board: { view: "Planning" },
-		record: { path: "Tasks/Alpha.md", node_id: "file-alpha" },
-		position: { x: 10, y: 20, width: 240, height: 160 },
-		target: { id: "done", label: "Done", action: "set-property", property: "status", value: "done" },
-		changed: true,
-	};
-}
-
 function snapshot(): CanvasBasesViewSnapshot {
 	return {
 		viewName: "Planning",
@@ -854,8 +694,6 @@ function makeTaskNotesApp({
 	relationshipCalls,
 	taskMenu,
 	writes = createTaskWrites(),
-	runtimeHost,
-	mdbaseRuntimeHost,
 }: {
 	capabilities?: string[];
 	tasks?: Record<string, ReturnType<typeof task>>;
@@ -874,8 +712,6 @@ function makeTaskNotesApp({
 	relationshipCalls?: string[];
 	taskMenu?: TaskMenuLog;
 	writes?: TaskWriteLog;
-	runtimeHost?: unknown;
-	mdbaseRuntimeHost?: unknown;
 }): App {
 	const capabilities = new Set(capabilityList ?? [
 		"tasks.read",
@@ -907,9 +743,7 @@ function makeTaskNotesApp({
 		},
 		plugins: {
 			getPlugin: (id: string) =>
-				id === "mdbase-obsidian" && mdbaseRuntimeHost
-					? { api: { apiVersion: 1, runtime: mdbaseRuntimeHost } }
-					: id === "tasknotes"
+				id === "tasknotes"
 					? {
 							cacheManager: {
 								isTaskFile: (taskFrontmatter: Record<string, unknown>) =>
@@ -919,7 +753,6 @@ function makeTaskNotesApp({
 							api: {
 								apiVersion: 1,
 								hasCapability: (capability: string) => capabilities.has(capability),
-								...(runtimeHost ? { runtime: runtimeHost } : {}),
 									tasks: {
 										get: async (path: string) => tasks[path] ?? null,
 									update: async (path: string, patch: unknown, context: unknown) => {
