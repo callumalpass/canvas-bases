@@ -45,6 +45,8 @@ Rendered relationship edge on the board:
 - TaskNotes is optional. TaskNotes badges, task menus, task relationship edges,
   and task zone actions are skipped when TaskNotes is unavailable or does not
   expose the required runtime capability.
+- mdbase is optional. When its local interoperability grant is enabled, Canvas
+  Bases provides the `canvas.card.create` action contract to other plugins.
 
 ## Using The Canvas Bases Layout
 
@@ -144,6 +146,22 @@ the live board and generated Canvas.
 
 If TaskNotes is disabled, absent, or missing a capability, Canvas Bases keeps the
 Bases and Canvas workflows working without TaskNotes-only behavior.
+
+## mdbase Action Provider
+
+With the mdbase plugin installed and **Allow local application
+interoperability** enabled, Canvas Bases registers one action provider:
+
+```text
+canvas.card.create@1.0.0
+```
+
+The action appends a text or file card to a selected `.canvas` file and returns
+the created card ID. Its input and output are defined by an mdbase action
+contract using JSON Schema. Callers can require the exact provider application
+`canvas-bases`; provider ambiguity and incompatible versions fail explicitly.
+
+The provider is optional and does not change normal Canvas Bases behavior.
 
 ## Commands
 
