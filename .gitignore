@@ -4,4 +4,5 @@ main.js
 coverage
 .copy-files.local
 test-results
+.testbed
 media/canvas-bases-release-video/

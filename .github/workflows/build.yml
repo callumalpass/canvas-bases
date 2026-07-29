@@ -14,6 +14,9 @@ permissions:
   id-token: write
   attestations: write
 
+env:
+  MDBASE_SPEC_REVISION: 9155a3d7b390da0c5b7d1928b95f89ad23b8fb2c
+
 jobs:
   build:
     name: Build Obsidian Plugin
@@ -46,6 +49,26 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Check out pinned mdbase testbed
+        uses: actions/checkout@v5
+        with:
+          repository: mdbase-dev/mdbase-spec
+          ref: ${{ env.MDBASE_SPEC_REVISION }}
+          path: mdbase-spec
+          persist-credentials: false
+
+      - name: Install portable testbed runner
+        working-directory: mdbase-spec/packages/testbed
+        run: npm ci
+
+      - name: Run provider and event-source black-box scenarios
+        run: |
+          npm run build:testbed-adapter
+          node mdbase-spec/packages/testbed/src/cli.mjs run \
+            --adapter scripts/testbed-adapter-bootstrap.cjs \
+            --scenario interop.application-provider-lifecycle \
+            --scenario interop.application-event-multicast
 
       - name: Validate release metadata
         run: |

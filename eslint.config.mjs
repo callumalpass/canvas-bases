@@ -231,6 +231,7 @@ export default [
 	{
 		ignores: [
 			"node_modules/**",
+			".testbed/**",
 			"main.js",
 			"dist/**",
 			"coverage/**",

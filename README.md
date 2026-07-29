@@ -171,6 +171,11 @@ Events are multicast, so every granted compatible subscriber receives its own
 copy. Contract compatibility does not grant access; the mdbase interoperability
 grant remains the authorization boundary.
 
+Maintainers can run `npm run test:testbed` to exercise the real Canvas action
+provider and event source through the spec-owned provider-lifecycle and
+two-consumer multicast scenarios. The testbed uses the normal plugin bridge
+boundary and validates deterministic transcripts.
+
 ## Commands
 
 ```text
