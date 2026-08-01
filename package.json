@@ -54,7 +54,7 @@
 		"vitest": "^4.0.13"
 	},
 	"dependencies": {
-		"@callumalpass/mdbase-interop": "file:vendor/callumalpass-mdbase-interop-0.1.0-rc.2.tgz",
+		"@callumalpass/mdbase-interop": "0.1.0-rc.2",
 		"@codemirror/state": "^6.5.0",
 		"@codemirror/view": "^6.38.6"
 	}
