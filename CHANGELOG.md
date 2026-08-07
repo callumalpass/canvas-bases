@@ -1,14 +1,31 @@
 # Changelog
 
-## 0.1.2
+## Unreleased
 
-- Publish `canvas.drop@1.0.0` as a JSON-Schema-defined CloudEvent after notes
+## 0.1.3 - 2026-08-07
+
+- (#3, #6, #8) Kept the Canvas Bases toolbar in the view layout instead of opening
+  it over the board. Narrow embedded views now use a compact, horizontally
+  scrollable icon row so controls do not cover note cards, including when
+  translated labels are longer. Thanks to @randomness42, @bepolymathe, and
+  @UniqueClone for reporting this.
+- Added the `canvas.card.create@1.0.0` action provider for granted compatible
+  applications to add text or file cards to a Canvas.
+- Published `canvas.drop@1.0.0` as a JSON-Schema-defined CloudEvent after notes
   are dropped into active groups. Canvas Bases now uses the interoperability
   bridge only for cross-application events and actions; its own TaskNotes zone
   behavior continues to use the TaskNotes API directly.
-- Render image and PDF rows as read-only attachment cards instead of editable
-  markdown bodies, preventing binary files from being overwritten when a Canvas
-  Bases card is saved. Thanks to @yumizyg for reporting this in issue #5.
+- (#5) Rendered image and PDF rows as read-only attachment cards instead of
+  editable Markdown bodies, preventing binary files from being overwritten
+  when a Canvas Bases card is saved. Thanks to @yumizyg and @microsloppy for
+  reporting this.
+- Updated the bundled interoperability dependency to include its current URI
+  validation security fixes.
+- Added black-box interoperability checks for the Canvas action provider and
+  two-subscriber event delivery.
+
+## 0.1.2 - 2026-06-09
+
 - Hardened release-review linting so unsafe TypeScript boundary access is caught
   before publication.
 - Refreshed the README demo media and recording copy to use the Canvas Bases

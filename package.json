@@ -38,7 +38,7 @@
 		"@types/node": "^24.3.0",
 		"@typescript-eslint/eslint-plugin": "^8.59.3",
 		"@typescript-eslint/parser": "^8.59.3",
-		"esbuild": "^0.25.9",
+		"esbuild": "^0.28.1",
 		"eslint": "^9.39.4",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-obsidianmd": "^0.3.0",
@@ -55,7 +55,7 @@
 	},
 	"dependencies": {
 		"@callumalpass/mdbase-interop": "0.1.0-rc.2",
-		"@codemirror/state": "^6.5.0",
-		"@codemirror/view": "^6.38.6"
+		"@codemirror/state": "6.5.0",
+		"@codemirror/view": "6.38.6"
 	}
 }

@@ -14,6 +14,7 @@ for (const key of [
 	"HTMLElement",
 	"SVGElement",
 	"Event",
+	"UIEvent",
 	"CustomEvent",
 	"MutationObserver",
 	"DOMParser",

@@ -28,32 +28,6 @@
 	border-radius: 8px;
 	background: var(--background-primary);
 	box-shadow: var(--shadow-s);
-	transition:
-		background-color 160ms ease,
-		border-color 160ms ease,
-		box-shadow 160ms ease;
-}
-
-.canvas-bases-view__toolbar::after {
-	position: absolute;
-	top: 9px;
-	left: 50%;
-	width: 42px;
-	height: 3px;
-	border-radius: 999px;
-	background: var(--background-modifier-border-hover);
-	content: "";
-	opacity: 0;
-	pointer-events: none;
-	transform: translateX(-50%);
-	transition: opacity 160ms ease;
-}
-
-.canvas-bases-view__summary,
-.canvas-bases-view__actions {
-	transition:
-		opacity 160ms ease,
-		transform 160ms ease;
 }
 
 .canvas-bases-view__summary {
@@ -125,42 +99,6 @@
 	);
 	background-position: 12px 12px;
 	background-size: 24px 24px;
-}
-
-@media (hover: hover) {
-	.canvas-bases-view__toolbar {
-		position: absolute;
-		top: 0;
-		right: 0;
-		left: 0;
-		flex: none;
-	}
-
-	.canvas-bases-view__toolbar:not(:hover):not(:focus-within) {
-		border-color: transparent;
-		background-color: transparent;
-		box-shadow: none;
-	}
-
-	.canvas-bases-view__toolbar:not(:hover):not(:focus-within)::after {
-		opacity: 0.85;
-	}
-
-	.canvas-bases-view__toolbar:not(:hover):not(:focus-within) .canvas-bases-view__summary,
-	.canvas-bases-view__toolbar:not(:hover):not(:focus-within) .canvas-bases-view__actions {
-		opacity: 0;
-		pointer-events: none;
-		transform: translateY(-4px);
-	}
-
-	.canvas-bases-canvas-viewport {
-		margin-top: 0;
-		padding-top: 74px;
-	}
-
-	.canvas-bases-view__empty {
-		margin-top: 74px;
-	}
 }
 
 .canvas-bases-canvas-viewport.is-panning {
@@ -1505,27 +1443,14 @@
 		padding: 6px;
 	}
 
-	.canvas-bases-view__toolbar:not(:hover):not(:focus-within) {
-		border-color: var(--background-modifier-border);
-		background-color: var(--background-primary);
-		box-shadow: var(--shadow-s);
-	}
-
-	.canvas-bases-view__toolbar:not(:hover):not(:focus-within)::after {
-		opacity: 0;
-	}
-
-	.canvas-bases-view__toolbar:not(:hover):not(:focus-within) .canvas-bases-view__summary,
-	.canvas-bases-view__toolbar:not(:hover):not(:focus-within) .canvas-bases-view__actions {
-		opacity: 1;
-		pointer-events: auto;
-		transform: none;
-	}
-
 	.canvas-bases-view__actions {
-		flex: 0 0 auto;
+		flex: 0 1 auto;
 		flex-wrap: nowrap;
 		gap: 4px;
+		min-width: 0;
+		max-width: 100%;
+		overflow-x: auto;
+		scrollbar-width: thin;
 	}
 
 	.canvas-bases-view__button {
@@ -1553,10 +1478,11 @@
 	}
 
 	.canvas-bases-view__summary {
-		flex: 1 1 auto;
+		display: none;
 	}
 
 	.canvas-bases-view__actions {
+		flex: 1 1 auto;
 		gap: 3px;
 	}
 
@@ -1579,38 +1505,5 @@
 		min-width: 26px;
 		height: 26px;
 		padding: 0;
-	}
-}
-
-@media (hover: hover) {
-	@container (max-width: 760px) {
-		.canvas-bases-view__toolbar {
-			position: absolute;
-			top: 0;
-			right: 0;
-			left: 0;
-			flex: none;
-		}
-
-		.canvas-bases-view__toolbar:not(:hover):not(:focus-within) {
-			border-color: transparent;
-			background-color: transparent;
-			box-shadow: none;
-		}
-
-		.canvas-bases-view__toolbar:not(:hover):not(:focus-within)::after {
-			opacity: 0.85;
-		}
-
-		.canvas-bases-view__toolbar:not(:hover):not(:focus-within) .canvas-bases-view__summary,
-		.canvas-bases-view__toolbar:not(:hover):not(:focus-within) .canvas-bases-view__actions {
-			opacity: 0;
-			pointer-events: none;
-			transform: translateY(-4px);
-		}
-
-		.canvas-bases-canvas-viewport {
-			margin-top: 0;
-		}
 	}
 }
