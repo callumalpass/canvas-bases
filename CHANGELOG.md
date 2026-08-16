@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 0.1.4 - 2026-08-16
+
+- (#17) Restored single-finger board panning on touch devices without triggering
+  the marquee-selection menu. Thanks to @alwarez777 for reporting this.
+- (#13) Made new Canvas Bases views inherit the configured global layout, edge,
+  card, TaskNotes, and update-rule defaults. Thanks to @alwarez777 for reporting
+  this.
+- (#18) Added **Create note** to the board context menu. The Obsidian Bases note
+  creation flow applies compatible properties from the current Base filters so
+  the new note can appear in the view. Thanks to @bangbangbanggit for suggesting
+  this.
+- Raised the minimum supported Obsidian version to 1.10.2 for the official
+  filter-aware Bases note creation API.
+
 ## 0.1.3 - 2026-08-07
 
 - (#3, #6, #8) Kept the Canvas Bases toolbar in the view layout instead of opening

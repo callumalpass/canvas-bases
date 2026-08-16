@@ -17,7 +17,7 @@ const EVENT_SCENARIO = "interop.application-event-multicast";
 const implementation = {
 	id: "canvas-bases",
 	name: "Canvas Bases Obsidian plugin",
-	version: "0.1.3",
+	version: "0.1.4",
 	language: "TypeScript",
 	target: "Obsidian",
 };

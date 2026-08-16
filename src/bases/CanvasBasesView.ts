@@ -15,7 +15,6 @@ import {
 } from "obsidian";
 import type {
 	App,
-	BasesAllOptions,
 	BasesViewConfig,
 	DropdownComponent,
 	QueryController,
@@ -110,7 +109,6 @@ import {
 } from "./virtualization";
 import {
 	buildDefaultMaterializeOptions,
-	DEFAULT_SETTINGS,
 	normalizeDimension,
 	normalizeEdgeMode,
 	normalizeLayout,
@@ -118,6 +116,7 @@ import {
 	normalizeTaskNotesRelationshipMode,
 	splitPropertyList,
 } from "../settings/defaults";
+import { getBoardPointerAction } from "./boardPointer";
 import type { CanvasBasesTaskCard, CanvasBasesTaskPropertyKind } from "../tasknotes/runtime";
 import type { InterpolationValues, TranslateFn } from "../i18n";
 import {
@@ -4990,11 +4989,14 @@ export class CanvasBasesView extends BasesView {
 
 	private registerPanHandlers(viewportEl: HTMLElement): void {
 		this.registerDomEvent(viewportEl, "pointerdown", (event) => {
-			if (event.button === 1) {
+			const action = getBoardPointerAction(event);
+			if (action === "pan") {
 				this.startPan(event, viewportEl);
 				return;
 			}
-			this.startSelection(event);
+			if (action === "select") {
+				this.startSelection(event);
+			}
 		});
 		this.registerDomEvent(viewportEl, "contextmenu", (event) => {
 			this.openBoardContextMenu(event);
@@ -5011,7 +5013,7 @@ export class CanvasBasesView extends BasesView {
 	}
 
 	private startPan(event: PointerEvent, viewportEl: HTMLElement): void {
-		if (event.button !== 1 || isBoardInteractiveTarget(event.target)) return;
+		if (getBoardPointerAction(event) !== "pan" || isBoardInteractiveTarget(event.target)) return;
 
 		event.preventDefault();
 		this.clearDragListeners();
@@ -5043,6 +5045,14 @@ export class CanvasBasesView extends BasesView {
 		this.clearSelectedNodes();
 
 		const menu = new Menu();
+		menu.addItem((item) => {
+			item
+				.setTitle(this.t("view.menu.createNote"))
+				.setIcon("lucide-file-plus-2")
+				.onClick(() => {
+					void this.createFileForView();
+				});
+		});
 		menu.addItem((item) => {
 			item
 				.setTitle(this.t("view.menu.addPinnedNote"))
@@ -6470,153 +6480,6 @@ class ManualGroupNameModal extends Modal {
 		this.onSubmit(label);
 		this.close();
 	}
-}
-
-export function buildCanvasBasesViewOptions(t: TranslateFn): BasesAllOptions[] {
-	return [
-		{
-			type: "group",
-			displayName: t("basesOptions.canvas"),
-			items: [
-				{
-					type: "text",
-					key: VIEW_CONFIG_KEYS.canvasPath,
-					displayName: t("basesOptions.canvasPath"),
-					placeholder: "Canvas Bases/My View.canvas",
-					default: "",
-				},
-				{
-					type: "dropdown",
-					key: VIEW_CONFIG_KEYS.layout,
-					displayName: t("basesOptions.layout"),
-					default: "columns",
-					options: {
-						columns: t("options.layout.columns"),
-						rows: t("options.layout.rows"),
-						grid: t("options.layout.grid"),
-					},
-				},
-				{
-					type: "dropdown",
-					key: VIEW_CONFIG_KEYS.edgeMode,
-					displayName: t("basesOptions.edges"),
-					default: "none",
-					options: {
-						none: t("common.none"),
-						wikilinks: t("options.edgeMode.wikilinks"),
-						properties: t("options.edgeMode.properties"),
-						all: t("options.edgeMode.all"),
-					},
-				},
-				{
-					type: "text",
-					key: VIEW_CONFIG_KEYS.edgeProperties,
-					displayName: t("basesOptions.linkProperties"),
-					placeholder: "depends_on, related",
-					default: "",
-				},
-			],
-		},
-		{
-			type: "group",
-			displayName: t("basesOptions.cards"),
-			items: [
-				{
-					type: "toggle",
-					key: VIEW_CONFIG_KEYS.showBodyEditor,
-					displayName: t("basesOptions.showBodyEditor"),
-					default: true,
-				},
-			],
-		},
-		{
-			type: "group",
-			displayName: t("basesOptions.tasknotes"),
-			items: [
-				{
-					type: "dropdown",
-					key: VIEW_CONFIG_KEYS.taskNotesMode,
-					displayName: t("basesOptions.tasknotesIntegration"),
-					default: "auto",
-					options: {
-						auto: t("common.automatic"),
-						off: t("common.off"),
-					},
-				},
-				{
-					type: "toggle",
-					key: VIEW_CONFIG_KEYS.taskNotesShowBadges,
-					displayName: t("basesOptions.showTaskBadges"),
-					default: true,
-				},
-				{
-					type: "toggle",
-					key: VIEW_CONFIG_KEYS.taskNotesShowActions,
-					displayName: t("basesOptions.showTaskActions"),
-					default: true,
-				},
-				{
-					type: "dropdown",
-					key: VIEW_CONFIG_KEYS.taskNotesRelationships,
-					displayName: t("basesOptions.taskRelationshipEdges"),
-					default: "dependencies",
-					options: {
-						none: t("common.none"),
-						dependencies: t("options.relationships.dependencies"),
-						all: t("options.relationships.all"),
-					},
-				},
-			],
-		},
-		{
-			type: "group",
-			displayName: t("basesOptions.manualCards"),
-			items: [
-				{
-					type: "multitext",
-					key: VIEW_CONFIG_KEYS.manualNotePaths,
-					displayName: t("basesOptions.pinnedNotes"),
-					default: [],
-				},
-			],
-		},
-		{
-			type: "group",
-			displayName: t("basesOptions.updateRules"),
-			items: [
-				{
-					type: "toggle",
-					key: VIEW_CONFIG_KEYS.preservePositions,
-					displayName: t("basesOptions.preservePositions"),
-					default: true,
-				},
-				{
-					type: "toggle",
-					key: VIEW_CONFIG_KEYS.removeMissingNodes,
-					displayName: t("basesOptions.removeMissingNotes"),
-					default: true,
-				},
-				{
-					type: "slider",
-					key: VIEW_CONFIG_KEYS.nodeWidth,
-					displayName: t("basesOptions.nodeWidth"),
-					default: DEFAULT_SETTINGS.nodeWidth,
-					min: 160,
-					max: 520,
-					step: 20,
-				},
-				{
-					type: "slider",
-					key: VIEW_CONFIG_KEYS.nodeHeight,
-					displayName: t("basesOptions.nodeHeight"),
-					default: DEFAULT_SETTINGS.nodeHeight,
-					min: 80,
-					max: 320,
-					step: 10,
-				},
-			],
-		},
-	];
 }
 
 function getStringConfig(config: BasesViewConfig, key: string): string | null {

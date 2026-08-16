@@ -18,8 +18,8 @@ import {
 import { CanvasBasesSettingTab } from "./settings/settingsTab";
 import {
 	CanvasBasesView,
-	buildCanvasBasesViewOptions,
 } from "./bases/CanvasBasesView";
+import { buildCanvasBasesViewOptions } from "./bases/viewOptions";
 import {
 	type ActiveBasesViewSource,
 	getActiveBasesViewSource,
@@ -200,7 +200,7 @@ export default class CanvasBasesPlugin extends Plugin {
 	}
 
 	private registerCanvasBasesBasesView(): void {
-		if (!requireApiVersion("1.10.1")) {
+		if (!requireApiVersion("1.10.2")) {
 			new Notice(this.t("notices.obsidianVersionRequired"));
 			return;
 		}
@@ -211,7 +211,8 @@ export default class CanvasBasesPlugin extends Plugin {
 			factory: (controller, containerEl) => {
 				return new CanvasBasesView(controller, containerEl, this);
 			},
-			options: (): BasesAllOptions[] => buildCanvasBasesViewOptions(this.translate),
+			options: (): BasesAllOptions[] =>
+				buildCanvasBasesViewOptions(this.translate, this.settings),
 		};
 
 		this.registerBasesView(CANVAS_BASES_VIEW_TYPE, registration);

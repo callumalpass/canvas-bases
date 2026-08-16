@@ -39,7 +39,7 @@ Rendered relationship edge on the board:
 
 ## Requirements
 
-- Obsidian 1.10.1 or newer.
+- Obsidian 1.10.2 or newer.
 - Obsidian Bases.
 - Obsidian Canvas when opening or editing generated `.canvas` files.
 - TaskNotes is optional. TaskNotes badges, task menus, task relationship edges,
