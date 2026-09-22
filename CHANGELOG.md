@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.5 - 2026-09-22
+
+- (#23) Fixed TaskNotes project links created by dragging between cards to follow
+  TaskNotes' link formatting preferences, relative to the child task, instead of
+  always using full-path wikilinks. Thanks to @lodalisa for reporting this.
+
 ## 0.1.4 - 2026-08-16
 
 - (#17) Restored single-finger board panning on touch devices without triggering

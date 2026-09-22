@@ -561,6 +561,36 @@ describe("TaskNotesRuntime", () => {
 		].sort());
 	});
 
+	it.each(["Beta", "Projects/Beta"])("uses Obsidian's resolved project link text: %s", async (linktext) => {
+		const writes = createTaskWrites();
+		const app = makeTaskNotesApp({ writes });
+		const fileToLinktext = vi.fn(() => linktext);
+		app.metadataCache.fileToLinktext = fileToLinktext;
+		const runtime = new TaskNotesRuntime(app);
+		await expect(runtime.addProject("Tasks/Alpha.md", "Projects/Beta.md")).resolves.toBe(true);
+		expect(fileToLinktext).toHaveBeenCalledWith(expect.objectContaining({ path: "Projects/Beta.md" }), "Tasks/Alpha.md", true);
+		expect(writes.addProjects[0]?.project).toBe(`[[${linktext}]]`);
+	});
+
+	it("respects TaskNotes' Markdown link setting using the child as source", async () => {
+		const writes = createTaskWrites();
+		const app = makeTaskNotesApp({ writes, useFrontmatterMarkdownLinks: true });
+		const generateMarkdownLink = vi.fn(() => "[Beta](../Projects/Beta.md)");
+		app.fileManager = { generateMarkdownLink } as App["fileManager"];
+		const runtime = new TaskNotesRuntime(app);
+		await expect(runtime.addProject("Tasks/Alpha.md", "Projects/Beta.md")).resolves.toBe(true);
+		expect(generateMarkdownLink).toHaveBeenCalledWith(expect.objectContaining({ path: "Projects/Beta.md" }), "Tasks/Alpha.md", "", "");
+		expect(writes.addProjects[0]?.project).toBe("[Beta](../Projects/Beta.md)");
+	});
+
+	it("does not add a project when its file is missing", async () => {
+		const writes = createTaskWrites();
+		const app = makeTaskNotesApp({ writes });
+		app.vault.getAbstractFileByPath = () => null;
+		await expect(new TaskNotesRuntime(app).addProject("Tasks/Alpha.md", "Missing.md")).resolves.toBe(false);
+		expect(writes.addProjects).toEqual([]);
+	});
+
 	it("writes dependency and project links through the TaskNotes task API", async () => {
 		const writes = createTaskWrites();
 		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
@@ -587,7 +617,7 @@ describe("TaskNotesRuntime", () => {
 		expect(writes.addProjects).toEqual([
 			{
 				path: "Tasks/Alpha.md",
-				project: "[[Tasks/Beta]]",
+				project: "[[Beta]]",
 				context: { source: "canvas-bases", reason: "link-control" },
 			},
 		]);
@@ -693,6 +723,7 @@ function makeTaskNotesApp({
 	frontmatter = {},
 	relationshipCalls,
 	taskMenu,
+	useFrontmatterMarkdownLinks,
 	writes = createTaskWrites(),
 }: {
 	capabilities?: string[];
@@ -711,6 +742,7 @@ function makeTaskNotesApp({
 	frontmatter?: Record<string, Record<string, unknown>>;
 	relationshipCalls?: string[];
 	taskMenu?: TaskMenuLog;
+	useFrontmatterMarkdownLinks?: boolean;
 	writes?: TaskWriteLog;
 }): App {
 	const capabilities = new Set(capabilityList ?? [
@@ -730,6 +762,7 @@ function makeTaskNotesApp({
 				frontmatter: frontmatter[file.path],
 			}),
 			getFirstLinkpathDest: () => null,
+			fileToLinktext: (file: TFile) => file.basename,
 		},
 		vault: {
 			getAbstractFileByPath: (path: string) => makeFile(path),
@@ -752,6 +785,9 @@ function makeTaskNotesApp({
 							},
 							api: {
 								apiVersion: 1,
+								...(useFrontmatterMarkdownLinks === undefined ? {} : {
+									settings: { snapshot: () => ({ useFrontmatterMarkdownLinks }) },
+								}),
 								hasCapability: (capability: string) => capabilities.has(capability),
 									tasks: {
 										get: async (path: string) => tasks[path] ?? null,

@@ -104,6 +104,9 @@ interface TaskNotesRuntimeApiV1 {
 			context?: TaskNotesMutationContext
 		): Promise<TaskNotesTaskInfo>;
 	};
+	settings?: {
+		snapshot?(): { useFrontmatterMarkdownLinks?: boolean };
+	};
 	catalog?: {
 		statuses(): TaskNotesStatusConfig[];
 		priorities(): TaskNotesPriorityConfig[];
@@ -587,7 +590,15 @@ export class TaskNotesRuntime {
 		const api = this.getApi();
 		if (!api?.tasks?.addProject || !api.hasCapability("tasks.write")) return false;
 
-		await api.tasks.addProject(childPath, createWikiLink(parentPath), {
+		const parentFile = this.app.vault.getAbstractFileByPath(parentPath);
+		if (!(parentFile instanceof TFile)) return false;
+
+		// Match TaskNotes' frontmatter link policy, relative to the child note,
+		// not the Base hosting the board. Obsidian handles ambiguous filenames.
+		const projectReference = api.settings?.snapshot?.().useFrontmatterMarkdownLinks
+			? this.app.fileManager.generateMarkdownLink(parentFile, childPath, "", "")
+			: `[[${this.app.metadataCache.fileToLinktext(parentFile, childPath, true)}]]`;
+		await api.tasks.addProject(childPath, projectReference, {
 			source: "canvas-bases",
 			reason: "link-control",
 		});
