@@ -127,12 +127,14 @@ function extractLinkTargets(value: unknown): string[] {
 
 function extractTargetsFromString(value: string): string[] {
 	const targets: string[] = [];
-	const wikiLinkPattern = /\[\[([^\]|#]+)(?:#[^\]|]+)?(?:\|[^\]]+)?\]\]/gu;
-	let match = wikiLinkPattern.exec(value);
+	const linkPattern =
+		/\[\[([^\]|#]+)(?:#[^\]|]+)?(?:\|[^\]]+)?\]\]|\[[^\]]*\]\(([^)]+)\)/gu;
+	let match = linkPattern.exec(value);
 
 	while (match) {
-		targets.push(match[1]);
-		match = wikiLinkPattern.exec(value);
+		const target = match[1] ?? normalizeMarkdownLinkDestination(match[2]);
+		if (target) targets.push(target);
+		match = linkPattern.exec(value);
 	}
 
 	if (targets.length === 0 && value.trim().length > 0) {
@@ -142,14 +144,33 @@ function extractTargetsFromString(value: string): string[] {
 	return targets;
 }
 
-function normalizeLinkText(value: string): string {
-	return value
-		.trim()
+export function normalizeLinkText(value: string): string {
+	const trimmed = value.trim();
+	const markdownLink = /^\[[^\]]*\]\(([^)]+)\)$/u.exec(trimmed);
+	if (markdownLink) {
+		return normalizeMarkdownLinkDestination(markdownLink[1]);
+	}
+
+	return trimmed
 		.replace(/^\[\[/u, "")
 		.replace(/\]\]$/u, "")
 		.split("|")[0]
 		.split("#")[0]
 		.trim();
+}
+
+// Markdown link destinations may be wrapped in angle brackets or URL-encoded
+// (`[Beta](Tasks/My%20Beta.md)`). External URLs are not vault links.
+function normalizeMarkdownLinkDestination(destination: string): string {
+	const trimmed = destination.trim().replace(/^<(.*)>$/u, "$1");
+	if (/^[a-z][a-z0-9+.-]*:/iu.test(trimmed)) return "";
+
+	const path = trimmed.split("#")[0].trim();
+	try {
+		return decodeURI(path);
+	} catch {
+		return path;
+	}
 }
 
 function dedupeRelationships(
