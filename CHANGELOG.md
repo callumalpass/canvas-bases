@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- (#9) Relationship edges now recognize Markdown links such as
+  `[Beta](Tasks/Beta.md)` in configured link properties, and removing a property
+  link from an edge menu now matches Markdown-link values. New links created by
+  dragging between cards are still written as wikilinks. Thanks to @jannikgade
+  for requesting this.
+
 ## 0.1.5 - 2026-09-22
 
 - (#23) Fixed TaskNotes project links created by dragging between cards to follow

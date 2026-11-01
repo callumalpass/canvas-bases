@@ -66,7 +66,7 @@ import type {
 	CanvasNode,
 	CanvasTextNode,
 } from "../canvas/jsonCanvas";
-import { collectRelationships } from "../canvas/relationships";
+import { collectRelationships, normalizeLinkText } from "../canvas/relationships";
 import { buildCanvasBasesEdgeGeometry } from "./edgeGeometry";
 import {
 	applyManualViewItems,
@@ -7083,16 +7083,6 @@ function extractReferenceCandidates(value: unknown): string[] {
 	}
 
 	return [];
-}
-
-function normalizeLinkText(value: string): string {
-	return value
-		.trim()
-		.replace(/^\[\[/u, "")
-		.replace(/\]\]$/u, "")
-		.split("|")[0]
-		.split("#")[0]
-		.trim();
 }
 
 function taskReferencePathCandidates(path: string): string[] {
