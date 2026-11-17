@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Fixed integration with the published mdbase plugin (`mdbase-sync`), requiring
+  API v1 and interop profile 0.1 with **Allow plugin integrations** enabled.
+  Missing or disabled integrations remain quiet while waiting for availability.
+- Updated the mdbase interop dependency to stable 0.1.0 and aligned canvas drop
+  events with the spec's board/file/zone/position structure, preserving custom
+  zone IDs. Added a TaskNotes Workflows example.
+- TaskNotes file-menu integration now recognizes tasks through the public runtime
+  API instead of the private cache manager, including on TaskNotes v5.
+
 - (#9) Relationship edges now recognize Markdown links such as
   `[Beta](Tasks/Beta.md)` in configured link properties, and removing a property
   link from an edge menu now matches Markdown-link values. New links created by

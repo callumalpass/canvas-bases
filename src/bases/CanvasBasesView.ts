@@ -210,6 +210,7 @@ interface CanvasBasesControllerViewConfig {
 }
 
 interface CanvasBasesQueryController {
+	currentFile?: TFile;
 	query?: { views?: CanvasBasesControllerViewConfig[] };
 	viewName?: string;
 }
@@ -5274,21 +5275,12 @@ export class CanvasBasesView extends BasesView {
 				dataChanged ||= changed;
 				await this.plugin.interop.publishCanvasDrop({
 					board: {
+						path: this.canvasQueryController.currentFile?.path ?? "",
 						view: this.getSnapshot()?.viewName ?? this.canvasQueryController.viewName ?? "Canvas Bases",
 					},
-					record: {
-						path: node.path,
-						node_id: node.id,
-					},
-					position: { ...node.position },
-					target: {
-						id: targetGroup.id,
-						label: targetGroup.label,
-						action: targetGroup.action,
-						property: targetGroup.property,
-						value: targetGroup.value,
-					},
-					changed,
+					file: { path: node.path },
+					zone: { id: targetGroup.id, label: targetGroup.label },
+					position: { x: node.position.x, y: node.position.y },
 				});
 			}
 		}

@@ -48,9 +48,6 @@ export interface CanvasBasesTaskCard {
 
 type TaskNotesPluginInstance = {
 	api?: TaskNotesRuntimeApiV1;
-	cacheManager?: {
-		isTaskFile?(frontmatter: Record<string, unknown>): boolean;
-	};
 };
 
 interface TaskNotesRuntimeApiV1 {
@@ -634,7 +631,7 @@ export class TaskNotesRuntime {
 			}
 		}
 
-		return this.populateLegacyTaskFileMenu(menu, path);
+		return await this.populateLegacyTaskFileMenu(menu, path);
 	}
 
 	async showTaskMenu(path: string, event: MouseEvent, onUpdate: () => void): Promise<boolean> {
@@ -677,24 +674,16 @@ export class TaskNotesRuntime {
 		return api?.apiVersion === 1 && typeof api.hasCapability === "function" ? api : null;
 	}
 
-	private populateLegacyTaskFileMenu(menu: Menu, path: string): boolean {
+	private async populateLegacyTaskFileMenu(menu: Menu, path: string): Promise<boolean> {
 		const file = this.app.vault.getAbstractFileByPath(path);
 		if (!(file instanceof TFile)) return false;
-		if (!this.isLegacyTaskFile(file)) return false;
+		if (!await this.isTask(path)) return false;
 
 		const before = getMenuItemCount(menu);
 		this.app.workspace.trigger("file-menu", menu, file, "canvas-bases");
 		const after = getMenuItemCount(menu);
 
 		return typeof before === "number" && typeof after === "number" ? after > before : true;
-	}
-
-	private isLegacyTaskFile(file: TFile): boolean {
-		const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
-		if (!isRecord(frontmatter)) return false;
-
-		const tasknotes = this.app.plugins.getPlugin("tasknotes") as TaskNotesPluginInstance | null;
-		return tasknotes?.cacheManager?.isTaskFile?.(frontmatter) === true;
 	}
 
 	private getCatalog(api: TaskNotesRuntimeApiV1): TaskNotesCatalog {

@@ -12,27 +12,10 @@ import {
 } from "./canvas/createCard";
 
 export interface CanvasDropEventData {
-	board: {
-		view: string;
-	};
-	record: {
-		path: string;
-		node_id: string;
-	};
-	position: {
-		x: number;
-		y: number;
-		width: number;
-		height: number;
-	};
-	target?: {
-		id: string;
-		label: string;
-		action: string;
-		property: string;
-		value: string;
-	};
-	changed: boolean;
+	board: { path: string; view: string };
+	file: { path: string };
+	zone: { id: string; label: string };
+	position: { x: number; y: number };
 }
 
 export const CANVAS_DROP_EVENT_CONTRACT = {
@@ -41,53 +24,42 @@ export const CANVAS_DROP_EVENT_CONTRACT = {
 	id: "canvas.drop",
 	version: "1.0.0",
 	name: "Canvas card dropped",
-	description: "A file card was dropped into an active Canvas Bases group.",
+	description: "Emitted when a card is dropped on a canvas zone.",
 	data_schema: {
 		dialect: "json-schema-2020-12",
 		value: {
 			type: "object",
-			required: ["board", "record", "position", "changed"],
+			required: ["board", "file", "zone", "position"],
 			additionalProperties: false,
 			properties: {
 				board: {
 					type: "object",
-					required: ["view"],
+					required: ["path", "view"],
 					additionalProperties: false,
-					properties: { view: { type: "string", minLength: 1 } },
+					properties: { path: { type: "string" }, view: { type: "string" } },
 				},
-				record: {
+				file: {
 					type: "object",
-					required: ["path", "node_id"],
+					required: ["path"],
+					additionalProperties: false,
+					properties: { path: { type: "string" } },
+				},
+				zone: {
+					type: "object",
+					required: ["id", "label"],
 					additionalProperties: false,
 					properties: {
-						path: { type: "string", minLength: 1 },
-						node_id: { type: "string", minLength: 1 },
+						// Canvas Bases supports user-defined groups, not just status lanes.
+						id: { type: "string" },
+						label: { type: "string" },
 					},
 				},
 				position: {
 					type: "object",
-					required: ["x", "y", "width", "height"],
+					required: ["x", "y"],
 					additionalProperties: false,
-					properties: {
-						x: { type: "number" },
-						y: { type: "number" },
-						width: { type: "number", exclusiveMinimum: 0 },
-						height: { type: "number", exclusiveMinimum: 0 },
-					},
+					properties: { x: { type: "number" }, y: { type: "number" } },
 				},
-				target: {
-					type: "object",
-					required: ["id", "label", "action", "property", "value"],
-					additionalProperties: false,
-					properties: {
-						id: { type: "string", minLength: 1 },
-						label: { type: "string" },
-						action: { type: "string", minLength: 1 },
-						property: { type: "string", minLength: 1 },
-						value: { type: "string" },
-					},
-				},
-				changed: { type: "boolean" },
 			},
 		},
 	},
@@ -178,7 +150,9 @@ export const CANVAS_CARD_CREATE_CONTRACT = {
 
 interface MdbaseObsidianPlugin {
 	api?: {
+		apiVersion: number;
 		interop?: {
+			profileVersion: string;
 			connect(plugin: Plugin): InteropClient;
 		};
 		getInteropStatus?(): { enabled: boolean };
@@ -197,7 +171,11 @@ export class CanvasBasesInteropProvider {
 	connect(): void {
 		if (this.client || this.connecting) return;
 		const mdbase = this.getMdbasePlugin();
-		if (!mdbase?.api?.interop || mdbase.api.getInteropStatus?.().enabled === false) return;
+		if (
+			mdbase?.api?.apiVersion !== 1 ||
+			mdbase.api.interop?.profileVersion !== "0.1" ||
+			mdbase.api.getInteropStatus?.().enabled !== true
+		) return;
 		this.connecting = this.register(mdbase)
 			.catch((error: unknown) => {
 				if (this.registrationFailureReported) return;
@@ -230,7 +208,7 @@ export class CanvasBasesInteropProvider {
 				id: CANVAS_DROP_EVENT_CONTRACT.id,
 				version: CANVAS_DROP_EVENT_CONTRACT.version,
 			},
-			subject: encodeURI(data.record.path),
+			subject: encodeURI(data.file.path),
 			correlation_id: `canvas-drop:${eventId()}`,
 			data,
 		});
@@ -277,7 +255,7 @@ export class CanvasBasesInteropProvider {
 		const app = this.plugin.app as typeof this.plugin.app & {
 			plugins?: { getPlugin(id: string): unknown };
 		};
-		return app.plugins?.getPlugin("mdbase-obsidian") as MdbaseObsidianPlugin | null;
+		return app.plugins?.getPlugin("mdbase-sync") as MdbaseObsidianPlugin | null;
 	}
 }
 

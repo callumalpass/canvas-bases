@@ -12,6 +12,31 @@ import {
 } from "../src/interop";
 
 describe("Canvas Bases interoperability provider", () => {
+	it.each([
+		{ apiVersion: undefined, profileVersion: "0.1", enabled: true },
+		{ apiVersion: 2, profileVersion: "0.1", enabled: true },
+		{ apiVersion: 1, profileVersion: "0.2", enabled: true },
+		{ apiVersion: 1, profileVersion: "0.1", enabled: false },
+	])("ignores an unavailable bridge: %j", async ({ apiVersion, profileVersion, enabled }) => {
+		const connect = vi.fn();
+		const mdbase = {
+			api: {
+				apiVersion,
+				interop: { profileVersion, connect },
+				getInteropStatus: () => ({ enabled, profileVersion }),
+			},
+		};
+		const getPlugin = vi.fn(() => mdbase);
+		const provider = new CanvasBasesInteropProvider({
+			app: { plugins: { getPlugin } },
+		} as never);
+		provider.connect();
+		provider.connect();
+		await provider.dispose();
+		expect(getPlugin).toHaveBeenCalledWith("mdbase-sync");
+		expect(connect).not.toHaveBeenCalled();
+	});
+
 	it("registers canvas.card.create and appends a validated file card", async () => {
 		const app = MockApp.createConfigured__({ files: {} });
 		const bridge = new InMemoryInteropBridge({ authorize: () => true });
@@ -27,13 +52,17 @@ describe("Canvas Bases interoperability provider", () => {
 		});
 		const mdbase = {
 			api: {
-				interop: { connect: vi.fn((): InteropClient => providerClient) },
-				getInteropStatus: () => ({ enabled: true }),
+				apiVersion: 1,
+				interop: { profileVersion: "0.1", connect: vi.fn((): InteropClient => providerClient) },
+				getInteropStatus: () => ({ enabled: true, profileVersion: "0.1" }),
 			},
 		};
+		let installed = false;
+		let enabled = false;
+		mdbase.api.getInteropStatus = () => ({ enabled, profileVersion: "0.1" });
 		Object.assign(app, {
 			plugins: {
-				getPlugin: (id: string) => id === "mdbase-obsidian" ? mdbase : null,
+				getPlugin: (id: string) => installed && id === "mdbase-sync" ? mdbase : null,
 			},
 		});
 		const plugin = {
@@ -42,11 +71,18 @@ describe("Canvas Bases interoperability provider", () => {
 		};
 		const provider = new CanvasBasesInteropProvider(plugin as never);
 		provider.connect();
+		installed = true;
+		provider.connect();
+		expect(mdbase.api.interop.connect).not.toHaveBeenCalled();
+		enabled = true;
+		provider.connect();
+		provider.connect();
 
 		await vi.waitFor(() => {
 			expect(bridge.describe().action_providers).toHaveLength(1);
 			expect(bridge.describe().event_sources).toHaveLength(1);
 		});
+		expect(mdbase.api.interop.connect).toHaveBeenCalledTimes(1);
 		const outcome = await caller.invokeAction({
 			request_id: "req-create-card",
 			contract: {
@@ -87,17 +123,10 @@ describe("Canvas Bases interoperability provider", () => {
 			(event) => received.push(event),
 		);
 		await expect(provider.publishCanvasDrop({
-			board: { view: "Planning" },
-			record: { path: "Tasks/Ship contracts.md", node_id: "file-1" },
-			position: { x: 10, y: 20, width: 240, height: 160 },
-			target: {
-				id: "done",
-				label: "Done",
-				action: "set-property",
-				property: "status",
-				value: "done",
-			},
-			changed: true,
+			board: { path: "Boards/Planning.base", view: "Planning" },
+			file: { path: "Tasks/Ship contracts.md" },
+			position: { x: 10, y: 20 },
+			zone: { id: "review-queue", label: "Review" },
 		})).resolves.toBe(true);
 		expect(received).toEqual([
 			expect.objectContaining({
@@ -106,9 +135,12 @@ describe("Canvas Bases interoperability provider", () => {
 				mdbasecontractversion: CANVAS_DROP_EVENT_CONTRACT.version,
 				mdbaseapplication: "canvas-bases",
 				subject: "Tasks/Ship%20contracts.md",
-				data: expect.objectContaining({
-					record: { path: "Tasks/Ship contracts.md", node_id: "file-1" },
-				}),
+				data: {
+					board: { path: "Boards/Planning.base", view: "Planning" },
+					file: { path: "Tasks/Ship contracts.md" },
+					zone: { id: "review-queue", label: "Review" },
+					position: { x: 10, y: 20 },
+				},
 			}),
 		]);
 
