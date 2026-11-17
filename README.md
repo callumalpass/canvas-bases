@@ -150,8 +150,8 @@ Bases and Canvas workflows working without TaskNotes-only behavior.
 
 ## mdbase Interoperability
 
-With the mdbase plugin installed and **Allow local application
-interoperability** enabled, Canvas Bases registers one action provider:
+With the mdbase plugin (`mdbase-sync`) installed and **Allow plugin
+integrations** enabled (off by default), Canvas Bases registers one action provider:
 
 ```text
 canvas.card.create@1.0.0
@@ -166,7 +166,8 @@ The provider is optional and does not change normal Canvas Bases behavior.
 
 Canvas Bases also declares `canvas.drop@1.0.0` as an event source. Dropping a
 file card into an active group publishes a CloudEvent containing the board,
-record, position, target group, and whether the group assignment changed.
+file path, target zone ID and label, and drop coordinates (`position.x`/`y`).
+`board.path` is the source `.base` path (empty if the view has no backing file).
 Events are multicast, so every granted compatible subscriber receives its own
 copy. Contract compatibility does not grant access; the mdbase interoperability
 grant remains the authorization boundary.
@@ -175,6 +176,39 @@ Maintainers can run `npm run test:testbed` to exercise the real Canvas action
 provider and event source through the spec-owned provider-lifecycle and
 two-consumer multicast scenarios. The testbed uses the normal plugin bridge
 boundary and validates deterministic transcripts.
+
+### Trigger a TaskNotes Workflows workflow
+
+With TaskNotes Workflows installed, save this as a workflow note in its configured
+workflow folder. It completes the dropped task when the zone label is **Done**;
+use a property-only zone if the workflow should own the task mutation.
+
+```yaml
+---
+type: runtime_workflow
+id: complete-canvas-task
+version: 1.0.0
+name: Complete task dropped in Done
+enabled: true
+triggers:
+  - id: canvas-done
+    event: { id: canvas.drop, version: 1.0.0 }
+    x-tasknotes: { type: contract.event, source: canvas-bases }
+steps:
+  - id: complete
+    action: { id: task.complete, version: 1.0.0 }
+    if:
+      $expr: 'event.data.zone.label == "Done"'
+    input:
+      task:
+        $expr: event.data.file.path
+x-tasknotes: { format_version: 1, source: tasknotes-workflows }
+---
+```
+
+Zone IDs are Canvas Bases group IDs, not necessarily status values; match your
+zone label or actual `event.data.zone.id`. Ordinary boards require neither
+TaskNotes nor this workflow.
 
 ## Commands
 

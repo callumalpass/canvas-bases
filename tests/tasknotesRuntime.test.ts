@@ -385,11 +385,7 @@ describe("TaskNotesRuntime", () => {
 		const fileMenu = createFileMenuLog();
 		const runtime = new TaskNotesRuntime(makeTaskNotesApp({
 			fileMenu,
-			frontmatter: {
-				"260608yp5.md": {
-					tags: ["task"],
-				},
-			},
+			tasks: { "260608yp5.md": task("260608yp5.md") },
 		}));
 		const menu = { items: [] };
 
@@ -404,6 +400,15 @@ describe("TaskNotesRuntime", () => {
 				source: "canvas-bases",
 			},
 		]);
+	});
+
+	it("does not open a task file menu without a runtime task", async () => {
+		const fileMenu = createFileMenuLog();
+		const runtime = new TaskNotesRuntime(makeTaskNotesApp({ fileMenu }));
+		await expect(runtime.populateTaskMenu(
+			{ items: [] } as never, "Notes/Idea.md", () => undefined
+		)).resolves.toBe(false);
+		expect(fileMenu.calls).toEqual([]);
 	});
 
 	it("collects TaskNotes dependency edges from blocker to blocked task", async () => {
@@ -778,11 +783,6 @@ function makeTaskNotesApp({
 			getPlugin: (id: string) =>
 				id === "tasknotes"
 					? {
-							cacheManager: {
-								isTaskFile: (taskFrontmatter: Record<string, unknown>) =>
-									Array.isArray(taskFrontmatter.tags) &&
-									taskFrontmatter.tags.includes("task"),
-							},
 							api: {
 								apiVersion: 1,
 								...(useFrontmatterMarkdownLinks === undefined ? {} : {

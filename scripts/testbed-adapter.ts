@@ -146,10 +146,10 @@ async function eventMulticast(): Promise<Record<string, unknown>[]> {
 			(event) => received.push({ consumer: "consumer-beta", event }),
 		);
 		await fixture.provider.publishCanvasDrop({
-			board: { view: "Testbed" },
-			record: { path: "Notes/Shared.md", node_id: "file-1" },
-			position: { x: 10, y: 20, width: 240, height: 160 },
-			changed: false,
+			board: { path: "Boards/Testbed.base", view: "Testbed" },
+			file: { path: "Notes/Shared.md" },
+			position: { x: 10, y: 20 },
+			zone: { id: "review-queue", label: "Review" },
 		});
 		const event = received[0]?.event;
 		return [
@@ -190,13 +190,14 @@ async function applicationFixture() {
 	const caller = bridge.connect(identity("caller"));
 	const mdbase = {
 		api: {
-			interop: { connect: (): InteropClient => application },
-			getInteropStatus: () => ({ enabled: true }),
+			apiVersion: 1,
+			interop: { profileVersion: "0.1", connect: (): InteropClient => application },
+			getInteropStatus: () => ({ enabled: true, profileVersion: "0.1" }),
 		},
 	};
 	Object.assign(app, {
 		plugins: {
-			getPlugin: (id: string) => id === "mdbase-obsidian" ? mdbase : null,
+			getPlugin: (id: string) => id === "mdbase-sync" ? mdbase : null,
 		},
 	});
 	const plugin = {
